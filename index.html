@@ -482,7 +482,7 @@ owner: HR
               <li>一檔一事；<strong>原則與例外必須同塊</strong></li>
               <li>標題層級清楚：# 主題、## 小節、### 例外／注意</li>
               <li>用列表、表格，少寫長散文</li>
-              <li>Chunk Size 約 600、Overlap 約 100 是起點；法規長文再放大</li>
+              <li>Chunk Size 約 1500、Overlap 約 100 是起點；法規長文再視情況微調</li>
             </ul>
           </div>
           <div class="tab-panel" data-panel="instruct">
@@ -509,7 +509,7 @@ owner: HR
                 <button type="button" class="copy-btn" data-copy-target="kbPromptCut">複製指令</button>
               </div>
               <pre class="code-block" id="kbPromptCut"><code>角色：你是 RAG 切塊審核員。
-任務：檢查這份 Markdown 適不適合「依標題切 + chunk 600 / overlap 100」。
+任務：檢查這份 Markdown 適不適合「依標題切 + chunk 1500 / overlap 100」。
 請列出：
 - 建議切點（標題）
 - 哪裡會切太碎或切太雜
@@ -739,7 +739,7 @@ owner: HR
                 <tr><th>Max Output</th><td>6K · 夠寫較長實務論述與依據</td></tr>
                 <tr><th>相似度門檻</th><td>依模型分數分布校準，不寫死</td></tr>
               </table>
-              <p class="case-param-note">註：上方為 <strong>TP NOTE01 實機組態</strong>。教室通用建議仍可從 600／3K 起調，再依文件長度與回答長度拉高。</p>
+              <p class="case-param-note">註：上方為 <strong>TP NOTE01 實機組態</strong>。教室通用建議可從 Chunk 1500、一般輸出 3K（複雜查核可到 9K）起調。</p>
             </div>
           </div>
         </div>

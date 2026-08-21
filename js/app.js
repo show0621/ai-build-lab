@@ -25,7 +25,7 @@ const FLOW_COPY = {
   retrieve: {
     title: "檢索 · 向量搜尋",
     body: "用 embedding 找相近 chunk。Top-K 建議先 15～20，寧可多撈再交給 Reranker 精煉。",
-    tip: "vector_search.top_k = 20\nchunk_size ≈ 600\noverlap ≈ 100",
+    tip: "vector_search.top_k = 20\nchunk_size ≈ 1500\noverlap ≈ 100",
   },
   enough: {
     title: "判斷 · 是否足夠？",
@@ -105,11 +105,11 @@ const API_COPY = {
 const PARAMS = [
   {
     name: "Chunk Size",
-    range: "500～700 tokens",
-    suggest: "建議先用 600 tokens",
+    range: "1200～1800 tokens",
+    suggest: "建議先用 1500 tokens",
     explain:
-      "太大：一塊混太多主題，檢索變糊。太小：句子被切斷、上下文碎。中文規章通常 600 左右好切標題段落。",
-    slider: { min: 300, max: 1000, step: 50, value: 600, unit: "tokens", noteLow: "過碎，引用不完整", noteHigh: "過雜，容易夾帶無關句" },
+      "太大：一塊混太多主題，檢索變糊。太小：句子被切斷、上下文碎。中文規章／法規段落建議先用 1500，較能一次裝完整小節。",
+    slider: { min: 500, max: 3000, step: 100, value: 1500, unit: "tokens", noteLow: "過碎，引用不完整", noteHigh: "過雜，容易夾帶無關句" },
   },
   {
     name: "Chunk Overlap",
@@ -161,11 +161,11 @@ const PARAMS = [
   },
   {
     name: "Max Output",
-    range: "2K～4K tokens",
-    suggest: "一般查核問答建議 3K",
+    range: "2K～9K tokens",
+    suggest: "一般查核問答建議 3K，複雜查核問答可以 9K",
     explain:
-      "夠寫清楚步驟與引用即可。設太高不代表會更好，反而拉長等待；真正長文應拆任務。",
-    slider: { min: 500, max: 8000, step: 500, value: 3000, unit: "tokens", noteLow: "答案易被截斷", noteHigh: "延遲與成本上升" },
+      "一般查核問答用 3K 通常夠寫步驟與引用。遇到較長實務論述、多段依據時可拉到 9K；設太高會拉長等待與成本，真正超長文仍建議拆任務。",
+    slider: { min: 500, max: 9000, step: 500, value: 3000, unit: "tokens", noteLow: "答案易被截斷", noteHigh: "延遲與成本上升" },
   },
   {
     name: "相似度門檻",
@@ -178,14 +178,14 @@ const PARAMS = [
 ];
 
 const PRESET = [
-  ["Chunk Size", "600"],
+  ["Chunk Size", "1500"],
   ["Chunk Overlap", "100"],
   ["Vector Top-K", "20"],
   ["Reranker", "ON"],
   ["Rerank Top-K", "6"],
   ["Temperature", "0.15"],
   ["Context", "32K"],
-  ["Max Output", "3K"],
+  ["Max Output", "3K／複雜 9K"],
   ["相似度門檻", "依模型校準"],
 ];
 
@@ -964,7 +964,7 @@ $all(".chunk-mode-btn").forEach((btn) => {
 
 const FAIL_COPY = {
   碎: "症狀：一句規則被切成兩塊，引用缺半句。改法：依標題切，必要時加大 Chunk Size；原則與例外同塊。",
-  雜: "症狀：一塊混兩個主題，檢索變糊。改法：一檔一事、一節一意；不要為了湊滿 600 tokens 硬塞。",
+  雜: "症狀：一塊混兩個主題，檢索變糊。改法：一檔一事、一節一意；不要為了湊滿 Chunk Size 硬塞。",
   題: "症狀：標題太詩意或太籠統，問句對不到。改法：標題寫成人會搜的話，例如「年假申請期限」而不是「注意事項」。",
   meta: "症狀：新舊版搶命中、權限不清。改法：YAML 補 version / 生效日 / owner；舊版標過期或下架。",
   混: "症狀：請假、報銷、資安塞同一檔。改法：拆檔；檔名用主題，不要叫「完整彙整」。",
