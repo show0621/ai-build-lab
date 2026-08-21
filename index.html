@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>用 AI 做出你想要的程式｜構想 → SPEC → 知識庫 → 回饋迴路</title>
+  <meta name="description" content="60–70 分鐘互動教學：構想、SPEC、PROMPT、知識庫切塊、HOOK／MCP／Subagent、工作流與 AI 回饋迴路" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="bg-layer" aria-hidden="true">
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <nav class="top-nav" id="topNav">
+    <a class="brand" href="#hero">
+      <span class="brand-mark"></span>
+      <span class="brand-text">AI Build Lab</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="開啟選單" aria-expanded="false">
+      <span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#plan">構想</a></li>
+      <li><a href="#flow">流程圖</a></li>
+      <li><a href="#spec">SPEC</a></li>
+      <li><a href="#prompt">PROMPT</a></li>
+      <li><a href="#api">API</a></li>
+      <li><a href="#kb">知識庫</a></li>
+      <li><a href="#params">參數</a></li>
+      <li><a href="#case">案例</a></li>
+      <li><a href="#summary">總結</a></li>
+      <li><a href="#collab">協作</a></li>
+      <li><a href="#loop">回饋</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="btn btn-deck" id="deckToggle" type="button" title="投影片全螢幕（P）">投影片模式</button>
+      <div class="talk-timer" id="talkTimer" title="建議演講節奏">
+        <span class="timer-label">60–70 min</span>
+        <div class="timer-track"><div class="timer-fill" id="timerFill"></div></div>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- HERO -->
+    <section class="section hero" id="hero">
+      <div class="hero-inner">
+        <p class="eyebrow reveal">互動教學 · 60～70 分鐘</p>
+        <h1 class="hero-title reveal">
+          用 AI 做出<br /><span class="accent">你想要的成果</span>
+        </h1>
+        <p class="hero-lead reveal">
+          從構想、SPEC、PROMPT、知識庫切塊，到 HOOK／MCP／Subagent，
+          再到讓 AI 知道自己何時容易錯——一套可重複使用的實作路徑。
+        </p>
+        <p class="hero-author reveal">作者：李孟霖 · <a href="mailto:nh17528@ntbna.gov.tw">nh17528@ntbna.gov.tw</a></p>
+        <div class="hero-cta reveal">
+          <a class="btn btn-primary" href="#plan">開始主題</a>
+          <button class="btn btn-ghost" id="demoPulse" type="button">體驗互動</button>
+          <button class="btn btn-ghost" id="heroDeck" type="button">投影片全螢幕</button>
+        </div>
+        <p class="hero-case-hint reveal">實戰案例：<a href="#case">TP NOTE01</a> · <a href="#case" data-case-jump="comparable">北區國稅局 TP 可比篩選器</a></p>
+        <div class="path-strip reveal" id="pathStrip">
+          <button class="path-node active" data-target="plan"><span>01</span>構想</button>
+          <button class="path-node" data-target="flow"><span>02</span>流程</button>
+          <button class="path-node" data-target="spec"><span>03</span>SPEC</button>
+          <button class="path-node" data-target="prompt"><span>04</span>PROMPT</button>
+          <button class="path-node" data-target="api"><span>05</span>API</button>
+          <button class="path-node" data-target="kb"><span>06</span>知識庫</button>
+          <button class="path-node" data-target="params"><span>07</span>參數</button>
+          <button class="path-node" data-target="case"><span>08</span>案例</button>
+          <button class="path-node" data-target="summary"><span>09</span>總結</button>
+          <button class="path-node" data-target="collab"><span>10</span>協作</button>
+          <button class="path-node" data-target="loop"><span>11</span>回饋</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 01 PLAN -->
+    <section class="section" id="plan" data-minutes="7">
+      <div class="section-head">
+        <span class="section-num">01</span>
+        <div>
+          <h2>構想與規劃</h2>
+          <p>先想清楚「要解決誰的什麼問題」，再動手叫 AI 寫碼。</p>
+        </div>
+        <span class="min-badge">約 7 分</span>
+      </div>
+
+      <div class="canvas-grid">
+        <article class="glass panel interactive" data-panel="goal">
+          <button class="panel-trigger" type="button">
+            <h3>目的一句話</h3>
+            <span class="hint">點擊展開</span>
+          </button>
+          <div class="panel-body">
+            <p>用模板：<strong>幫〔誰〕在〔情境〕完成〔結果〕</strong>。</p>
+            <div class="example-box">
+              幫「查核員／稅務同仁」在「查移轉訂價法規與 OECD TPG」時，用自然語言問答拿到「有引用依據的答案」——見案例 <strong>TP NOTE01</strong>。
+            </div>
+            <ul class="check-list">
+              <li>誰會用？頻率多高？</li>
+              <li>成功長什麼樣？（可驗收）</li>
+              <li>什麼不做？（邊界）</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="glass panel interactive" data-panel="scope">
+          <button class="panel-trigger" type="button">
+            <h3>範圍三層</h3>
+            <span class="hint">點擊展開</span>
+          </button>
+          <div class="panel-body">
+            <p class="scope-intro">先把功能拆成三層，跟 AI 說「這次只做哪一層」，才不會一次要全世界。</p>
+            <div class="tier-stack" id="tierStack">
+              <button type="button" class="tier tier-btn" data-tier="mvp">
+                <strong>MVP</strong>
+                <span class="tier-label">最小可演示</span>
+              </button>
+              <button type="button" class="tier tier-btn" data-tier="v1">
+                <strong>V1</strong>
+                <span class="tier-label">可給真實用戶</span>
+              </button>
+              <button type="button" class="tier tier-btn" data-tier="later">
+                <strong>Later</strong>
+                <span class="tier-label">先記下來不現做</span>
+              </button>
+            </div>
+            <aside class="tier-explain" id="tierExplain">
+              <p>再點上面一層，看白話說明與 TP NOTE01 例子。</p>
+            </aside>
+            <p class="scope-footer">跟 AI 協作時，永遠先鎖 <strong>MVP</strong>，做完能演示，再往 V1 加。</p>
+          </div>
+        </article>
+
+        <article class="glass panel interactive" data-panel="inputs">
+          <button class="panel-trigger" type="button">
+            <h3>輸入 / 輸出 / 約束</h3>
+            <span class="hint">點擊展開</span>
+          </button>
+          <div class="panel-body">
+            <table class="mini-table">
+              <tr><th>輸入</th><td>使用者問題、上傳檔、帳號角色</td></tr>
+              <tr><th>輸出</th><td>答案 + 引用來源 + 信心說明</td></tr>
+              <tr><th>約束</th><td>不可瞎編、需標出知識庫依據</td></tr>
+            </table>
+          </div>
+        </article>
+      </div>
+
+      <div class="workshop glass">
+        <h3>現場練習 · 30 秒填空</h3>
+        <div class="fill-form" id="planForm">
+          <label>幫 <input type="text" placeholder="誰" data-field="who" /> 在 <input type="text" placeholder="情境" data-field="when" /> 完成 <input type="text" placeholder="結果" data-field="what" /></label>
+          <p class="live-sentence" id="liveSentence">幫〔誰〕在〔情境〕完成〔結果〕</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 FLOW -->
+    <section class="section" id="flow" data-minutes="7">
+      <div class="section-head">
+        <span class="section-num">02</span>
+        <div>
+          <h2>怎麼畫流程圖</h2>
+          <p>流程圖是給人看的地圖，也是給 AI 的骨架。</p>
+        </div>
+        <span class="min-badge">約 7 分</span>
+      </div>
+
+      <p class="section-note">點節點看說明。建議符號：橢圓＝起迄、菱形＝判斷、矩形＝處理、文件＝知識庫。</p>
+
+      <div class="flow-board glass" id="flowBoard">
+        <svg class="flow-lines" viewBox="0 0 800 280" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <path d="M90 140 H190" />
+          <path d="M310 140 H400" />
+          <path d="M510 140 H600" />
+          <path d="M450 70 V100" />
+          <path d="M450 180 V210" />
+        </svg>
+        <button class="flow-node" data-flow="start" style="--x:8%;--y:42%">開始<br /><small>使用者提問</small></button>
+        <button class="flow-node" data-flow="retrieve" style="--x:28%;--y:42%">檢索<br /><small>向量搜尋</small></button>
+        <button class="flow-node diamond" data-flow="enough" style="--x:50%;--y:42%"><span class="diamond-label">足夠?</span></button>
+        <button class="flow-node alt" data-flow="rerank" style="--x:50%;--y:8%">Rerank<br /><small>重排精煉</small></button>
+        <button class="flow-node warn" data-flow="fallback" style="--x:50%;--y:76%">回退<br /><small>請澄清 / 拒答</small></button>
+        <button class="flow-node primary" data-flow="answer" style="--x:72%;--y:42%">生成答案<br /><small>+ 引用來源</small></button>
+        <button class="flow-node" data-flow="end" style="--x:90%;--y:42%">結束</button>
+      </div>
+
+      <aside class="flow-detail glass" id="flowDetail" hidden>
+        <button class="close-detail" type="button" aria-label="關閉">×</button>
+        <h3 id="flowDetailTitle"></h3>
+        <p id="flowDetailBody"></p>
+        <pre class="code-block" id="flowDetailTip"></pre>
+      </aside>
+
+      <div class="tip-row">
+        <div class="glass tip-card">
+          <h4>給人看</h4>
+          <p>左右主路徑、上下例外路徑；一句話標註每個節點。</p>
+        </div>
+        <button class="glass tip-card tip-card-btn" type="button" id="tipAiReadable" aria-haspopup="dialog">
+          <h4>給 AI 看</h4>
+          <p>把流程節點變成步驟清單，寫進 SPEC / PROMPT。</p>
+          <span class="tip-click-hint">點擊看對照說明</span>
+        </button>
+        <div class="glass tip-card">
+          <h4>工具建議</h4>
+          <p>ChatGPT 或 Gemini——先醜再美，重點是對齊。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 SPEC -->
+    <section class="section" id="spec" data-minutes="8">
+      <div class="section-head">
+        <span class="section-num">03</span>
+        <div>
+          <h2>怎麼做 SPEC</h2>
+          <p>SPEC 是合約：AI 照著做，你照著驗收。</p>
+        </div>
+        <span class="min-badge">約 8 分</span>
+      </div>
+
+      <div class="tabs" id="specTabs">
+        <div class="tab-list" role="tablist">
+          <button role="tab" aria-selected="true" data-tab="structure">結構</button>
+          <button role="tab" aria-selected="false" data-tab="example">範例片段</button>
+          <button role="tab" aria-selected="false" data-tab="accept">驗收標準</button>
+        </div>
+        <div class="tab-panels glass">
+          <div class="tab-panel active" data-panel="structure">
+            <ol class="numbered">
+              <li><strong>背景與目標</strong> — 為什麼做、成功長怎樣</li>
+              <li><strong>使用者與場景</strong> — 角色、頻率、裝置</li>
+              <li><strong>功能清單</strong> — Must / Should / Could</li>
+              <li><strong>非功能</strong> — 延遲、安全、語系、引用必填</li>
+              <li><strong>資料與知識</strong> — 來源、更新節奏、權限</li>
+              <li><strong>介面與流程</strong> — 對應流程圖節點</li>
+              <li><strong>API / 整合</strong> — 端點、錯誤碼、限流</li>
+              <li><strong>驗收與排除</strong> — 做得到才算完、明確不做什麼</li>
+            </ol>
+          </div>
+          <div class="tab-panel" data-panel="example">
+            <p class="spec-plain-intro">先看「白話版」：這段 SPEC 是在跟 AI／工程師講清楚——使用者丟什麼進來、系統要吐什麼出去、什麼情況下不能瞎掰、多快要回、什麼事不做。</p>
+            <div class="spec-plain-list">
+              <article class="spec-plain-item glass-lite">
+                <h4>這功能叫什麼？</h4>
+                <p><strong>知識庫問答</strong>：使用者用平常說話的方式提問，系統去知識庫找資料再回答。</p>
+              </article>
+              <article class="spec-plain-item glass-lite">
+                <h4>輸入（使用者給系統什麼）</h4>
+                <p>一段<strong>自然語言問題</strong>，也就是一般人講話的句子，不是程式碼。</p>
+                <p class="spec-tag">限制：最多約 500 字，避免一次貼整份報告把系統塞爆。</p>
+              </article>
+              <article class="spec-plain-item glass-lite">
+                <h4>輸出（系統要交什麼作業）</h4>
+                <ul>
+                  <li><strong>答案</strong>：用人話回覆</li>
+                  <li><strong>引用 chunk id</strong>：標出「這句話是從知識庫哪一小段來的」（chunk＝切好的知識片段）</li>
+                  <li><strong>是否低信心</strong>：系統自評「我有沒有把握」；沒把握要坦白說</li>
+                </ul>
+              </article>
+              <article class="spec-plain-item glass-lite">
+                <h4>規則（什麼情況下不准亂答）</h4>
+                <p>知識庫裡<strong>找不到夠用的依據</strong>時：<strong>不准自己腦補</strong>。改成<strong>反問使用者</strong>（請講清楚一點），或<strong>直接說不知道／拒答</strong>。</p>
+              </article>
+              <article class="spec-plain-item glass-lite">
+                <h4>效能（要多快）</h4>
+                <p>從按下送出到看到完整答案，大多數時候（約 95% 的請求）要在 <strong>8 秒內</strong>完成。寫這行是為了避免做出「正確但慢到不能用」的系統。</p>
+              </article>
+              <article class="spec-plain-item glass-lite">
+                <h4>排除（明確說不做什麼）</h4>
+                <ul>
+                  <li><strong>不可僅提供最終法院判決</strong>：不能只丟一句判決結論；要附推論、依據與不確定的地方</li>
+                  <li><strong>不可只給法律建議卻沒有推論過程</strong>：可以給建議方向，但必須說清楚怎麼推導出來、依據哪段資料</li>
+                  <li><strong>不改寫原始政策文件</strong>：AI 可以引用、說明，但不能擅自改公司正式規定的原文</li>
+                </ul>
+              </article>
+            </div>
+            <details class="spec-raw">
+              <summary>對照：寫給 AI 的精簡原文</summary>
+              <pre class="code-block"><code>## 功能：知識庫問答
+- 輸入：自然語言問題（≤ 500 字）
+- 輸出：答案、引用 chunk id、是否低信心
+- 規則：無足夠依據時不得臆測，改回問或拒答
+- 效能：P95 端到端 &lt; 8 秒
+- 排除：不可僅提供最終法院判決／不可只給法律建議而無推論過程；不改寫原始政策文件</code></pre>
+            </details>
+          </div>
+          <div class="tab-panel" data-panel="accept">
+            <ul class="check-list">
+              <li>給 10 題黃金問題，至少 8 題有正確引用</li>
+              <li>刻意超範圍問題會被拒答或澄清</li>
+              <li>UI 可點開來源段落對照</li>
+              <li>參數表與預設值寫在設定檔，可調</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 PROMPT -->
+    <section class="section" id="prompt" data-minutes="8">
+      <div class="section-head">
+        <span class="section-num">04</span>
+        <div>
+          <h2>怎麼做 PROMPT</h2>
+          <p>把 SPEC 翻譯成模型聽得懂、可重複的指令。</p>
+        </div>
+        <span class="min-badge">約 8 分</span>
+      </div>
+
+      <div class="prompt-layers">
+        <button class="layer-chip glass" data-layer="role" type="button">① 角色</button>
+        <button class="layer-chip glass" data-layer="task" type="button">② 任務</button>
+        <button class="layer-chip glass" data-layer="context" type="button">③ 情境 / 知識</button>
+        <button class="layer-chip glass" data-layer="format" type="button">④ 輸出格式</button>
+        <button class="layer-chip glass" data-layer="rules" type="button">⑤ 規則與拒答</button>
+      </div>
+
+      <div class="prompt-stage glass" id="promptStage">
+        <p class="prompt-placeholder">點上方圖層，組出一段完整 PROMPT。</p>
+        <pre class="code-block prompt-out" id="promptOut" hidden></pre>
+      </div>
+
+      <div class="compare-row">
+        <div class="glass compare">
+          <h4>弱 PROMPT</h4>
+          <p>「幫我做一個客服機器人。」</p>
+        </div>
+        <div class="glass compare good">
+          <h4>強 PROMPT</h4>
+          <p>角色 + 任務 + 只能用提供的段落 + JSON 輸出欄位 + 低信心時的行為。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 API -->
+    <section class="section" id="api" data-minutes="5">
+      <div class="section-head">
+        <span class="section-num">05</span>
+        <div>
+          <h2>API 細節怎麼說明</h2>
+          <p>給協作者與 AI 一份「怎麼呼叫、怎麼失敗」的地圖。</p>
+        </div>
+        <span class="min-badge">約 5 分</span>
+      </div>
+
+      <div class="api-grid">
+        <article class="glass api-card" data-api="chat">
+          <div class="method post">POST</div>
+          <h3>/v1/chat/query</h3>
+          <p>問答主流程：檢索 → 重排 → 生成。</p>
+        </article>
+        <article class="glass api-card" data-api="ingest">
+          <div class="method put">PUT</div>
+          <h3>/v1/kb/documents</h3>
+          <p>上傳 / 更新 Markdown 知識文件。</p>
+        </article>
+        <article class="glass api-card" data-api="health">
+          <div class="method get">GET</div>
+          <h3>/v1/health</h3>
+          <p>模型與向量庫是否就緒。</p>
+        </article>
+      </div>
+
+      <div class="api-inspector glass" id="apiInspector" hidden>
+        <button class="close-detail" type="button" aria-label="關閉">×</button>
+        <div id="apiInspectorBody"></div>
+      </div>
+    </section>
+
+    <!-- 06 KB -->
+    <section class="section" id="kb" data-minutes="10">
+      <div class="section-head">
+        <span class="section-num">06</span>
+        <div>
+          <h2>知識庫與 Markdown</h2>
+          <p>好的知識庫像整理過的書櫃。切塊、下指令、驗收，都要能講清楚。</p>
+        </div>
+        <span class="min-badge">約 10 分</span>
+      </div>
+
+      <div class="kb-steps">
+        <div class="kb-step glass" data-step="1">
+          <span>1</span>
+          <h3>拆主題</h3>
+          <p>一檔一事：請假、報銷、資安……</p>
+        </div>
+        <div class="kb-step glass" data-step="2">
+          <span>2</span>
+          <h3>寫結構</h3>
+          <p>標題層級清楚，列表與表格利於切塊。</p>
+        </div>
+        <div class="kb-step glass" data-step="3">
+          <span>3</span>
+          <h3>加 metadata</h3>
+          <p>版本、生效日、部門、權限標籤。</p>
+        </div>
+        <div class="kb-step glass" data-step="4">
+          <span>4</span>
+          <h3>切塊入庫</h3>
+          <p>依標題切，再套 Chunk Size / Overlap。</p>
+        </div>
+      </div>
+
+      <div class="md-demo glass">
+        <div class="md-toolbar">
+          <span>example.md</span>
+          <button type="button" id="toggleMdView">切換預覽</button>
+        </div>
+        <pre class="code-block md-source" id="mdSource"><code>---
+title: 請假規定
+version: 2026.03
+owner: HR
+---
+
+# 年假
+- 到職滿一年：特休 7 天
+- 申請需提前 3 個工作日
+
+# 病假
+- 需附證明（連續 2 天以上）
+- 當年度上限依勞基法</code></pre>
+        <div class="md-preview" id="mdPreview" hidden>
+          <p class="meta">HR · v2026.03</p>
+          <h4>年假</h4>
+          <ul>
+            <li>到職滿一年：特休 7 天</li>
+            <li>申請需提前 3 個工作日</li>
+          </ul>
+          <h4>病假</h4>
+          <ul>
+            <li>需附證明（連續 2 天以上）</li>
+            <li>當年度上限依勞基法</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tabs kb-deep" id="kbTabs">
+        <div class="tab-list" role="tablist">
+          <button role="tab" aria-selected="true" data-tab="chunk">怎麼切塊</button>
+          <button role="tab" aria-selected="false" data-tab="instruct">指令怎麼下</button>
+          <button role="tab" aria-selected="false" data-tab="inspect">怎麼檢驗對接</button>
+          <button role="tab" aria-selected="false" data-tab="pass">怎樣算合格</button>
+        </div>
+        <div class="tab-panels glass">
+          <div class="tab-panel active" data-panel="chunk">
+            <p class="spec-plain-intro">優先<strong>依標題切</strong>，不要先依字數硬切。一塊＝一個可獨立引用的意思單位；Overlap 是保險，不是把主題混在一起的藉口。</p>
+            <div class="chunk-mode-bar">
+              <button type="button" class="chunk-mode-btn active" data-chunk-mode="good">好切法</button>
+              <button type="button" class="chunk-mode-btn" data-chunk-mode="bad">壞切法</button>
+            </div>
+            <div class="chunk-viz" id="chunkViz">
+              <article class="chunk-piece glass-lite" data-chunk="a">
+                <header><span class="chunk-id">chunk A</span><strong># 年假</strong></header>
+                <ul>
+                  <li>到職滿一年：特休 7 天</li>
+                  <li>申請需提前 3 個工作日</li>
+                </ul>
+              </article>
+              <div class="chunk-cut" id="chunkCut">──── 依 H1 切點 · overlap 只重疊邊界句 ────</div>
+              <article class="chunk-piece glass-lite" data-chunk="b">
+                <header><span class="chunk-id">chunk B</span><strong># 病假</strong></header>
+                <ul>
+                  <li>需附證明（連續 2 天以上）</li>
+                  <li>當年度上限依勞基法</li>
+                </ul>
+              </article>
+            </div>
+            <p class="chunk-note" id="chunkNote">年假規則完整在 A、病假完整在 B。問「年假要提前幾天申請？」能整段引用。</p>
+            <ul class="check-list">
+              <li>一檔一事；<strong>原則與例外必須同塊</strong></li>
+              <li>標題層級清楚：# 主題、## 小節、### 例外／注意</li>
+              <li>用列表、表格，少寫長散文</li>
+              <li>Chunk Size 約 600、Overlap 約 100 是起點；法規長文再放大</li>
+            </ul>
+          </div>
+          <div class="tab-panel" data-panel="instruct">
+            <p class="spec-plain-intro">不要只說「幫我整理知識庫」。把角色、切法、輸出欄位一次講完。點複製，貼進對話即可。</p>
+            <article class="prompt-card">
+              <div class="prompt-card-head">
+                <h4>① 請 AI 整理成合格 Markdown</h4>
+                <button type="button" class="copy-btn" data-copy-target="kbPromptMd">複製指令</button>
+              </div>
+              <pre class="code-block" id="kbPromptMd"><code>角色：你是知識庫工程師。
+任務：把我貼上的資料整理成「可入向量庫」的 Markdown。
+規則：
+1. 一檔一事；檔名用主題，不要用「完整版」「彙整」
+2. 標題：# 主題、## 小節、### 例外／注意
+3. 原則與例外必須寫在同一節，不可拆檔
+4. 開頭 YAML：title, version, owner, effective_date, tags
+5. 用列表、表格，少寫長散文
+6. 每節都要能單獨回答至少一個問題
+輸出：完整 Markdown + 建議切塊邊界（標在 ##）+ 每塊能回答的範例問題</code></pre>
+            </article>
+            <article class="prompt-card">
+              <div class="prompt-card-head">
+                <h4>② 請 AI 審核切塊（不要硬切字數）</h4>
+                <button type="button" class="copy-btn" data-copy-target="kbPromptCut">複製指令</button>
+              </div>
+              <pre class="code-block" id="kbPromptCut"><code>角色：你是 RAG 切塊審核員。
+任務：檢查這份 Markdown 適不適合「依標題切 + chunk 600 / overlap 100」。
+請列出：
+- 建議切點（標題）
+- 哪裡會切太碎或切太雜
+- 哪些原則／例外被拆開了
+- 修正後的標題結構
+禁止：直接依字數硬切、把例外和原則拆到不同塊。</code></pre>
+            </article>
+          </div>
+          <div class="tab-panel" data-panel="inspect">
+            <p class="spec-plain-intro">對接成功不是「檔案有上傳」，而是<strong>黃金問題能找回正確段落，而且答得出引用</strong>。請 AI 當驗收官，不准只說「看起來可以」。</p>
+            <ol class="numbered">
+              <li>準備 8～10 題黃金問題（你已經知道標準答案）</li>
+              <li>對每一題看：命中哪個 chunk、能不能引用原文</li>
+              <li>失敗要分類，才能知道改 Markdown 還是改參數</li>
+            </ol>
+            <div class="fail-chips" id="failChips">
+              <button type="button" class="fail-chip" data-fail="碎">切太碎</button>
+              <button type="button" class="fail-chip" data-fail="雜">切太雜</button>
+              <button type="button" class="fail-chip" data-fail="題">標題不清</button>
+              <button type="button" class="fail-chip" data-fail="meta">缺 metadata</button>
+              <button type="button" class="fail-chip" data-fail="混">主題混檔</button>
+              <button type="button" class="fail-chip" data-fail="舊">文件過期</button>
+              <button type="button" class="fail-chip" data-fail="超">問題超範圍</button>
+            </div>
+            <aside class="kb-map-detail" id="failDetail">
+              <p>點上方失敗類型，看典型症狀與該改哪裡。</p>
+            </aside>
+            <article class="prompt-card">
+              <div class="prompt-card-head">
+                <h4>③ 請 AI 檢驗知識庫是否對接成功</h4>
+                <button type="button" class="copy-btn" data-copy-target="kbPromptQa">複製指令</button>
+              </div>
+              <pre class="code-block" id="kbPromptQa"><code>角色：你是知識庫驗收官，不准只說「看起來可以」。
+任務：用下列黃金問題檢驗知識庫是否對接成功。
+對每一題輸出：
+1. 應命中的檔名／標題
+2. 實際檢索到什麼（若能讀檔就讀）
+3. 能否引用原文
+4. 判定：通過 / 失敗
+5. 失敗類型：切太碎 | 切太雜 | 標題不清 | 缺 metadata | 主題混檔 | 文件過期 | 問題超範圍
+最後給：通過率、不合格清單、我該改 Markdown 還是改參數（Chunk / Top-K / Rerank）。
+通過標準：10 題至少 8 題命中正確段落且有引用。
+黃金問題：
+- （請填 8～10 題）</code></pre>
+            </article>
+          </div>
+          <div class="tab-panel" data-panel="pass">
+            <p class="spec-plain-intro">點選打勾，當現場驗收清單。全部打勾才算這份 Markdown「可以入庫」。</p>
+            <ul class="qualify-list" id="qualifyList">
+              <li><button type="button" class="qualify-check" aria-pressed="false"></button><span>一檔一事，沒有「彙整大全」</span></li>
+              <li><button type="button" class="qualify-check" aria-pressed="false"></button><span>標題即目錄：人看懂、機器切得動</span></li>
+              <li><button type="button" class="qualify-check" aria-pressed="false"></button><span>一塊能獨立引用，不需要前後文才懂</span></li>
+              <li><button type="button" class="qualify-check" aria-pressed="false"></button><span>原則與例外寫在同一節</span></li>
+              <li><button type="button" class="qualify-check" aria-pressed="false"></button><span>YAML 有 title / version / owner / 生效日 / tags</span></li>
+              <li><button type="button" class="qualify-check" aria-pressed="false"></button><span>舊版有標註或已下架，不會跟新版搶命中</span></li>
+              <li><button type="button" class="qualify-check" aria-pressed="false"></button><span>黃金問題 ≥ 80% 能命中正確段落</span></li>
+              <li><button type="button" class="qualify-check" aria-pressed="false"></button><span>答案能指出 chunk／標題，人點得回原文</span></li>
+            </ul>
+            <p class="qualify-score" id="qualifyScore">0 / 8 合格項</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 PARAMS -->
+    <section class="section" id="params" data-minutes="8">
+      <div class="section-head">
+        <span class="section-num">07</span>
+        <div>
+          <h2>RAG / 生成參數說明</h2>
+          <p>點每一列看「為什麼這樣設」。先用建議值，再依實測微調。</p>
+        </div>
+        <span class="min-badge">約 8 分</span>
+      </div>
+
+      <div class="params-table-wrap glass">
+        <table class="params-table" id="paramsTable">
+          <thead>
+            <tr>
+              <th>參數</th>
+              <th>建議值</th>
+              <th>說明</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- filled by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="param-detail glass" id="paramDetail" hidden>
+        <button class="close-detail" type="button" aria-label="關閉">×</button>
+        <h3 id="paramTitle"></h3>
+        <p class="param-suggest" id="paramSuggest"></p>
+        <p id="paramExplain"></p>
+        <div class="slider-demo" id="paramSliderWrap" hidden>
+          <label><span id="sliderLabel"></span> <strong id="sliderValue"></strong></label>
+          <input type="range" id="paramSlider" />
+          <p class="slider-note" id="sliderNote"></p>
+        </div>
+      </div>
+
+      <div class="preset-bar glass">
+        <p>一鍵套用教室預設</p>
+        <button type="button" class="btn btn-primary" id="applyPreset">套用建議組態</button>
+        <ul class="preset-list" id="presetList"></ul>
+      </div>
+    </section>
+
+    <!-- 08 CASES -->
+    <section class="section" id="case" data-minutes="8">
+      <div class="section-head">
+        <span class="section-num">08</span>
+        <div>
+          <h2>實戰案例</h2>
+          <p>同一套方法，套在兩個真實產品上對照學習。</p>
+        </div>
+        <span class="min-badge">約 8 分</span>
+      </div>
+
+      <div class="case-switch" id="caseSwitch" role="tablist" aria-label="選擇案例">
+        <button type="button" class="case-switch-btn active" data-case="note01" role="tab" aria-selected="true">
+          <span class="case-switch-code">01</span>
+          TP NOTE01 · 知識庫
+        </button>
+        <button type="button" class="case-switch-btn" data-case="comparable" role="tab" aria-selected="false">
+          <span class="case-switch-code">02</span>
+          北區國稅局 · TP 可比篩選器
+        </button>
+      </div>
+
+      <!-- CASE A: TP NOTE01 -->
+      <div class="case-view active" id="caseView-note01" data-case-view="note01">
+        <div class="case-hero glass">
+          <div class="case-badge">CASE · TP NOTE01</div>
+          <h3>TP AI NOTE · 移轉訂價專屬知識庫</h3>
+          <p class="case-one-liner">
+            幫<strong>查核員／稅務同仁</strong>在<strong>查 OECD TPG、台灣 TP 查核準則、BAPA／MAP</strong>時，
+            用自然語言問答拿到<strong>有知識庫引用的推論答案</strong>，並能存筆記、匯出、回寫知識庫。
+          </p>
+          <div class="case-tags">
+            <span>心智圖導覽</span>
+            <span>本機 RAG</span>
+            <span>法規 Markdown／PDF</span>
+            <span>查核員 Prompt</span>
+            <span>筆記匯出</span>
+          </div>
+        </div>
+
+        <div class="case-tabs" id="caseTabs">
+          <div class="tab-list" role="tablist">
+            <button role="tab" aria-selected="true" data-tab="purpose">目的</button>
+            <button role="tab" aria-selected="false" data-tab="flowmap">流程對應</button>
+            <button role="tab" aria-selected="false" data-tab="specbits">SPEC 精華</button>
+            <button role="tab" aria-selected="false" data-tab="promptbits">PROMPT</button>
+            <button role="tab" aria-selected="false" data-tab="kbmap">知識庫地圖</button>
+            <button role="tab" aria-selected="false" data-tab="paramsmap">參數落地</button>
+          </div>
+          <div class="tab-panels glass">
+            <div class="tab-panel active" data-panel="purpose">
+              <div class="case-split">
+                <div>
+                  <h4>誰 × 情境 × 結果</h4>
+                  <ul class="check-list">
+                    <li><strong>誰</strong>：TP／BAPA 查核與學習者</li>
+                    <li><strong>情境</strong>：法條多、跨 OECD／台灣／函令，難一次翻完</li>
+                    <li><strong>結果</strong>：可引用的答案 + 節點詳情 + 可存筆記</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>MVP 邊界</h4>
+                  <ul class="check-list">
+                    <li>做：本機知識庫檢索 → 模型推論 → 引用</li>
+                    <li>做：心智圖點選法規節點</li>
+                    <li>不做：取代正式法律意見書</li>
+                    <li>不做：無依據時硬答</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="tab-panel" data-panel="flowmap">
+              <ol class="numbered case-flow-list">
+                <li><strong>開始</strong>：使用者提問（例：BAPA 申請要注意什麼？）</li>
+                <li><strong>檢索</strong>：本機 TP 知識庫向量／關鍵字命中段落</li>
+                <li><strong>Rerank／篩選</strong>：依意圖（避風港、DEMPE、PE…）加權</li>
+                <li><strong>判斷</strong>：不足 → 澄清；足夠 → 生成</li>
+                <li><strong>生成</strong>：查核實務論述 +【參考依據】</li>
+                <li><strong>結束</strong>：存筆記本／知識庫／匯出 Word·PDF</li>
+              </ol>
+            </div>
+            <div class="tab-panel" data-panel="specbits">
+              <pre class="code-block"><code>## TP NOTE01 · 功能摘要
+- 輸入：自然語言問題；可點心智圖節點帶入上下文
+- 輸出：正式回答、查核實務重點、參考依據（知識庫段落）
+- 資料：OECD TPG、台灣查核準則、三層文據、MAP/BAPA、BEPS/MLI
+- 非功能：優先本機知識庫；低信心不得臆測
+- 驗收：黃金題（避風港、BAPA、可比較利潤法）能正確引用</code></pre>
+            </div>
+            <div class="tab-panel" data-panel="promptbits">
+              <pre class="code-block"><code>角色：你是「TP 移轉訂價查核員」。
+任務：依檢索到的 TP 知識庫段落推論作答。
+格式：【推論思考】【正式回答】【查核實務重點】【參考依據】
+規則：
+- 只根據提供段落；不足則說明不足並請澄清
+- 勿混淆「TP 第14點避風港」與「CbCR 避風港」
+- 繁體中文；引用標 [知識庫 N]</code></pre>
+            </div>
+            <div class="tab-panel" data-panel="kbmap">
+              <div class="kb-map">
+                <button type="button" class="kb-map-node" data-kb="oecd">OECD TPG／教材</button>
+                <button type="button" class="kb-map-node" data-kb="tw">台灣查核準則</button>
+                <button type="button" class="kb-map-node" data-kb="tier3">三層文據</button>
+                <button type="button" class="kb-map-node" data-kb="bapa">MAP／BAPA</button>
+                <button type="button" class="kb-map-node" data-kb="beps">BEPS／MLI／Pillar</button>
+              </div>
+              <aside class="kb-map-detail" id="kbMapDetail">
+                <p>點上方節點，看 Markdown／文件如何切主題入庫。</p>
+              </aside>
+            </div>
+            <div class="tab-panel" data-panel="paramsmap">
+              <table class="mini-table case-param-table">
+                <tr><th>Chunk Size</th><td>3K · 法規長文／教材段落一次裝較完整</td></tr>
+                <tr><th>Overlap</th><td>100 · 避免條次在切點斷裂</td></tr>
+                <tr><th>Top-K</th><td>20 → Rerank 後 6</td></tr>
+                <tr><th>Temperature</th><td>0.15 · 查核語氣求穩</td></tr>
+                <tr><th>Max Output</th><td>6K · 夠寫較長實務論述與依據</td></tr>
+                <tr><th>相似度門檻</th><td>依模型分數分布校準，不寫死</td></tr>
+              </table>
+              <p class="case-param-note">註：上方為 <strong>TP NOTE01 實機組態</strong>。教室通用建議仍可從 600／3K 起調，再依文件長度與回答長度拉高。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CASE B: TP 可比篩選器 -->
+      <div class="case-view" id="caseView-comparable" data-case-view="comparable" hidden>
+        <div class="case-hero glass">
+          <div class="case-badge">CASE · 北區國稅局</div>
+          <h3>TP 可比篩選器 · 可比分析輔助</h3>
+          <p class="case-one-liner">
+            幫<strong>北區國稅局查核同仁</strong>在<strong>做移轉訂價可比分析</strong>時，
+            依產業／財務／可比條件<strong>篩出候選可比對象</strong>，加速人工覆核前的資料整理。
+          </p>
+          <div class="case-tags">
+            <span>內部工具</span>
+            <span>登入保護</span>
+            <span>條件篩選</span>
+            <span>可比分析</span>
+            <span>Vercel 部署</span>
+          </div>
+          <a class="case-link btn btn-primary" href="https://ntb-comparable-alpha.vercel.app/login?next=%2F" target="_blank" rel="noopener noreferrer">
+            開啟線上示範 →
+          </a>
+          <p class="case-link-note">內部使用需登入 · 非正式官方網站 · 僅供分析輔助</p>
+        </div>
+
+        <div class="case-tabs" id="caseTabsComparable">
+          <div class="tab-list" role="tablist">
+            <button role="tab" aria-selected="true" data-tab="c-purpose">目的</button>
+            <button role="tab" aria-selected="false" data-tab="c-flow">流程對應</button>
+            <button role="tab" aria-selected="false" data-tab="c-spec">SPEC 精華</button>
+            <button role="tab" aria-selected="false" data-tab="c-prompt">PROMPT／協作</button>
+            <button role="tab" aria-selected="false" data-tab="c-diff">和 NOTE01 差在哪</button>
+          </div>
+          <div class="tab-panels glass">
+            <div class="tab-panel active" data-panel="c-purpose">
+              <div class="case-split">
+                <div>
+                  <h4>誰 × 情境 × 結果</h4>
+                  <ul class="check-list">
+                    <li><strong>誰</strong>：北區國稅局 TP 查核同仁</li>
+                    <li><strong>情境</strong>：可比對象條件多、手動篩很花時間</li>
+                    <li><strong>結果</strong>：依條件列出候選清單，方便人工再判斷</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>MVP 邊界</h4>
+                  <ul class="check-list">
+                    <li>做：登入 → 設條件 → 篩選 → 看結果</li>
+                    <li>做：內部權限，避免公開裸奔</li>
+                    <li>不做：自動取代查核結論</li>
+                    <li>不做：對外正式對外公告系統</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="tab-panel" data-panel="c-flow">
+              <ol class="numbered case-flow-list">
+                <li><strong>開始</strong>：登入內部帳號</li>
+                <li><strong>輸入條件</strong>：產業、財務指標、可比篩選參數</li>
+                <li><strong>處理</strong>：依規則／資料集過濾候選</li>
+                <li><strong>輸出</strong>：可比候選列表與關鍵欄位</li>
+                <li><strong>人工確認</strong>：查核員覆核後再寫入正式分析</li>
+              </ol>
+            </div>
+            <div class="tab-panel" data-panel="c-spec">
+              <pre class="code-block"><code>## 北區國稅局 · TP 可比篩選器
+- 輸入：登入憑證、篩選條件（產業／財務／可比參數）
+- 輸出：候選可比清單與關鍵欄位
+- 規則：僅輔助篩選；最終判斷由查核員負責
+- 非功能：需登入；內部使用；標示非正式官方站
+- 部署：Vercel（https://ntb-comparable-alpha.vercel.app）
+- 排除：不自動產出正式查核核定結論</code></pre>
+            </div>
+            <div class="tab-panel" data-panel="c-prompt">
+              <pre class="code-block"><code>跟 AI 協作時可這樣下 SPEC／PROMPT：
+角色：你是熟悉移轉訂價可比分析的前端／全端助手。
+任務：做一個「可比篩選」內部網頁：登入後可設條件、篩資料、列表展示。
+約束：
+- 結果僅供輔助，UI 需提示「人工覆核」
+- 需登入保護，勿做公開免登入查詢
+- 介面繁體中文；條件欄位要可擴充
+驗收：能登入、能篩、能看到清單；部署到 Vercel。</code></pre>
+            </div>
+            <div class="tab-panel" data-panel="c-diff">
+              <div class="case-split">
+                <div>
+                  <h4>TP NOTE01</h4>
+                  <ul class="check-list">
+                    <li>偏<strong>知識問答／RAG</strong></li>
+                    <li>核心：Chunk、Top-K、Prompt、引用</li>
+                    <li>輸出：有依據的文字論述</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>TP 可比篩選器</h4>
+                  <ul class="check-list">
+                    <li>偏<strong>條件篩選／資料工具</strong></li>
+                    <li>核心：登入、表單、規則、列表</li>
+                    <li>輸出：候選可比清單供人工覆核</li>
+                  </ul>
+                </div>
+              </div>
+              <p class="case-param-note">同一條路徑：構想 → 流程 → SPEC → PROMPT → 部署；只是「產品形態」不同。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 09 SUMMARY: AI 工作規則 -->
+    <section class="section" id="summary" data-minutes="5">
+      <div class="section-head">
+        <span class="section-num">09</span>
+        <div>
+          <h2>總結 · AI 工作規則</h2>
+          <p>把前面學的串成一條完整 RAG 問答流程。點藍色名詞可看淺白比喻。</p>
+        </div>
+        <span class="min-badge">約 5 分</span>
+      </div>
+
+      <p class="summary-lead glass">你可以把它理解成：使用者問一句話 → 系統先去知識庫「找資料」→ 再把資料交給 AI，並規定它「只能怎麼答」→ 最後用固定格式交作業。</p>
+
+      <div class="rag-flow glass" aria-label="RAG 流程">
+        <div class="rag-step">使用者問題</div>
+        <div class="rag-arrow">↓</div>
+        <button type="button" class="rag-step term-btn" data-term="vector-search">Vector Search</button>
+        <div class="rag-arrow">↓</div>
+        <button type="button" class="rag-step term-btn" data-term="topk">Top-K</button>
+        <div class="rag-arrow">↓</div>
+        <button type="button" class="rag-step term-btn" data-term="reranker">Reranker</button>
+        <div class="rag-arrow">↓</div>
+        <button type="button" class="rag-step term-btn" data-term="chunks">取得 retrieved_chunks</button>
+        <div class="rag-arrow">↓</div>
+        <div class="rag-prompt-box">
+          <button type="button" class="term-btn term-inline" data-term="prompt">AI Prompt</button>
+          <ul>
+            <li>只能根據資料回答</li>
+            <li>發現衝突 → 說明</li>
+            <li>找不到 → 不亂猜</li>
+            <li>必須提供引用</li>
+          </ul>
+        </div>
+        <div class="rag-arrow">↓</div>
+        <div class="rag-step soft">JSON 結構化輸出</div>
+        <div class="rag-arrow">↓</div>
+        <div class="rag-outputs">
+          <button type="button" class="term-btn chip" data-term="answer">answer</button>
+          <button type="button" class="term-btn chip" data-term="citation">citations</button>
+          <button type="button" class="term-btn chip" data-term="confidence">confidence</button>
+          <button type="button" class="term-btn chip" data-term="followup">follow_up</button>
+        </div>
+      </div>
+
+      <div class="summary-chain glass">
+        <h3>你現在學到的其實已經串起來了</h3>
+        <p class="summary-chain-intro">前面問的東西現在可以全部接起來：（點名詞看比喻）</p>
+        <ol class="chain-list">
+          <li>
+            <button type="button" class="term-btn term-inline" data-term="embedding">Embedding</button>
+            <span>→ 把文件轉成向量</span>
+          </li>
+          <li>
+            <button type="button" class="term-btn term-inline" data-term="vector-search">Vector Search</button>
+            <span>→ 找可能相關的文件</span>
+          </li>
+          <li>
+            <button type="button" class="term-btn term-inline" data-term="topk">Top-K</button>
+            <span>→ 先取前 K 筆，例如 20 筆</span>
+          </li>
+          <li>
+            <button type="button" class="term-btn term-inline" data-term="reranker">Reranker</button>
+            <span>→ 再把這 20 筆重新排序</span>
+          </li>
+          <li>
+            <button type="button" class="term-btn term-inline" data-term="chunks">retrieved_chunks</button>
+            <span>→ 把最後選出的資料塞進 Prompt</span>
+          </li>
+          <li>
+            <button type="button" class="term-btn term-inline" data-term="prompt">Prompt</button>
+            <span>→ 告訴 AI「只能怎麼回答」</span>
+          </li>
+          <li>
+            <button type="button" class="term-btn term-inline" data-term="citation">Citation</button>
+            <span>→ 告訴使用者「答案根據哪裡」</span>
+          </li>
+          <li>
+            <button type="button" class="term-btn term-inline" data-term="confidence">Confidence</button>
+            <span>→ 告訴使用者「這答案可靠程度」</span>
+          </li>
+          <li>
+            <button type="button" class="term-btn term-inline" data-term="followup">Follow-up</button>
+            <span>→ 告訴使用者「還需要做什麼」</span>
+          </li>
+        </ol>
+        <p class="summary-finale">這就是一個完整的 <strong>RAG 問答流程</strong>。
+          <button type="button" class="term-btn term-inline" data-term="rag">什麼是 RAG？</button>
+          ·
+          <button type="button" class="term-btn term-inline" data-term="api">API 又是什麼？</button>
+        </p>
+      </div>
+    </section>
+
+    <!-- 10 COLLAB: HOOK / MCP / SUBAGENT / WORKFLOW -->
+    <section class="section" id="collab" data-minutes="8">
+      <div class="section-head">
+        <span class="section-num">10</span>
+        <div>
+          <h2>HOOK · MCP · Subagent · Workflow</h2>
+          <p>AI 不只會寫字。把它接上工具、門禁與分工，才叫工作流。</p>
+        </div>
+        <span class="min-badge">約 8 分</span>
+      </div>
+
+      <p class="section-note">點卡片看白話比喻。四件事常常一起出現：知識用 Markdown，外部系統用
+        <button type="button" class="term-btn term-inline" data-term="mcp">MCP</button>，
+        自動檢查用 <button type="button" class="term-btn term-inline" data-term="hook">Hook</button>，
+        大任務用 <button type="button" class="term-btn term-inline" data-term="subagent">Subagent</button>，
+        整套串起來就是 <button type="button" class="term-btn term-inline" data-term="workflow">Workflow</button>。
+      </p>
+
+      <div class="tool-grid" id="toolGrid">
+        <button type="button" class="glass tool-card active" data-tool="hook">
+          <span class="tool-kicker">01</span>
+          <h3>HOOK</h3>
+          <p>事件前後的自動門禁</p>
+        </button>
+        <button type="button" class="glass tool-card" data-tool="mcp">
+          <span class="tool-kicker">02</span>
+          <h3>MCP</h3>
+          <p>讓 AI 接上外部工具</p>
+        </button>
+        <button type="button" class="glass tool-card" data-tool="subagent">
+          <span class="tool-kicker">03</span>
+          <h3>SUBAGENT</h3>
+          <p>派出專責小助理</p>
+        </button>
+        <button type="button" class="glass tool-card" data-tool="workflow">
+          <span class="tool-kicker">04</span>
+          <h3>WORKFLOW</h3>
+          <p>把步驟變成可重複劇本</p>
+        </button>
+      </div>
+
+      <aside class="tool-detail glass" id="toolDetail">
+        <p class="tool-metaphor" id="toolMetaphor">比喻：門口保全——AI 要出門或進門前，先檢查證件。</p>
+        <h3 id="toolTitle">HOOK（鉤子／事件攔截）</h3>
+        <p id="toolBody">Hook 是「某件事發生之前或之後，自動跑一段檢查或後續動作」。不是讓人每次盯著看，而是把規則寫進事件裡。</p>
+        <ul class="check-list" id="toolList">
+          <li>改完檔自動格式化</li>
+          <li>危險指令（刪檔、對外連網）先問人</li>
+          <li>送出前提醒：不要貼金鑰、個資</li>
+          <li>Subagent 結束後，自動接下一棒</li>
+        </ul>
+      </aside>
+
+      <div class="when-table-wrap glass">
+        <h3>什麼時候用哪個</h3>
+        <table class="mini-table when-table">
+          <tr><th>需求</th><td>用什麼</td></tr>
+          <tr><th>知識要被找到</th><td>Markdown 切塊 + 黃金問題驗收</td></tr>
+          <tr><th>AI 要連外部系統</th><td>MCP（瀏覽器、資料庫、內部 API）</td></tr>
+          <tr><th>做事前／事後自動檢查</th><td>Hook</td></tr>
+          <tr><th>大任務要分工或平行</th><td>Subagent</td></tr>
+          <tr><th>整套要可重複給同事用</th><td>Workflow（SPEC + Skill + 上述工具）</td></tr>
+        </table>
+      </div>
+
+      <div class="wf-board glass">
+        <h3>怎麼建立 Workflow</h3>
+        <p class="wf-intro">點步驟看做法。先寫人怎麼做，再決定哪一步給 AI、哪一步給人。</p>
+        <div class="wf-steps" id="wfSteps">
+          <button type="button" class="wf-step active" data-wf="1"><span>1</span>寫出現況</button>
+          <button type="button" class="wf-step" data-wf="2"><span>2</span>標人／AI</button>
+          <button type="button" class="wf-step" data-wf="3"><span>3</span>寫成 SPEC</button>
+          <button type="button" class="wf-step" data-wf="4"><span>4</span>接 MCP</button>
+          <button type="button" class="wf-step" data-wf="5"><span>5</span>加 Hook</button>
+          <button type="button" class="wf-step" data-wf="6"><span>6</span>派 Subagent</button>
+          <button type="button" class="wf-step" data-wf="7"><span>7</span>跑黃金案例</button>
+        </div>
+        <aside class="wf-explain" id="wfExplain">
+          <h4>1 · 寫出現況</h4>
+          <p>把現在人工怎麼做寫成 5～9 步。不要一開始就想自動化，先對齊「真正的路徑」。</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 11 LOOP: AI Feedback Loop -->
+    <section class="section" id="loop" data-minutes="8">
+      <div class="section-head">
+        <span class="section-num">11</span>
+        <div>
+          <h2>AI 回饋迴路</h2>
+          <p>核心問題不是「辨識」，而是「辨識之後，如何知道自己可能錯了？」</p>
+        </div>
+        <span class="min-badge">約 8 分 · 8 張</span>
+      </div>
+
+      <div class="loop-deck glass" id="loopDeck">
+        <p class="loop-kicker" id="loopKicker">Slide 1 / 8</p>
+
+        <div class="loop-slide active" data-loop="0">
+          <p class="loop-label">核心命題</p>
+          <h3 class="loop-headline">AI 的核心問題不是「辨識」，而是「辨識之後，如何知道自己可能錯了？」</h3>
+          <p class="loop-caption">場景看起來完全不同。點一列，看各自在辨識什麼。</p>
+          <div class="loop-scene-grid">
+            <button type="button" class="loop-scene" data-loop-fill="scene-tesla"><strong>Tesla</strong><span>路況</span></button>
+            <button type="button" class="loop-scene" data-loop-fill="scene-stock"><strong>股票</strong><span>型態</span></button>
+            <button type="button" class="loop-scene" data-loop-fill="scene-invoice"><strong>發票</strong><span>欄位</span></button>
+            <button type="button" class="loop-scene" data-loop-fill="scene-risk"><strong>風險案件</strong><span>異常</span></button>
+            <button type="button" class="loop-scene" data-loop-fill="scene-file"><strong>文件歸檔</strong><span>關聯</span></button>
+          </div>
+        </div>
+
+        <div class="loop-slide" data-loop="1" hidden>
+          <p class="loop-label">案例一 · Tesla（只借方法，不講技術）</p>
+          <h3 class="loop-headline loop-headline-sm">大量真實世界資料，讓困難案例變成教材</h3>
+          <div class="loop-chips wrap">
+            <button type="button" class="loop-chip-btn" data-loop-fill="tesla-data">真實世界資料</button>
+            <span class="loop-arrow">↓</span>
+            <button type="button" class="loop-chip-btn" data-loop-fill="tesla-ai">AI 辨識</button>
+            <span class="loop-arrow">↓</span>
+            <button type="button" class="loop-chip-btn" data-loop-fill="tesla-hard">困難案例</button>
+            <span class="loop-arrow">↓</span>
+            <button type="button" class="loop-chip-btn" data-loop-fill="tesla-human">人工標註</button>
+            <span class="loop-arrow">↓</span>
+            <button type="button" class="loop-chip-btn" data-loop-fill="tesla-fix">改善再部署</button>
+            <span class="loop-arrow">↺</span>
+          </div>
+          <div class="loop-actions">
+            <button type="button" class="loop-pop-btn" data-loop-pop="tesla-flow">看完整學習閉環</button>
+            <button type="button" class="loop-pop-btn" data-loop-pop="tesla-vision">放棄雷達、只用鏡頭</button>
+            <button type="button" class="loop-ask-btn" data-loop-fill="tesla-ask">如果從自駕車抽離，這是什麼？</button>
+          </div>
+        </div>
+
+        <div class="loop-slide" data-loop="2" hidden>
+          <p class="loop-label">案例二 · 股票型態學</p>
+          <h3 class="loop-headline loop-headline-sm">不是只學「什麼是頭肩頂」</h3>
+          <div class="compare-row loop-compare">
+            <button type="button" class="glass-lite compare loop-fill-card" data-loop-fill="stock-ai">
+              <h4>AI 一開始</h4>
+              <p>股票 A → 頭肩頂 → 信心 95%</p>
+            </button>
+            <button type="button" class="glass-lite compare good loop-fill-card" data-loop-fill="stock-human">
+              <h4>人工看完</h4>
+              <p>不是。不要只當成「AI 錯了」。</p>
+            </button>
+          </div>
+          <p class="loop-caption">把這次錯誤拿去分類。點類型看為什麼像、其實不是。</p>
+          <div class="loop-err-chips">
+            <button type="button" data-loop-fill="err-1">① 假突破</button>
+            <button type="button" data-loop-fill="err-2">② 成交量不符</button>
+            <button type="button" data-loop-fill="err-3">③ 左右肩比例異常</button>
+            <button type="button" data-loop-fill="err-4">④ 時間跨度異常</button>
+            <button type="button" data-loop-fill="err-5">⑤ 型態不完整</button>
+            <button type="button" data-loop-fill="err-6">⑥ 很像但不是</button>
+          </div>
+        </div>
+
+        <div class="loop-slide" data-loop="3" hidden>
+          <p class="loop-label">抽象化 · Tesla ＋ 股票</p>
+          <h3 class="loop-headline">AI 真正需要學習的，不只是答案，而是錯誤。</h3>
+          <div class="compare-row loop-compare">
+            <button type="button" class="glass-lite compare loop-fill-card" data-loop-fill="abs-old">
+              <h4>傳統</h4>
+              <p>輸入 → 答案</p>
+            </button>
+            <button type="button" class="glass-lite compare good loop-fill-card" data-loop-fill="abs-new">
+              <h4>要推的</h4>
+              <p>判斷 → 錯誤？→ 分類 → 人工驗證 → 改善</p>
+            </button>
+          </div>
+          <div class="loop-actions">
+            <button type="button" class="loop-pop-btn" data-loop-pop="abs-flow">看完整迴路</button>
+            <button type="button" class="loop-ask-btn" data-loop-fill="abs-value">什麼資料最有價值？</button>
+          </div>
+        </div>
+
+        <div class="loop-slide" data-loop="4" hidden>
+          <p class="loop-label">問：同一個方法論放到機關資料上，會發生什麼？</p>
+          <h3 class="loop-headline loop-headline-sm">應用一 · 自動發票歸檔</h3>
+          <div class="loop-chips wrap">
+            <span>發票</span>
+            <span class="loop-arrow">→</span>
+            <span>AI 辨識</span>
+            <span class="loop-arrow">→</span>
+            <button type="button" class="loop-chip-btn" data-loop-fill="inv-hi">高信心 → 自動歸檔</button>
+            <span class="loop-arrow">/</span>
+            <button type="button" class="loop-chip-btn" data-loop-fill="inv-lo">低信心 → 人工確認</button>
+            <span class="loop-arrow">→</span>
+            <span>錯誤案例庫</span>
+          </div>
+          <p class="loop-caption">這是一個可能的應用案例，不是在批評現有系統。</p>
+          <div class="loop-actions">
+            <button type="button" class="loop-pop-btn" data-loop-pop="invoice-flow">看完整流程圖</button>
+          </div>
+        </div>
+
+        <div class="loop-slide" data-loop="5" hidden>
+          <p class="loop-label">應用二 · 風險案件辨識</p>
+          <h3 class="loop-headline loop-headline-sm">AI Risk Learning Loop</h3>
+          <div class="compare-row loop-compare">
+            <button type="button" class="glass-lite compare loop-fill-card" data-loop-fill="fp">
+              <h4>False Positive</h4>
+              <p>AI：「很可疑。」人工：「其實沒問題。」</p>
+            </button>
+            <button type="button" class="glass-lite compare good loop-fill-card" data-loop-fill="fn">
+              <h4>False Negative</h4>
+              <p>AI：「沒問題。」人工：「查出重大異常。」</p>
+            </button>
+          </div>
+          <p class="loop-caption">系統不是只問「準不準」，而是問「在哪些情況下容易錯」。</p>
+          <div class="loop-actions">
+            <button type="button" class="loop-pop-btn" data-loop-pop="flywheel">看風險辨識飛輪</button>
+          </div>
+        </div>
+
+        <div class="loop-slide" data-loop="6" hidden>
+          <p class="loop-label">品質管理 · 不是作業指令</p>
+          <h3 class="loop-headline loop-headline-sm">先建立基準樣本，估計錯誤率與錯誤結構</h3>
+          <div class="loop-bars" aria-hidden="true">
+            <button type="button" class="loop-bar" data-loop-fill="bar-1" style="--h:80%"><span>8%</span><small>第1輪</small></button>
+            <button type="button" class="loop-bar" data-loop-fill="bar-2" style="--h:40%"><span>4%</span><small>第2輪</small></button>
+            <button type="button" class="loop-bar" data-loop-fill="bar-3" style="--h:20%"><span>2%</span><small>第3輪</small></button>
+            <button type="button" class="loop-bar" data-loop-fill="bar-4" style="--h:10%"><span>1%</span><small>第4輪</small></button>
+          </div>
+          <p class="loop-caption">目的不是一開始 100% 正確，而是可量化、可追蹤、可持續改善。</p>
+          <div class="loop-actions">
+            <button type="button" class="loop-pop-btn" data-loop-pop="sample-flow">看抽樣與改善流程</button>
+          </div>
+        </div>
+
+        <div class="loop-slide" data-loop="7" hidden>
+          <p class="loop-label">拉回業務 · 最終目標</p>
+          <h3 class="loop-headline loop-headline-sm">風險排序 → 人看高不確定案件 → 回饋成下一輪資料</h3>
+          <p class="loop-caption">形成「AI 辨識—人工驗證—錯誤分類—模型改善」的閉環。</p>
+          <div class="loop-actions">
+            <button type="button" class="loop-pop-btn" data-loop-pop="biz">看完整表述</button>
+          </div>
+          <blockquote class="loop-quote">
+            我們不是把人拿掉，而是讓人專注在 AI 最不確定、最容易錯、也最值得人工判斷的案件。
+          </blockquote>
+        </div>
+
+        <aside class="loop-fill" id="loopFill">
+          <p id="loopFillBody">點場景看「AI 要辨識什麼」。看起來不同，底層是同一套閉環。</p>
+        </aside>
+
+        <div class="loop-nav">
+          <button type="button" id="loopPrev" aria-label="上一張">←</button>
+          <div class="loop-dots" id="loopDots" role="tablist" aria-label="回饋迴路投影片"></div>
+          <button type="button" id="loopNext" aria-label="下一張">→</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <p class="footer-note">AI Build Lab · 教學展示用 · 可本機直接開啟 · 快捷鍵 P 投影片／Esc 離開</p>
+      <p class="footer-author">
+        作者：<strong>李孟霖</strong>
+        <span class="footer-sep">·</span>
+        聯絡：<a href="mailto:nh17528@ntbna.gov.tw">nh17528@ntbna.gov.tw</a>
+      </p>
+    </footer>
+  </main>
+
+  <button class="fab-next" id="fabNext" type="button" title="下一主題">下一主題 →</button>
+
+  <div class="deck-chrome" id="deckChrome" hidden>
+    <div class="deck-bar" id="deckBar">
+      <span class="deck-title">投影片模式 · AI Build Lab</span>
+      <span class="deck-counter" id="deckCounter">1 / 1</span>
+      <div class="deck-controls">
+        <button type="button" id="deckPrev" aria-label="上一張">←</button>
+        <button type="button" id="deckNext" aria-label="下一張">→</button>
+        <button type="button" id="deckHideChrome" aria-label="隱藏控制列" title="隱藏控制列（H）">隱藏</button>
+        <button type="button" id="deckExit" aria-label="離開">離開 Esc</button>
+      </div>
+    </div>
+    <p class="deck-hint" id="deckHint">← → 或空白鍵翻頁 · 回饋區先翻 8 張內頁 · H 隱藏控制列 · P 切換 · F 全螢幕</p>
+  </div>
+  <button type="button" class="deck-peek" id="deckPeek" hidden title="顯示控制列（H）">控制列</button>
+
+  <div class="modal-overlay" id="loopModal" hidden role="dialog" aria-modal="true" aria-labelledby="loopModalTitle">
+    <div class="modal-panel glass loop-modal-panel">
+      <button class="close-detail" type="button" id="loopModalClose" aria-label="關閉">×</button>
+      <p class="modal-eyebrow" id="loopModalEyebrow">點開看流程</p>
+      <h3 id="loopModalTitle"></h3>
+      <div class="loop-modal-body" id="loopModalBody"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="termModal" hidden role="dialog" aria-modal="true" aria-labelledby="termModalTitle">
+    <div class="modal-panel glass term-modal-panel">
+      <button class="close-detail" type="button" id="termModalClose" aria-label="關閉">×</button>
+      <p class="modal-eyebrow" id="termModalEyebrow">名詞小百科</p>
+      <h3 id="termModalTitle"></h3>
+      <p class="term-metaphor" id="termModalMetaphor"></p>
+      <p class="modal-lead" id="termModalBody"></p>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="aiFlowModal" hidden role="dialog" aria-modal="true" aria-labelledby="aiFlowModalTitle">
+    <div class="modal-panel glass">
+      <button class="close-detail" type="button" id="aiFlowModalClose" aria-label="關閉">×</button>
+      <p class="modal-eyebrow">給 AI 看 · 對照說明</p>
+      <h3 id="aiFlowModalTitle">人腦流程 → AI 步驟清單</h3>
+      <p class="modal-lead">流程圖對人來說已經夠清楚；對 AI 要再拆成可執行的步驟與欄位，再寫進 SPEC／PROMPT。</p>
+
+      <div class="modal-block human-block">
+        <h4>例如你腦中的流程可能是</h4>
+        <div class="human-flow">
+          <span>案件資料</span>
+          <span class="arrow">→</span>
+          <span>判斷交易類型</span>
+          <span class="arrow">→</span>
+          <span>找受測個體</span>
+          <span class="arrow">→</span>
+          <span>功能風險分析</span>
+          <span class="arrow">→</span>
+          <span>選擇利潤率指標</span>
+          <span class="arrow">→</span>
+          <span>撰寫論述</span>
+          <span class="arrow">→</span>
+          <span>人工確認</span>
+        </div>
+        <p class="modal-note">這對人來說已經很清楚。</p>
+      </div>
+
+      <div class="modal-block ai-block">
+        <h4>但對 AI 來說，最好進一步寫成</h4>
+        <div class="ai-steps">
+          <details open>
+            <summary>Step 1：取得案件基本資料</summary>
+            <ul>
+              <li>公司名稱</li>
+              <li>所在地</li>
+              <li>關係企業</li>
+              <li>交易類型</li>
+              <li>交易金額</li>
+            </ul>
+          </details>
+          <details>
+            <summary>Step 2：辨識受測個體</summary>
+            <ul>
+              <li>分析交易雙方功能</li>
+              <li>分析承擔風險</li>
+              <li>判斷誰較適合成為受測個體</li>
+              <li>輸出選擇理由</li>
+            </ul>
+          </details>
+          <details>
+            <summary>Step 3：進行功能風險分析</summary>
+            <ul>
+              <li>製造功能</li>
+              <li>採購功能</li>
+              <li>銷售功能</li>
+              <li>研發功能</li>
+              <li>市場風險</li>
+              <li>存貨風險</li>
+              <li>信用風險</li>
+            </ul>
+          </details>
+          <details>
+            <summary>Step 4：選擇最適利潤率指標</summary>
+            <ul>
+              <li>判斷交易性質</li>
+              <li>比較適用的 PLI</li>
+              <li>說明為何選擇該指標</li>
+            </ul>
+          </details>
+          <details>
+            <summary>Step 5：產生報告文字</summary>
+            <ul>
+              <li>依前述步驟產出可審閱的論述草稿</li>
+            </ul>
+          </details>
+          <details>
+            <summary>Step 6：列出 AI 判斷依據及不確定事項</summary>
+            <ul>
+              <li>標出引用／推論依據</li>
+              <li>標出需人工確認的不確定點</li>
+            </ul>
+          </details>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
