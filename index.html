@@ -38,6 +38,7 @@
       <li><a href="#summary">總結</a></li>
       <li><a href="#collab">協作</a></li>
       <li><a href="#loop">回饋</a></li>
+      <li><a href="#workshop">SPEC工坊</a></li>
     </ul>
     <div class="nav-actions">
       <button class="btn btn-deck" id="deckToggle" type="button" title="投影片全螢幕（P）">投影片模式</button>
@@ -66,7 +67,7 @@
           <button class="btn btn-ghost" id="demoPulse" type="button">體驗互動</button>
           <button class="btn btn-ghost" id="heroDeck" type="button">投影片全螢幕</button>
         </div>
-        <p class="hero-case-hint reveal">實戰案例：<a href="#case">TP NOTE01</a> · <a href="#case" data-case-jump="comparable">北區國稅局 TP 可比篩選器</a></p>
+        <p class="hero-case-hint reveal">實戰案例：<a href="#case">TP NOTE01</a> · <a href="#case" data-case-jump="comparable">北區國稅局 TP 可比篩選器</a> · <a href="#workshop">SPEC／PROMPT 工坊</a></p>
         <div class="path-strip reveal" id="pathStrip">
           <button class="path-node active" data-target="plan"><span>01</span>構想</button>
           <button class="path-node" data-target="flow"><span>02</span>流程</button>
@@ -79,6 +80,7 @@
           <button class="path-node" data-target="summary"><span>09</span>總結</button>
           <button class="path-node" data-target="collab"><span>10</span>協作</button>
           <button class="path-node" data-target="loop"><span>11</span>回饋</button>
+          <button class="path-node" data-target="workshop"><span>12</span>SPEC工坊</button>
         </div>
       </div>
     </section>
@@ -1198,6 +1200,71 @@ owner: HR
       </div>
     </section>
 
+    <!-- 12 SPEC WORKSHOP -->
+    <section class="section" id="workshop" data-minutes="8">
+      <div class="section-head">
+        <span class="section-num">12</span>
+        <div>
+          <h2>SPEC／PROMPT 工坊</h2>
+          <p>把需求寫成人話給 Claude：產出完整 SPEC＋可直接貼上的 PROMPT（含整套系統，不只網頁 UI）。</p>
+        </div>
+        <span class="min-badge">實作區</span>
+      </div>
+
+      <div class="workshop-banner glass">
+        <p><strong>重要提醒：</strong>產出內容會明確要求 Claude「不要只做網頁或 UI」。必須一併設計知識庫、Markdown 規則、RAG 參數、上傳下載與檔案管理、錯誤處理與驗收標準。</p>
+      </div>
+
+      <div class="workshop-layout">
+        <div class="workshop-form glass">
+          <label class="field">
+            <span>專案名稱</span>
+            <input type="text" id="wsProjectName" value="AI 專業助理平台（法令／翻譯／去識別化）" />
+          </label>
+          <label class="field">
+            <span>一句話目的（幫誰在什麼情境完成什麼）</span>
+            <textarea id="wsGoal" rows="2">幫查核／稅務同仁在處理法令查詢、外文資料與敏感文件時，完成有依據的問答、專業翻譯與可追溯的去識別化產出。</textarea>
+          </label>
+          <label class="field">
+            <span>目標讀者／使用者</span>
+            <input type="text" id="wsUsers" value="北區國稅局／內部查核同仁、需要處理 TP／法令與雙語文件者" />
+          </label>
+          <label class="field">
+            <span>技術偏好（可改）</span>
+            <input type="text" id="wsStack" value="可用 HTML/JS 或現代前端 + 本機／伺服器知識庫；匯出 Word／ODT／PDF；繁體中文 UI" />
+          </label>
+
+          <div class="ws-blocks-head">
+            <h3>功能區塊（可編輯／新增）</h3>
+            <div class="ws-block-actions">
+              <button type="button" class="btn btn-ghost" id="wsLoadDemo">載入示範六區塊</button>
+              <button type="button" class="btn btn-ghost" id="wsAddBlock">＋ 新增區塊</button>
+            </div>
+          </div>
+          <div id="wsBlocks" class="ws-blocks"></div>
+
+          <div class="ws-generate-row">
+            <button type="button" class="btn btn-primary" id="wsGenerate">產生給 Claude 的 SPEC＋PROMPT</button>
+          </div>
+        </div>
+
+        <div class="workshop-out glass">
+          <div class="ws-out-tabs" role="tablist">
+            <button type="button" class="active" data-ws-tab="spec" role="tab" aria-selected="true">SPEC</button>
+            <button type="button" data-ws-tab="prompt" role="tab" aria-selected="false">PROMPT（貼給 Claude）</button>
+            <button type="button" data-ws-tab="system" role="tab" aria-selected="false">整套系統清單</button>
+          </div>
+          <div class="ws-out-toolbar">
+            <button type="button" class="btn btn-ghost" id="wsCopy">複製目前分頁</button>
+            <button type="button" class="btn btn-ghost" id="wsCopyAll">複製全部</button>
+            <span class="ws-copy-status" id="wsCopyStatus" hidden>已複製</span>
+          </div>
+          <pre class="code-block ws-output" id="wsOutput"><code>先編輯左側區塊，再按「產生給 Claude 的 SPEC＋PROMPT」。
+也可先按「載入示範六區塊」看完整範例。</code></pre>
+        </div>
+      </div>
+    </section>
+
     <footer class="site-footer">
       <p class="footer-note">AI Build Lab · 教學展示用 · 可本機直接開啟 · 快捷鍵 P 投影片／Esc 離開</p>
       <p class="footer-author">
@@ -1332,5 +1399,6 @@ owner: HR
   </div>
 
   <script src="js/app.js"></script>
+  <script src="js/spec-workshop.js"></script>
 </body>
 </html>

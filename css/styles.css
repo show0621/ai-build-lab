@@ -2970,6 +2970,194 @@ body.deck-mode .panel.open .panel-body {
   }
 }
 
+/* SPEC Workshop */
+.workshop-banner {
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--coral, #e07a5f);
+  color: var(--ink-soft);
+}
+
+.workshop-banner p {
+  margin: 0;
+}
+
+.workshop-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.workshop-form,
+.workshop-out {
+  padding: 1.15rem 1.2rem;
+}
+
+.workshop-form .field {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.workshop-form .field span {
+  font-weight: 560;
+  color: var(--ink);
+  font-size: 0.88rem;
+}
+
+.workshop-form .field input,
+.workshop-form .field textarea,
+.ws-block-title,
+.ws-block-body {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  padding: 0.55rem 0.75rem;
+  font: inherit;
+  color: var(--ink);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.workshop-form .field input:focus,
+.workshop-form .field textarea:focus,
+.ws-block-title:focus,
+.ws-block-body:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(13, 159, 147, 0.15);
+}
+
+.ws-blocks-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.ws-blocks-head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.ws-block-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.ws-blocks {
+  display: grid;
+  gap: 0.75rem;
+  max-height: 420px;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.ws-block {
+  padding: 0.75rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.ws-block-top {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ws-block-title {
+  flex: 1;
+  font-weight: 560;
+}
+
+.ws-block-del {
+  border: 1px solid var(--line);
+  background: rgba(224, 122, 95, 0.1);
+  color: #b3543c;
+  border-radius: 10px;
+  padding: 0.35rem 0.65rem;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.ws-block-body {
+  font-size: 0.86rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 120px;
+  font-family: var(--mono);
+}
+
+.ws-generate-row {
+  margin-top: 1rem;
+}
+
+.ws-out-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.65rem;
+}
+
+.ws-out-tabs button {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.ws-out-tabs button.active {
+  background: #fff;
+  color: var(--ink);
+  border-color: rgba(13, 159, 147, 0.4);
+  box-shadow: 0 6px 18px rgba(13, 159, 147, 0.12);
+}
+
+.ws-out-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
+}
+
+.ws-copy-status {
+  font-size: 0.82rem;
+  color: var(--teal-deep);
+}
+
+.ws-output {
+  max-height: min(62vh, 640px);
+  white-space: pre-wrap;
+  font-size: 0.78rem;
+}
+
+body.deck-mode .ws-blocks {
+  max-height: 280px;
+}
+
+body.deck-mode .ws-output {
+  max-height: 42vh;
+}
+
+@media (max-width: 900px) {
+  .workshop-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

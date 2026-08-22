@@ -1,6 +1,6 @@
 /* AI Build Lab — interactions */
 
-const SECTIONS = ["hero", "plan", "flow", "spec", "prompt", "api", "kb", "params", "case", "summary", "collab", "loop"];
+const SECTIONS = ["hero", "plan", "flow", "spec", "prompt", "api", "kb", "params", "case", "summary", "collab", "loop", "workshop"];
 
 const SECTION_TITLES = {
   plan: "構想",
@@ -14,6 +14,7 @@ const SECTION_TITLES = {
   collab: "協作",
   summary: "總結",
   loop: "回饋",
+  workshop: "SPEC工坊",
 };
 
 const FLOW_COPY = {
