@@ -1212,7 +1212,7 @@ owner: HR
       </div>
 
       <div class="workshop-banner glass">
-        <p><strong>重要提醒：</strong>產出內容會明確要求 Claude「不要只做網頁或 UI」。必須一併設計知識庫、Markdown 規則、RAG 參數、上傳下載與檔案管理、錯誤處理與驗收標準。</p>
+        <p><strong>重要提醒：</strong>產出的 PROMPT 會要求 Claude<strong>第一回合先做出好看、可點的網頁</strong>，主畫面要有<strong>4 大功能區塊</strong>（問答／翻譯／去識別化／筆記本）可直接使用；禁止只交資料夾結構。同時仍要規劃知識庫、Markdown、RAG 參數、上傳下載與驗收。</p>
       </div>
 
       <div class="workshop-layout">
@@ -1231,7 +1231,7 @@ owner: HR
           </label>
           <label class="field">
             <span>技術偏好（可改）</span>
-            <input type="text" id="wsStack" value="可用 HTML/JS 或現代前端 + 本機／伺服器知識庫；匯出 Word／ODT／PDF；繁體中文 UI" />
+            <input type="text" id="wsStack" value="先交付漂亮可操作的前端（HTML/CSS/JS 或現代前端均可）；再開知識庫／API；匯出 Word／ODT／PDF；繁體中文 UI" />
           </label>
 
           <div class="ws-blocks-head">
