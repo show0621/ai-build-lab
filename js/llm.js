@@ -361,202 +361,213 @@ function setPipeStatus(t) {
 function drawAttnSvg(focusIdx, mode = "predict") {
   const svg = $("#attnSvg");
   if (!svg) return;
-  // mode: scan | filter | link | predict  (progressive search)
+  // mode: scan | filter | link | predict
+  // Dense word-cloud: words stay in place — no collapse-to-center
   const tokens = PIPE_TOKENS;
-  const W = 800;
-  const H = 460;
+  const W = 860;
+  const H = 480;
   const focus = Math.min(Math.max(focusIdx, 0), tokens.length - 1);
   const focusTok = tokens[focus];
-  const query = tokens.join("");
+
   const showFilter = mode === "filter" || mode === "link" || mode === "predict";
   const showLinks = mode === "link" || mode === "predict";
   const showPredict = mode === "predict";
 
-  const palette = ["#1e3a5f", "#0d9488", "#c2410c", "#4d7c0f", "#a16207", "#0369a1", "#be123c", "#6d28d9"];
-
+  // Dense literary / Web2.0-like cloud positions (normalized)
+  // related: TP domain; noise: distractors
   const cloud = [
-    { t: "受測個體", rel: 0.94, x: 0.5, y: 0.4, s: 28 },
-    { t: "功能", rel: 0.9, x: 0.36, y: 0.34, s: 24 },
-    { t: "風險", rel: 0.82, x: 0.64, y: 0.32, s: 22 },
-    { t: "移轉訂價", rel: 0.86, x: 0.5, y: 0.26, s: 20 },
-    { t: "單純", rel: 0.76, x: 0.42, y: 0.5, s: 20 },
-    { t: "TNMM", rel: 0.64, x: 0.68, y: 0.46, s: 18 },
-    { t: "可比公司", rel: 0.6, x: 0.3, y: 0.48, s: 16 },
-    { t: "利潤率", rel: 0.52, x: 0.58, y: 0.54, s: 15 },
-    { t: "OECD", rel: 0.48, x: 0.24, y: 0.3, s: 15 },
-    { t: "一方", rel: 0.55, x: 0.34, y: 0.58, s: 14 },
-    { t: "資產", rel: 0.42, x: 0.66, y: 0.58, s: 14 },
-    { t: "查核準則", rel: 0.4, x: 0.74, y: 0.28, s: 13 },
-    { t: "函釋", rel: 0.38, x: 0.26, y: 0.2, s: 13 },
-    { t: "BAPA", rel: 0.36, x: 0.78, y: 0.4, s: 13 },
-    { t: "選擇", rel: 0.7, x: 0.5, y: 0.62, s: 18 },
-    { t: "台積電", rel: 0.05, x: 0.12, y: 0.18, s: 16 },
-    { t: "永續", rel: 0.06, x: 0.88, y: 0.16, s: 15 },
-    { t: "ETF", rel: 0.04, x: 0.1, y: 0.72, s: 14 },
-    { t: "疫苗", rel: 0.03, x: 0.88, y: 0.72, s: 13 },
-    { t: "高股息", rel: 0.04, x: 0.14, y: 0.52, s: 12 },
-    { t: "美食", rel: 0.02, x: 0.86, y: 0.54, s: 12 },
-    { t: "旅遊", rel: 0.02, x: 0.2, y: 0.84, s: 12 },
-    { t: "籃球", rel: 0.02, x: 0.78, y: 0.84, s: 11 },
-    { t: "天氣", rel: 0.01, x: 0.5, y: 0.88, s: 11 },
-    { t: "零碳", rel: 0.05, x: 0.08, y: 0.4, s: 12 },
-    { t: "貼文", rel: 0.02, x: 0.92, y: 0.32, s: 11 },
-    { t: "指數", rel: 0.05, x: 0.62, y: 0.78, s: 12 },
-    { t: "鴻海", rel: 0.04, x: 0.38, y: 0.16, s: 13 },
+    // —— related (scattered, not clustered in one blob) ——
+    { t: "受測個體", rel: 0.94, x: 0.22, y: 0.28, s: 26, c: "#0f766e" },
+    { t: "功能", rel: 0.9, x: 0.62, y: 0.22, s: 24, c: "#0369a1" },
+    { t: "風險", rel: 0.84, x: 0.78, y: 0.38, s: 22, c: "#c2410c" },
+    { t: "移轉訂價", rel: 0.88, x: 0.38, y: 0.18, s: 20, c: "#15803d" },
+    { t: "單純", rel: 0.78, x: 0.48, y: 0.55, s: 20, c: "#a16207" },
+    { t: "選擇", rel: 0.86, x: 0.55, y: 0.36, s: 22, c: "#1e3a5f" },
+    { t: "TNMM", rel: 0.66, x: 0.18, y: 0.52, s: 17, c: "#0369a1" },
+    { t: "可比公司", rel: 0.62, x: 0.82, y: 0.22, s: 15, c: "#9f1239" },
+    { t: "利潤率", rel: 0.55, x: 0.7, y: 0.58, s: 15, c: "#0f766e" },
+    { t: "OECD", rel: 0.5, x: 0.12, y: 0.2, s: 14, c: "#1d4ed8" },
+    { t: "一方", rel: 0.58, x: 0.32, y: 0.62, s: 14, c: "#b45309" },
+    { t: "資產", rel: 0.45, x: 0.88, y: 0.5, s: 13, c: "#334155" },
+    { t: "查核準則", rel: 0.42, x: 0.58, y: 0.14, s: 13, c: "#0e7490" },
+    { t: "函釋", rel: 0.4, x: 0.28, y: 0.42, s: 13, c: "#7c3aed" },
+    { t: "BAPA", rel: 0.38, x: 0.42, y: 0.72, s: 13, c: "#0369a1" },
+    { t: "個體", rel: 0.72, x: 0.5, y: 0.28, s: 16, c: "#0f766e" },
+    { t: "交易", rel: 0.44, x: 0.68, y: 0.44, s: 13, c: "#57534e" },
+    { t: "利潤", rel: 0.4, x: 0.24, y: 0.72, s: 12, c: "#15803d" },
+    // —— distractors (many, fill the cloud) ——
+    { t: "台積電", rel: 0.04, x: 0.08, y: 0.12, s: 15, c: "#a8a29e" },
+    { t: "鴻海", rel: 0.04, x: 0.92, y: 0.12, s: 14, c: "#a8a29e" },
+    { t: "永續", rel: 0.05, x: 0.14, y: 0.38, s: 14, c: "#a8a29e" },
+    { t: "ETF", rel: 0.04, x: 0.9, y: 0.68, s: 14, c: "#a8a29e" },
+    { t: "疫苗", rel: 0.03, x: 0.08, y: 0.68, s: 13, c: "#a8a29e" },
+    { t: "高股息", rel: 0.04, x: 0.74, y: 0.12, s: 12, c: "#a8a29e" },
+    { t: "美食", rel: 0.02, x: 0.94, y: 0.42, s: 12, c: "#a8a29e" },
+    { t: "旅遊", rel: 0.02, x: 0.06, y: 0.48, s: 12, c: "#a8a29e" },
+    { t: "籃球", rel: 0.02, x: 0.86, y: 0.78, s: 11, c: "#a8a29e" },
+    { t: "天氣", rel: 0.01, x: 0.48, y: 0.86, s: 11, c: "#a8a29e" },
+    { t: "零碳", rel: 0.05, x: 0.16, y: 0.82, s: 12, c: "#a8a29e" },
+    { t: "貼文", rel: 0.02, x: 0.36, y: 0.08, s: 11, c: "#a8a29e" },
+    { t: "指數", rel: 0.05, x: 0.64, y: 0.8, s: 12, c: "#a8a29e" },
+    { t: "國泰", rel: 0.03, x: 0.78, y: 0.7, s: 12, c: "#a8a29e" },
+    { t: "富邦", rel: 0.03, x: 0.2, y: 0.08, s: 12, c: "#a8a29e" },
+    { t: "公司治理", rel: 0.06, x: 0.88, y: 0.3, s: 11, c: "#a8a29e" },
+    { t: "半導體", rel: 0.04, x: 0.1, y: 0.3, s: 11, c: "#a8a29e" },
+    { t: "定期定額", rel: 0.03, x: 0.34, y: 0.88, s: 11, c: "#a8a29e" },
+    { t: "Podcast", rel: 0.02, x: 0.56, y: 0.08, s: 11, c: "#a8a29e" },
+    { t: "設計", rel: 0.03, x: 0.72, y: 0.86, s: 12, c: "#a8a29e" },
+    { t: "Usability", rel: 0.02, x: 0.42, y: 0.48, s: 10, c: "#a8a29e" },
+    { t: "Participation", rel: 0.02, x: 0.6, y: 0.68, s: 10, c: "#a8a29e" },
+    { t: "RSS", rel: 0.02, x: 0.26, y: 0.56, s: 10, c: "#a8a29e" },
+    { t: "AJAX", rel: 0.02, x: 0.84, y: 0.58, s: 10, c: "#a8a29e" },
+    { t: "簡報", rel: 0.02, x: 0.14, y: 0.6, s: 11, c: "#a8a29e" },
+    { t: "咖啡", rel: 0.01, x: 0.96, y: 0.55, s: 11, c: "#a8a29e" },
   ];
 
-  cloud.forEach((w, i) => {
-    w.color = palette[i % palette.length];
-    if (query.includes(w.t) || w.t.includes(focusTok)) w.rel = Math.min(0.98, w.rel + 0.12);
+  // Mark input focus & next-stage candidates as special anchors in the cloud
+  cloud.forEach((w) => {
+    if (w.t === focusTok || w.t.includes(focusTok)) {
+      w.rel = Math.max(w.rel, 0.95);
+      w.isFocus = true;
+    }
   });
+  // Ensure focus token exists as a node if missing
+  if (!cloud.some((w) => w.isFocus)) {
+    cloud.push({ t: focusTok, rel: 0.98, x: 0.48, y: 0.4, s: 24, c: "#1e3a5f", isFocus: true });
+  }
 
-  const related = [...cloud].filter((w) => w.rel >= 0.35).sort((a, b) => b.rel - a.rel);
   const nextPred = [
     { t: "功能", p: 0.35 },
-    { t: "較", p: 0.18 },
+    { t: "較", p: 0.18, x: 0.52, y: 0.64, s: 16, c: "#0d9488", isNext: true },
     { t: "單純", p: 0.14 },
     { t: "風險", p: 0.1 },
     { t: "一方", p: 0.08 },
   ];
+  // Place "較" as a next-stage word elsewhere if not present
+  if (!cloud.some((w) => w.t === "較")) {
+    cloud.push({ t: "較", rel: 0.2, x: 0.52, y: 0.64, s: 16, c: "#0d9488", isNext: true });
+  }
 
-  const cx = W * 0.5;
-  const cy = H * 0.4;
+  const related = [...cloud].filter((w) => w.rel >= 0.35).sort((a, b) => b.rel - a.rel);
+  const focusNode = cloud.find((w) => w.isFocus) || related[0];
 
   const phaseHint =
     mode === "scan"
-      ? "① 掃描腦內文字雲…"
+      ? "① 快速掃描龐大詞庫…"
       : mode === "filter"
-        ? "② 找出相關／淡化無關…"
+        ? "② 相關變亮、無關淡化（位置不變）"
         : mode === "link"
-          ? "③ 建立神經連結並計算機率…"
-          : "④ 預測下一個 Token 機率…";
+          ? "③ 串接相關詞並標示機率"
+          : "④ 下一階段候選散落點亮";
 
   const defs = `<defs>
-    <linearGradient id="paperGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f7f3ea"/>
-      <stop offset="100%" stop-color="#efe8dc"/>
+    <linearGradient id="paperGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#faf7f0"/>
+      <stop offset="100%" stop-color="#f0ebe1"/>
     </linearGradient>
-    <pattern id="paperGrain" width="4" height="4" patternUnits="userSpaceOnUse">
-      <circle cx="1" cy="1" r="0.4" fill="rgba(120,100,70,0.06)"/>
-    </pattern>
   </defs>
-  <rect width="${W}" height="${H}" fill="url(#paperGrad)" rx="18"/>
-  <rect width="${W}" height="${H}" fill="url(#paperGrain)" rx="18" opacity="0.7"/>
-  <circle cx="${cx}" cy="${cy}" r="118" fill="none" stroke="rgba(30,58,95,0.08)" stroke-width="1"/>
-  <circle cx="${cx}" cy="${cy}" r="78" fill="none" stroke="rgba(13,148,136,0.1)" stroke-width="1" stroke-dasharray="3 5"/>`;
+  <rect width="${W}" height="${H}" fill="url(#paperGrad)" rx="16"/>`;
 
-  const title = `<text x="${cx}" y="30" text-anchor="middle" font-family="Outfit,sans-serif" font-size="15" fill="#1e3a5f" font-weight="600">腦內文字雲 · 尋找 · 連結 · 預測</text>
-  <text x="${cx}" y="50" text-anchor="middle" font-family="Outfit,sans-serif" font-size="12" fill="#0d9488">${phaseHint}</text>`;
+  const title = `<text x="${W / 2}" y="28" text-anchor="middle" font-family="Outfit,sans-serif" font-size="15" fill="#1e3a5f" font-weight="600">文字雲詞庫 · 快速搜尋 · 串接機率</text>
+  <text x="${W / 2}" y="48" text-anchor="middle" font-family="Outfit,sans-serif" font-size="12" fill="#0d9488">${phaseHint}</text>`;
 
-  const center = `<g class="attn-focus-ring">
-    <circle cx="${cx}" cy="${cy}" r="46" fill="rgba(255,255,255,0.45)" stroke="#1e3a5f" stroke-width="1.4"/>
-    <circle cx="${cx}" cy="${cy}" r="40" fill="none" stroke="#0d9488" stroke-width="1" opacity="0.45"/>
-    <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="11" fill="#78716c" font-family="Outfit,sans-serif">焦點詞</text>
-    <text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="20" font-weight="700" fill="#1e3a5f" font-family="Outfit,sans-serif">${focusTok}</text>
-  </g>`;
-
-  let mesh = "";
-  if (showLinks) {
-    const top = related.slice(0, 8);
-    for (let i = 0; i < top.length; i++) {
-      for (let j = i + 1; j < Math.min(top.length, i + 3); j++) {
-        const a = top[i];
-        const b = top[j];
-        mesh += `<path class="attn-mesh" d="M${a.x * W} ${a.y * H} Q${cx} ${cy} ${b.x * W} ${b.y * H}" fill="none" stroke="rgba(13,148,136,0.12)" stroke-width="1"/>`;
-      }
-    }
+  // Rapid search sweep (scan mode)
+  let sweep = "";
+  if (mode === "scan") {
+    sweep = `<rect class="attn-sweep" x="0" y="56" width="48" height="${H - 70}" fill="url(#sweepGrad)" opacity="0.35"/>
+    <defs><linearGradient id="sweepGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="rgba(13,148,136,0)"/><stop offset="50%" stop-color="rgba(13,148,136,0.25)"/><stop offset="100%" stop-color="rgba(13,148,136,0)"/>
+    </linearGradient></defs>`;
   }
 
+  // Chain links: focus → related[1] → related[2] … (path through cloud, not hub)
   let links = "";
   let pills = "";
   let pulses = "";
   if (showLinks) {
-    related.slice(0, 8).forEach((w, idx) => {
-      const x = w.x * W;
-      const y = w.y * H;
-      const p = w.rel;
-      const bend = idx % 2 === 0 ? -22 : 22;
-      const mx = (cx + x) / 2 + bend;
-      const my = (cy + y) / 2;
-      const ang = Math.atan2(y - cy, x - cx);
-      const d = `M${cx + 40 * Math.cos(ang)} ${cy + 40 * Math.sin(ang)} Q${mx} ${my} ${x} ${y}`;
-      const delay = `${0.12 + idx * 0.18}s`;
-      links += `<path class="attn-ink attn-draw" d="${d}" stroke-width="${1 + p * 3.2}" fill="none" stroke="#0d9488" style="--delay:${delay};--op:${0.45 + p * 0.4}"/>`;
-      if (idx < 6) {
-        pulses += `<path class="attn-ink-pulse" d="${d}" stroke-width="${1.2 + p}" fill="none" style="--delay:${delay}"/>`;
-        pills += `<g class="attn-prob-reveal" style="--delay:${0.28 + idx * 0.18}s">
-          <rect x="${mx - 18}" y="${my - 9}" width="36" height="16" rx="8" fill="#fffaf3" stroke="#99f6e4"/>
-          <text x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="#0f766e" font-weight="600">${Math.round(p * 100)}%</text>
-        </g>`;
-      }
-    });
-  } else if (mode === "scan") {
-    cloud.forEach((w, i) => {
-      if (i % 3 !== 0) return;
-      links += `<path class="attn-scan-ray" d="M${cx} ${cy} L${w.x * W} ${w.y * H}" fill="none" stroke="rgba(120,113,108,0.18)" stroke-width="0.8" style="--delay:${(i % 8) * 0.08}s"/>`;
-    });
+    const chain = [focusNode, ...related.filter((w) => w !== focusNode)].slice(0, 7);
+    for (let i = 0; i < chain.length - 1; i++) {
+      const a = chain[i];
+      const b = chain[i + 1];
+      const x1 = a.x * W;
+      const y1 = a.y * H;
+      const x2 = b.x * W;
+      const y2 = b.y * H;
+      const mx = (x1 + x2) / 2 + (i % 2 === 0 ? 18 : -18);
+      const my = (y1 + y2) / 2;
+      const p = b.rel;
+      const d = `M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}`;
+      const delay = `${0.1 + i * 0.2}s`;
+      links += `<path class="attn-ink attn-draw" d="${d}" stroke-width="${1.4 + p * 2.8}" fill="none" stroke="#0d9488" style="--delay:${delay};--op:${0.5 + p * 0.35}"/>`;
+      pulses += `<path class="attn-ink-pulse" d="${d}" stroke-width="${1.1 + p}" fill="none" style="--delay:${delay}"/>`;
+      pills += `<g class="attn-prob-reveal" style="--delay:${0.25 + i * 0.2}s">
+        <rect x="${mx - 18}" y="${my - 9}" width="36" height="16" rx="8" fill="#fffef9" stroke="#5eead4"/>
+        <text x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="#0f766e" font-weight="600">${Math.round(p * 100)}%</text>
+      </g>`;
+    }
   }
 
+  // Word cloud — stay put; only brightness/opacity change
   let words = "";
   cloud.forEach((w, i) => {
     const x = w.x * W;
     const y = w.y * H;
     const isRel = w.rel >= 0.35;
     let cls = "attn-cloud-word";
-    if (showFilter) {
-      cls += isRel ? " is-related" : " is-unrelated";
-    } else {
-      cls += " is-scanning";
-    }
+    if (mode === "scan") cls += " is-scanning";
+    else if (showFilter) cls += isRel ? " is-related" : " is-unrelated";
+    if (w.isFocus) cls += " is-focus";
+    if (showPredict && (w.isNext || nextPred.some((n) => n.t === w.t && n.p >= 0.14))) cls += " is-next";
     if (showLinks && isRel) cls += " is-linked";
-    const weight = isRel && showFilter ? 700 : w.s >= 18 ? 650 : 500;
-    const fill = showFilter && !isRel ? "#a8a29e" : w.color;
+
+    // scan flicker delay for mass-search feel
+    const scanDelay = `${(i % 12) * 0.05}s`;
     words += `<text class="${cls}" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle"
-      font-size="${w.s}" font-family="Outfit,'Noto Sans TC',sans-serif" font-weight="${weight}"
-      fill="${fill}" style="--d:${5 + (i % 6) * 0.4}s;--delay:${(i % 8) * 0.1}s;--i:${i}">${w.t}</text>`;
+      font-size="${w.s}" font-family="Georgia,'Noto Serif TC',serif" font-weight="${w.isFocus || isRel ? 700 : 500}"
+      fill="${showFilter && !isRel ? "#c4bfb6" : w.c}"
+      style="--d:${6 + (i % 5) * 0.35}s;--delay:${(i % 9) * 0.08}s;--scan:${scanDelay};--i:${i}">${w.t}</text>`;
   });
 
+  // Next predictions as scattered callouts near bottom-right / existing nodes — NOT a collapse
   let predict = "";
   if (showPredict) {
-    const baseY = H - 78;
-    predict = `<g class="attn-predict-panel">
-      <text x="36" y="${baseY - 14}" font-size="12" fill="#57534e" font-family="Outfit,sans-serif">下一步：預測下一個 Token／知識答案機率</text>
-      ${nextPred
-        .map((n, i) => {
-          const x = 36 + i * 148;
-          const bw = 28 + n.p * 90;
-          return `<g class="attn-pred-item" style="--delay:${0.15 + i * 0.12}s">
-            <text x="${x}" y="${baseY + 6}" font-size="13" fill="#1e3a5f" font-family="Outfit,sans-serif" font-weight="600">${n.t}</text>
-            <text x="${x + 52}" y="${baseY + 6}" font-size="11" fill="#0d9488" font-family="JetBrains Mono,monospace">${Math.round(n.p * 100)}%</text>
-            <rect x="${x}" y="${baseY + 14}" width="120" height="6" rx="3" fill="rgba(30,58,95,0.08)"/>
-            <rect class="attn-pred-bar" x="${x}" y="${baseY + 14}" width="${bw}" height="6" rx="3" fill="#0d9488" style="--bw:${bw}px"/>
-          </g>`;
-        })
-        .join("")}
-      <text x="${W - 40}" y="${baseY - 34}" text-anchor="end" font-size="11" fill="#0d9488" font-family="Outfit,sans-serif">→ 生成鏈繼續</text>
-    </g>`;
+    const spots = [
+      { t: "功能", p: 0.35, x: 0.62, y: 0.22 },
+      { t: "較", p: 0.18, x: 0.52, y: 0.64 },
+      { t: "單純", p: 0.14, x: 0.48, y: 0.55 },
+      { t: "風險", p: 0.1, x: 0.78, y: 0.38 },
+      { t: "一方", p: 0.08, x: 0.32, y: 0.62 },
+    ];
+    predict = spots
+      .map((s, i) => {
+        const x = s.x * W;
+        const y = s.y * H - 22;
+        return `<g class="attn-next-tag" style="--delay:${0.15 + i * 0.12}s">
+          <rect x="${x - 28}" y="${y - 11}" width="56" height="18" rx="9" fill="#fffef9" stroke="#0d9488" stroke-width="1.2"/>
+          <text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="#0f766e">下一字 ${Math.round(s.p * 100)}%</text>
+        </g>`;
+      })
+      .join("");
+    predict += `<text x="${W / 2}" y="${H - 18}" text-anchor="middle" font-size="12" fill="#57534e" font-family="Outfit,sans-serif">下一階段候選已散落標註（不往中心收縮）· 生成鏈可繼續往外長</text>`;
   } else {
-    predict = `<text x="${cx}" y="${H - 36}" text-anchor="middle" font-size="12" fill="#78716c" font-family="Outfit,sans-serif">${
-      mode === "scan" ? "正在掃描龐大詞庫…" : mode === "filter" ? "無關詞後退淡化中…" : "連線與機率計算中…"
+    predict = `<text x="${W / 2}" y="${H - 20}" text-anchor="middle" font-size="12" fill="#78716c" font-family="Outfit,sans-serif">${
+      mode === "scan" ? "大量詞彙快速掃過…" : mode === "filter" ? "無關後退淡化，相關留在原位變亮…" : "沿語意路徑串接中…"
     }</text>`;
   }
 
-  const legend = `<text x="28" y="${H - 12}" font-size="11" fill="#78716c" font-family="Outfit,sans-serif">相關＝前層加亮　無關＝淡化後退　線上％＝語意相關機率　底部＝下一字預測</text>`;
-
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.classList.remove("llm-attn-tech");
-  svg.classList.add("llm-attn-literary");
+  svg.classList.add("llm-attn-literary", "attn-spread");
   svg.dataset.phase = mode;
-  svg.innerHTML = defs + title + mesh + links + pulses + words + center + pills + predict + legend;
+  svg.innerHTML = defs + title + sweep + links + pulses + words + pills + predict;
 }
 
-/** Progressive: scan → filter → link → predict */
 function runAttnSearchAnimation(focusIdx, onDone) {
   const phases = [
-    { mode: "scan", status: "掃描文字雲…", wait: 900 },
-    { mode: "filter", status: "相關留下、無關淡化後退…", wait: 1100 },
-    { mode: "link", status: "神經連結＋機率計算…", wait: 1600 },
-    { mode: "predict", status: "預測下一個 Token…", wait: 1200 },
+    { mode: "scan", status: "快速大量搜尋詞庫…", wait: 1100 },
+    { mode: "filter", status: "相關變亮、無關淡化…", wait: 1000 },
+    { mode: "link", status: "串接連結＋機率…", wait: 1700 },
+    { mode: "predict", status: "下一階段散落標註…", wait: 1300 },
   ];
   let i = 0;
   const tick = () => {

@@ -438,41 +438,70 @@
 }
 
 .llm-attn-svg .attn-cloud-word {
-  animation: attnFloat var(--d, 5s) ease-in-out var(--delay, 0s) infinite;
   transform-box: fill-box;
   transform-origin: center;
-  transition: opacity 0.7s ease, transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), fill 0.5s;
+  transition: opacity 0.65s ease, fill 0.45s ease, filter 0.5s ease;
 }
 
 .llm-attn-svg .attn-cloud-word.is-scanning {
-  opacity: 0.85;
+  animation: attnSearchFlicker 0.55s ease-in-out var(--scan, 0s) infinite;
+}
+
+@keyframes attnSearchFlicker {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  40% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.55;
+  }
 }
 
 .llm-attn-svg .attn-cloud-word.is-related {
   opacity: 1;
-  transform: scale(1.06);
-  animation: attnFloatRelated var(--d, 5s) ease-in-out var(--delay, 0s) infinite;
+  filter: drop-shadow(0 0 6px rgba(13, 148, 136, 0.25));
+  animation: none;
+}
+
+.llm-attn-svg .attn-cloud-word.is-focus {
+  filter: drop-shadow(0 0 8px rgba(30, 58, 95, 0.35));
 }
 
 .llm-attn-svg .attn-cloud-word.is-unrelated {
-  opacity: 0.22;
-  transform: scale(0.78) translateY(10px);
-  filter: blur(0.35px);
+  opacity: 0.18;
+  filter: none;
   animation: none;
 }
 
 .llm-attn-svg .attn-cloud-word.is-linked {
-  transform: scale(1.1);
+  /* stay in place — only glow */
+  filter: drop-shadow(0 0 8px rgba(13, 148, 136, 0.4));
 }
 
-@keyframes attnFloatRelated {
-  0%,
-  100% {
-    transform: scale(1.06) translateY(0);
+.llm-attn-svg .attn-cloud-word.is-next {
+  filter: drop-shadow(0 0 6px rgba(13, 148, 136, 0.35));
+}
+
+.llm-attn-svg .attn-sweep {
+  animation: attnSweepMove 1.05s linear infinite;
+}
+
+@keyframes attnSweepMove {
+  from {
+    transform: translateX(0);
   }
-  50% {
-    transform: scale(1.06) translateY(-5px);
+  to {
+    transform: translateX(820px);
   }
+}
+
+.llm-attn-svg .attn-next-tag {
+  opacity: 0;
+  animation: attnProbIn 0.4s ease forwards;
+  animation-delay: var(--delay, 0.1s);
 }
 
 .llm-attn-svg .attn-draw {
@@ -522,7 +551,6 @@
 
 .llm-attn-svg .attn-prob-reveal {
   opacity: 0;
-  transform-origin: center;
   animation: attnProbIn 0.45s ease forwards;
   animation-delay: var(--delay, 0.3s);
 }
@@ -536,59 +564,6 @@
     opacity: 1;
     transform: scale(1);
   }
-}
-
-.llm-attn-svg .attn-scan-ray {
-  stroke-dasharray: 8 10;
-  animation: attnScan 1.2s linear infinite;
-  animation-delay: var(--delay, 0s);
-}
-
-@keyframes attnScan {
-  to {
-    stroke-dashoffset: -36;
-  }
-}
-
-.llm-attn-svg .attn-predict-panel {
-  animation: attnPredictIn 0.55s ease forwards;
-}
-
-.llm-attn-svg .attn-pred-item {
-  opacity: 0;
-  animation: attnProbIn 0.4s ease forwards;
-  animation-delay: var(--delay, 0.1s);
-}
-
-.llm-attn-svg .attn-pred-bar {
-  transform-box: fill-box;
-  transform-origin: left center;
-  animation: attnBarGrow 0.7s ease forwards;
-  animation-delay: var(--delay, 0.15s);
-}
-
-@keyframes attnPredictIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes attnBarGrow {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-.llm-attn-svg .attn-cloud-word.on {
-  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.5));
 }
 
 .llm-attn-svg .attn-ink {
