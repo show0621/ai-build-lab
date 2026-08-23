@@ -1225,26 +1225,26 @@ owner: HR
       </div>
 
       <div class="workshop-banner glass">
-        <p><strong>重要提醒：</strong>產出的 PROMPT 會要求 Claude<strong>第一回合先做出好看、可點的網頁</strong>，主畫面要有<strong>4 大功能區塊</strong>（問答／翻譯／去識別化／筆記本）可直接使用；禁止只交資料夾結構。同時仍要規劃知識庫、Markdown、RAG 參數、上傳下載與驗收。</p>
+        <p><strong>示範已對齊 TP AI NOTE：</strong>產出會詳細寫「頂欄＋左拓撲＋右上詳情＋右下問答」版面、配色、按鈕與操作動線。請按「載入示範」再「產生」，複製 PROMPT 貼給 Claude，目標是做出同類專業工作台，而非只有結構檔。</p>
       </div>
 
       <div class="workshop-layout">
         <div class="workshop-form glass">
           <label class="field">
             <span>專案名稱</span>
-            <input type="text" id="wsProjectName" value="AI 專業助理平台（法令／翻譯／去識別化）" />
+            <input type="text" id="wsProjectName" value="專業知識庫工作台（對齊 TP AI NOTE 體驗）" />
           </label>
           <label class="field">
             <span>一句話目的（幫誰在什麼情境完成什麼）</span>
-            <textarea id="wsGoal" rows="2">幫查核／稅務同仁在處理法令查詢、外文資料與敏感文件時，完成有依據的問答、專業翻譯與可追溯的去識別化產出。</textarea>
+            <textarea id="wsGoal" rows="2">幫查核／稅務同仁在單一工作台完成：知識拓撲瀏覽、節點精讀、有引用的內部問答、翻譯對照、去識別化與筆記匯出——體驗與完成度對齊 TP AI NOTE。</textarea>
           </label>
           <label class="field">
             <span>目標讀者／使用者</span>
-            <input type="text" id="wsUsers" value="北區國稅局／內部查核同仁、需要處理 TP／法令與雙語文件者" />
+            <input type="text" id="wsUsers" value="內部查核同仁／需要法令知識庫與雙語文件處理者" />
           </label>
           <label class="field">
             <span>技術偏好（可改）</span>
-            <input type="text" id="wsStack" value="先交付漂亮可操作的前端（HTML/CSS/JS 或現代前端均可）；再開知識庫／API；匯出 Word／ODT／PDF；繁體中文 UI" />
+            <input type="text" id="wsStack" value="第1回合先交完整 HTML/CSS/JS 工作台 UI（可 mock）；再接 RAG／匯出。繁中。視覺對齊 TP AI NOTE：深頂欄、玻璃面板、藍／綠／琥珀語意色" />
           </label>
 
           <div class="ws-blocks-head">
