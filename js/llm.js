@@ -350,6 +350,7 @@ const PIPE_TOKENS = ["受測", "個體", "應", "如何", "選擇"];
 const PIPE_GEN = ["較", "單純"]; // 「功能」已在第 5 步選出，這裡只接續後續 token
 
 let pipeTimer = null;
+let pipeExtraTimers = [];
 let pipePaused = false;
 let pipeStep = 0;
 
@@ -357,6 +358,16 @@ function setPipeStatus(t) {
   const el = $("#pipeStatus");
   if (el) el.textContent = t;
 }
+
+/** Journey beat times (seconds) — keep in sync with drawAttnSvg CSS delays */
+const JOURNEY = {
+  word: 0,
+  prob: 2.2,
+  dash: 4.1,
+  hot: 6.9,
+  next: 8.8,
+  done: 11.2,
+};
 
 function buildCloudData(focusTok) {
   // z: 0 near (big/sharp) → 1 far (small/soft). Unrelated can also be large when near.
@@ -455,12 +466,12 @@ function drawAttnSvg(focusIdx, mode = "journey") {
   const fy = focusNode.y * H;
 
   // Sync probs → then even dash web → high-P green → next accent (no late % wave)
-  const T_WORD = 0;
-  const T_PROB = 2.2;
-  const T_DASH = 4.1;
-  const T_HOT = 6.9;
-  const T_NEXT = 8.8;
-  const JOURNEY_MS = 11200;
+  const T_WORD = JOURNEY.word;
+  const T_PROB = JOURNEY.prob;
+  const T_DASH = JOURNEY.dash;
+  const T_HOT = JOURNEY.hot;
+  const T_NEXT = JOURNEY.next;
+  const JOURNEY_MS = Math.round(JOURNEY.done * 1000);
 
   const defs = `<defs>
     <radialGradient id="queryHalo" cx="50%" cy="50%" r="50%">
@@ -612,10 +623,59 @@ function drawAttnSvg(focusIdx, mode = "journey") {
   svg.innerHTML = defs + ambient + vectorFx + links + pulses + words + pills + predict;
 }
 
+function clearPipeTimer() {
+  if (pipeTimer) {
+    clearTimeout(pipeTimer);
+    pipeTimer = null;
+  }
+  pipeExtraTimers.forEach(clearTimeout);
+  pipeExtraTimers = [];
+}
+
+function schedule(fn, ms) {
+  // Only replace the main chain timer — keep narration beats alive
+  if (pipeTimer) {
+    clearTimeout(pipeTimer);
+    pipeTimer = null;
+  }
+  pipeTimer = setTimeout(() => {
+    if (pipePaused) return;
+    fn();
+  }, ms);
+}
+
+/** Fire narration without cancelling the main schedule timer */
+function afterMs(ms, fn) {
+  const id = setTimeout(() => {
+    if (pipePaused) return;
+    fn();
+  }, ms);
+  pipeExtraTimers.push(id);
+}
+
+function narrateJourneyBeats() {
+  afterMs(Math.round(JOURNEY.word * 1000 + 150), () =>
+    setPipeStatus("文字星雲展開 · Embedding 向量空間")
+  );
+  afterMs(Math.round(JOURNEY.prob * 1000), () =>
+    setPipeStatus("搜尋可能關鍵 Token · 同步標示條件機率…")
+  );
+  afterMs(Math.round(JOURNEY.dash * 1000), () =>
+    setPipeStatus("神經虛線連結 · Attention 候選路徑成形…")
+  );
+  afterMs(Math.round(JOURNEY.hot * 1000), () =>
+    setPipeStatus("Transformer 加權演算 · 高機率路徑強化…")
+  );
+  afterMs(Math.round(JOURNEY.next * 1000), () =>
+    setPipeStatus("推演下一個可能 Token · Softmax 選字…")
+  );
+}
+
 function runAttnSearchAnimation(focusIdx, onDone) {
-  setPipeStatus("向量資料庫 · 文字星雲連結中…");
+  setPipeStatus("進入向量資料庫…");
   drawAttnSvg(focusIdx, "journey");
-  const ms = Number($("#attnSvg")?.dataset.journeyMs) || 11200;
+  narrateJourneyBeats();
+  const ms = Number($("#attnSvg")?.dataset.journeyMs) || Math.round(JOURNEY.done * 1000);
   schedule(() => {
     if (pipePaused) return;
     if (onDone) onDone();
@@ -628,21 +688,6 @@ function renderPipeTokens(active = -1) {
   el.innerHTML = PIPE_TOKENS.map(
     (t, i) => `<span class="llm-tok${i === active ? " on" : ""}">${t}</span>`
   ).join("");
-}
-
-function clearPipeTimer() {
-  if (pipeTimer) {
-    clearTimeout(pipeTimer);
-    pipeTimer = null;
-  }
-}
-
-function schedule(fn, ms) {
-  clearPipeTimer();
-  pipeTimer = setTimeout(() => {
-    if (pipePaused) return;
-    fn();
-  }, ms);
 }
 
 function runPipeline(fromStep = 0) {
@@ -815,7 +860,8 @@ function diveToBrain(onDone) {
     }
     if (stage) stage.dataset.act = "brain";
     drawAttnSvg(4, "journey");
-    const ms = Number($("#attnSvg")?.dataset.journeyMs) || 11200;
+    narrateJourneyBeats();
+    const ms = Number($("#attnSvg")?.dataset.journeyMs) || Math.round(JOURNEY.done * 1000);
     schedule(() => {
       if (brain) brain.classList.remove("cine-warp-in");
       if (onDone) onDone();
@@ -866,7 +912,7 @@ function runCinematicJourney() {
         const tick = () => {
           if (pipePaused) return;
           if (i >= PIPE_GEN.length) {
-            setPipeStatus("完成");
+            setPipeStatus("完成 · 下一個 Token 已推演（示意）");
             if (out) out.textContent = built + "…（示意）";
             renderBars(bars, NEXT_PROBS, { pick: "單純" });
             highlightChain(6);
