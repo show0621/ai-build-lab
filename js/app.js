@@ -65,15 +65,16 @@ const PROMPT_LAYERS = {
 
 const API_COPY = {
   chat: {
-    title: "POST /v1/chat/query",
+    title: "POST /v1/chat/query｜問答窗口",
     html: `
+      <p class="api-plain"><strong>白話：</strong>這是「使用者按下送出問題」時，網頁叫後端做事的窗口。網頁把問題送出去，後端去知識庫找資料、重排、再請 AI 生成答案，最後把答案＋引用送回來。</p>
+      <p class="api-plain"><strong>為什麼叫 POST？</strong>因為你在「送一份資料進去請對方處理」，不是單純看看狀態。</p>
       <dl class="kv">
-        <dt>Auth</dt><dd>Bearer token（依角色限知識範圍）</dd>
-        <dt>Body</dt><dd><code>{"query":"年假怎麼算？","top_k":20,"rerank":true}</code></dd>
-        <dt>200</dt><dd>answer + citations + confidence + usage</dd>
-        <dt>422</dt><dd>query 過長或空字串</dd>
-        <dt>429</dt><dd>限流：建議 30 rpm / user</dd>
-        <dt>說明重點</dt><dd>把 timeout、錯誤碼、範例 request/response 寫進 SPEC 附錄，方便 AI 實作。</dd>
+        <dt>誰能用</dt><dd>要登入（Bearer token）；不同角色可能只能查自己權限內的知識</dd>
+        <dt>你送什麼</dt><dd><code>{"query":"年假怎麼算？","top_k":20,"rerank":true}</code>＝問題文字＋要抓幾筆＋要不要重排</dd>
+        <dt>成功時</dt><dd>回答案、引用出處、信心高低、用量（方便對帳）</dd>
+        <dt>失敗例子</dt><dd>422：問題空白或太長；429：問太快被限流</dd>
+        <dt>教學重點</dt><dd>寫進 SPEC 時要附「範例請求／範例成功回覆／常見錯誤」，Claude 才知道畫面要接什麼欄位、失敗要顯示什麼。</dd>
       </dl>
       <pre class="code-block">{
   "answer": "到職滿一年特休 7 天…",
@@ -82,23 +83,26 @@ const API_COPY = {
 }</pre>`,
   },
   ingest: {
-    title: "PUT /v1/kb/documents",
+    title: "PUT /v1/kb/documents｜入庫窗口",
     html: `
+      <p class="api-plain"><strong>白話：</strong>這是「把法令 Markdown 放進知識庫」的窗口。沒有這個，問答系統就沒書可查。</p>
+      <p class="api-plain"><strong>廚房在做什麼？</strong>收到檔案後：切開段落 → 做成向量 → 存進資料庫（之後才能搜）。</p>
       <dl class="kv">
-        <dt>Auth</dt><dd>編輯者角色</dd>
-        <dt>Body</dt><dd>multipart：markdown 檔 + metadata（version, owner, tags）</dd>
-        <dt>處理</dt><dd>解析標題 → chunk → embedding → upsert</dd>
-        <dt>200</dt><dd>document_id, chunk_count, version</dd>
-        <dt>說明重點</dt><dd>寫清「更新是覆蓋還是版本並存」，避免知識庫幽靈舊文。</dd>
+        <dt>誰能用</dt><dd>編輯者角色（不是人人都能改知識庫）</dd>
+        <dt>你送什麼</dt><dd>檔案（markdown）＋標籤／版本／負責人等 metadata</dd>
+        <dt>成功時</dt><dd>回傳文件 id、切了幾塊、版本號</dd>
+        <dt>教學重點</dt><dd>一定要寫清「更新是覆蓋舊文，還是新舊版本並存」。寫不清，知識庫會留下幽靈舊規定，答案就會亂。</dd>
       </dl>`,
   },
   health: {
-    title: "GET /v1/health",
+    title: "GET /v1/health｜健康檢查",
     html: `
+      <p class="api-plain"><strong>白話：</strong>上課或上線前先問一聲：「廚房開了沒？」模型、向量庫、重排器是否都活著。</p>
+      <p class="api-plain"><strong>為什麼重要？</strong>若 AI 掛了還讓使用者一直提問，只會得到錯誤或空白，體驗很差。前端可先打這支，掛了就顯示「維護中」。</p>
       <dl class="kv">
-        <dt>用途</dt><dd>上課演示前確認模型與向量庫就緒</dd>
-        <dt>200</dt><dd><code>{"llm":"ok","vector":"ok","reranker":"ok"}</code></dd>
-        <dt>503</dt><dd>任一依賴掛掉 → 前端顯示維護中</dd>
+        <dt>成功</dt><dd><code>{"llm":"ok","vector":"ok","reranker":"ok"}</code></dd>
+        <dt>失敗</dt><dd>503：任一關鍵服務掛掉</dd>
+        <dt>教學重點</dt><dd>SPEC 裡寫「依賴檢查」與前端對應畫面，比等使用者回報「不能用了」更專業。</dd>
       </dl>`,
   },
 };

@@ -1319,6 +1319,40 @@ body.modal-open {
   margin-bottom: 1rem;
 }
 
+.api-teach {
+  padding: 1.15rem 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.api-teach h3 {
+  margin: 0 0 0.55rem;
+  font-size: 1.05rem;
+}
+
+.api-teach p {
+  margin: 0 0 0.65rem;
+  color: var(--ink-soft);
+}
+
+.api-teach .check-list {
+  margin: 0.35rem 0 0.75rem;
+}
+
+.api-teach-goal {
+  margin: 0.75rem 0 0 !important;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  background: rgba(13, 159, 147, 0.08);
+  border-left: 3px solid var(--teal);
+  color: var(--ink) !important;
+}
+
+.api-plain {
+  margin: 0 0 0.75rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
 .api-card {
   padding: 1.15rem 1.2rem;
   cursor: pointer;
