@@ -796,7 +796,10 @@ a.path-node-link {
 }
 
 .tip-card-btn {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
   width: 100%;
   text-align: left;
   cursor: pointer;
@@ -2959,7 +2962,7 @@ body.deck-mode .section {
   min-height: 0; /* allow flex child to shrink and scroll */
   height: auto;
   max-height: 100%;
-  padding: 1.35rem 2.5vw 5.75rem;
+  padding: 1.25rem 2.5vw 8rem; /* 底部留給投影片控制列，避免蓋住內容 */
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -2969,13 +2972,39 @@ body.deck-mode .section {
 }
 
 body.deck-mode.deck-chrome-hidden .section {
-  padding-bottom: 4rem;
+  padding-bottom: 4.5rem;
 }
 
 body.deck-mode .section.deck-active {
   display: flex !important;
   flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.65rem;
   outline: none;
+}
+
+/* 預設：子區塊依內容高度排列，由 section 捲動——勿強制拉高（否則字會置中、下面捲不動） */
+body.deck-mode .section.deck-active > * {
+  flex: 0 0 auto;
+  min-height: auto;
+  max-width: 100%;
+}
+
+body.deck-mode .section.deck-active > .tip-row,
+body.deck-mode .section.deck-active > .kb-steps,
+body.deck-mode .section.deck-active > .canvas-grid,
+body.deck-mode .section.deck-active > .api-grid,
+body.deck-mode .section.deck-active > .tool-grid {
+  align-items: start;
+}
+
+body.deck-mode .tip-card,
+body.deck-mode .tip-card-btn,
+body.deck-mode .kb-step,
+body.deck-mode .api-card {
+  align-self: start;
+  height: auto;
 }
 
 /* Hero only shows when it is the active deck slide — never stacked above themes */
@@ -2998,7 +3027,7 @@ body.deck-mode .hero-title {
 }
 
 body.deck-mode .section-head {
-  margin-bottom: 1rem;
+  margin-bottom: 0.35rem;
   flex-shrink: 0;
 }
 
@@ -3006,24 +3035,57 @@ body.deck-mode .section-head h2 {
   font-size: clamp(1.65rem, 3.2vw, 2.35rem);
 }
 
-body.deck-mode .section.deck-active > .canvas-grid,
-body.deck-mode .section.deck-active > .tip-row,
-body.deck-mode .section.deck-active > .panel,
-body.deck-mode .section.deck-active > .kb-steps {
+body.deck-mode .section-note {
+  margin: 0;
+}
+
+/* 參數頁例外：表格吃剩餘高度，說明固定可見 */
+body.deck-mode #params.deck-active > .params-table-wrap {
   flex: 1 1 auto;
   min-height: 0;
 }
 
-/* API 等長頁：勿強制拉伸，改依內容排列＋區內捲動，避免區塊重疊 */
-body.deck-mode .section.deck-active > .glass,
-body.deck-mode .section.deck-active > .api-grid,
-body.deck-mode .section.deck-active > .section-note {
-  flex: 0 0 auto;
-  min-height: auto;
+body.deck-mode .reveal {
+  opacity: 1 !important;
+  transform: none !important;
 }
 
-body.deck-mode .section-note {
-  margin: 0.35rem 0 0.65rem;
+/* 流程圖：卡片勿被拉高置中 */
+body.deck-mode #flow.deck-active .flow-board {
+  min-height: 260px;
+  margin-bottom: 0;
+}
+
+body.deck-mode #flow.deck-active .tip-row {
+  margin: 0;
+}
+
+body.deck-mode #flow.deck-active .tip-card,
+body.deck-mode #flow.deck-active .tip-card-btn {
+  padding: 0.95rem 1.05rem;
+}
+
+/* 知識庫等長頁：整頁可捲，分頁內容不被裁切 */
+body.deck-mode #kb.deck-active .kb-steps,
+body.deck-mode #kb.deck-active .md-demo,
+body.deck-mode #kb.deck-active .kb-deep {
+  margin-bottom: 0;
+}
+
+body.deck-mode #kb.deck-active .tab-panels {
+  max-height: none;
+  overflow: visible;
+}
+
+body.deck-mode #spec.deck-active .tab-panels,
+body.deck-mode #prompt.deck-active .tab-panels,
+body.deck-mode #case.deck-active .tab-panels {
+  max-height: none;
+  overflow: visible;
+}
+
+body.deck-mode #case.deck-active .case-view {
+  min-height: 0;
 }
 
 body.deck-mode #api.deck-active {
@@ -3361,8 +3423,8 @@ body.deck-mode .loop-headline {
 
 /* Expanded panels must scroll inside if tall */
 body.deck-mode .panel.open .panel-body {
-  max-height: min(60vh, 520px);
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
 }
 
 @keyframes deckIn {
@@ -3389,7 +3451,7 @@ body.deck-mode .panel.open .panel-body {
   }
 
   body.deck-mode .section {
-    padding: 1.25rem 1.1rem 6rem;
+    padding: 1.1rem 1rem 8rem;
   }
 
   .deck-bar {

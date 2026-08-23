@@ -522,11 +522,16 @@ function goDeck(idx) {
     if (!s.hasAttribute("tabindex")) s.setAttribute("tabindex", "-1");
     s.classList.toggle("deck-active", s.id === SECTIONS[deckIndex]);
     if (s.id === SECTIONS[deckIndex]) {
-      s.scrollTop = 0;
-      // Reveal glass cards that IO may have left at opacity 0 while display:none
-      $all(".glass, .panel, .kb-step, .api-card", s).forEach((el) => {
+      // Reveal elements that IO / animations may have left hidden
+      $all(".glass, .panel, .kb-step, .api-card, .tip-card, .reveal", s).forEach((el) => {
         el.style.opacity = "1";
         el.style.transform = "none";
+      });
+      $all(".flow-node", s).forEach((el) => {
+        el.style.opacity = "1";
+      });
+      requestAnimationFrame(() => {
+        s.scrollTop = 0;
       });
       try {
         s.focus({ preventScroll: true });
@@ -748,7 +753,7 @@ function openTermModal(termKey) {
   const body = $("#termModalBody");
   if (title) title.textContent = data.title;
   if (metaphor) metaphor.textContent = data.metaphor;
-  if (body) body.textContent = data.body;
+  if (body) body.innerHTML = data.body;
   show(modal);
   document.body.classList.add("modal-open");
 }
