@@ -2364,8 +2364,9 @@ body.pulse-demo .glass {
   font-size: 1.05rem;
 }
 
-.when-table th {
-  width: 11rem;
+.when-table .term-btn.term-inline {
+  font-size: inherit;
+  white-space: nowrap;
 }
 
 .wf-board {

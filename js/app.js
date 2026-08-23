@@ -338,7 +338,22 @@ const TERM_GLOSSARY = {
   workflow: {
     title: "Workflow（工作流）",
     metaphor: "比喻：把「這次剛好做成」變成「下次照做也成」",
-    body: "先寫人怎麼做，再標哪些步給 AI、哪些留給人，然後用 SPEC、Hook、MCP、Subagent 把它變成可重複的劇本。",
+    body: "先寫人怎麼做，再標哪些步給 AI、哪些留給人，然後用 <strong>SPEC／Skill</strong> 把約定寫清楚，再用 Hook、MCP、Subagent 把它變成可重複執行的路徑。",
+  },
+  spec: {
+    title: "SPEC（規格）",
+    metaphor: "比喻：跟廠商簽的「施工合約」",
+    body: "寫清楚要做什麼、輸入輸出、驗收標準、明確不做什麼。給人對齊，也給 AI 照著實作。<strong>建議：</strong>先寫白話驗收清單，再補精簡原文；範圍鎖 MVP，排除項一定要寫。",
+  },
+  skill: {
+    title: "Skill（技能／工作手冊）",
+    metaphor: "比喻：把「這次怎麼做出來的」寫成單位共用 SOP，下次直接照做",
+    body: "Skill 不是再接一條 MCP，而是把<strong>怎麼做這類任務</strong>寫成可重用說明（步驟、規則、該看哪些檔、輸出格式）。之後對話可自動套用，減少每次重講 PROMPT。<br /><br /><strong>建議怎麼做：</strong><br />1. 先用黃金案例跑通一次，記下成功步驟與踩坑。<br />2. 濃縮成短手冊：何時用、必做／禁止、輸出長怎樣。<br />3. 放進專案（例如 Cursor Skill／規則），讓同事同一條路徑可重複。<br />4. 真正接工具、門禁、分工，仍搭配 Hook／MCP／Subagent——Skill 管「怎麼做」，它們管「怎麼接、怎麼攔、怎麼拆」。",
+  },
+  "collab-tools": {
+    title: "上述工具（Hook／MCP／Subagent）",
+    metaphor: "比喻：劇本寫好了，還要有門禁、接線、分工才能上場",
+    body: "這裡的「上述工具」指同一頁前面三張卡：<strong>Hook</strong>（事件門禁）、<strong>MCP</strong>（接外部系統）、<strong>Subagent</strong>（專責小助理）。Workflow／Skill 負責可重複的做法；這三者負責執行時的檢查、接線與分工。",
   },
 };
 
@@ -1117,7 +1132,7 @@ const TOOL_COPY = {
     title: "Workflow（工作流）",
     metaphor: "比喻：把「這次剛好做成」變成「下次照做也成」的劇本。",
     body: "Workflow 不是另一個神奇按鈕，而是把人的步驟、AI 的步驟、門禁與工具，寫成可重複執行的路徑。",
-    items: ["先寫 5～9 步現況流程", "標哪些步 AI 做、哪些人做", "知識庫用 Markdown；外部系統用 MCP", "門禁用 Hook；分工用 Subagent"],
+    items: ["先寫 5～9 步現況流程", "標哪些步 AI 做、哪些人做", "知識庫用 Markdown；約定寫成 SPEC／Skill", "門禁用 Hook；外部系統用 MCP；分工用 Subagent"],
   },
 };
 
@@ -1149,7 +1164,7 @@ $all(".tool-card").forEach((card) => {
 const WF_COPY = {
   1: { title: "1 · 寫出現況", body: "把現在人工怎麼做寫成 5～9 步。不要一開始就想自動化，先對齊「真正的路徑」。" },
   2: { title: "2 · 標人／AI", body: "每一步標：AI 做、人做、或 AI 草稿＋人核准。不確定、高風險、要簽字的，留給人。" },
-  3: { title: "3 · 寫成 SPEC／PROMPT", body: "輸入、輸出、例外、驗收寫清楚。也可做成專案 Skill，讓之後的對話自動套用。" },
+  3: { title: "3 · 寫成 SPEC／Skill", body: "輸入、輸出、例外、驗收寫清楚。再濃縮成專案 Skill（可重用工作手冊），讓之後對話自動套用，同事不用每次重講。" },
   4: { title: "4 · 需要外部系統 → MCP", body: "AI 要查網、查庫、叫內部 API，就接 MCP。先列「允許哪些工具」，不要一次全開。" },
   5: { title: "5 · 需要門禁 → Hook", body: "危險命令先問、改檔後檢查、送出前擋機密。Hook 負責「自動執行規則」，不是取代判斷。" },
   6: { title: "6 · 需要分工 → Subagent", body: "搜程式、跑測試、平行調查，派專責子代理。主流程只收結果，避免上下文爆炸。" },

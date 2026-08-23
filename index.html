@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=ws-reveal-1" />
+  <link rel="stylesheet" href="css/styles.css?v=skill-term-1" />
 </head>
 <body>
   <div class="bg-layer" aria-hidden="true">
@@ -1012,7 +1012,8 @@ owner: HR
         <button type="button" class="term-btn term-inline" data-term="mcp">MCP</button>，
         自動檢查用 <button type="button" class="term-btn term-inline" data-term="hook">Hook</button>，
         大任務用 <button type="button" class="term-btn term-inline" data-term="subagent">Subagent</button>，
-        整套串起來就是 <button type="button" class="term-btn term-inline" data-term="workflow">Workflow</button>。
+        整套串起來就是 <button type="button" class="term-btn term-inline" data-term="workflow">Workflow</button>
+        （搭配 <button type="button" class="term-btn term-inline" data-term="skill">Skill</button> 把做法寫成可重用手冊）。
       </p>
 
       <div class="tool-grid" id="toolGrid">
@@ -1058,7 +1059,16 @@ owner: HR
           <tr><th>AI 要連外部系統</th><td>MCP（瀏覽器、資料庫、內部 API）</td></tr>
           <tr><th>做事前／事後自動檢查</th><td>Hook</td></tr>
           <tr><th>大任務要分工或平行</th><td>Subagent</td></tr>
-          <tr><th>整套要可重複給同事用</th><td>Workflow（SPEC + Skill + 上述工具）</td></tr>
+          <tr><th>整套要可重複給同事用</th><td>
+            <button type="button" class="term-btn term-inline" data-term="workflow">Workflow</button>
+            （
+            <button type="button" class="term-btn term-inline" data-term="spec">SPEC</button>
+            ＋
+            <button type="button" class="term-btn term-inline" data-term="skill">Skill</button>
+            ＋
+            <button type="button" class="term-btn term-inline" data-term="collab-tools">上述工具</button>
+            ）
+          </td></tr>
         </table>
       </div>
 
@@ -1068,7 +1078,7 @@ owner: HR
         <div class="wf-steps" id="wfSteps">
           <button type="button" class="wf-step active" data-wf="1"><span>1</span>寫出現況</button>
           <button type="button" class="wf-step" data-wf="2"><span>2</span>標人／AI</button>
-          <button type="button" class="wf-step" data-wf="3"><span>3</span>寫成 SPEC</button>
+          <button type="button" class="wf-step" data-wf="3"><span>3</span>寫成 SPEC／Skill</button>
           <button type="button" class="wf-step" data-wf="4"><span>4</span>接 MCP</button>
           <button type="button" class="wf-step" data-wf="5"><span>5</span>加 Hook</button>
           <button type="button" class="wf-step" data-wf="6"><span>6</span>派 Subagent</button>
@@ -1467,7 +1477,7 @@ owner: HR
     </div>
   </div>
 
-  <script src="js/app.js?v=term-html-1"></script>
+  <script src="js/app.js?v=skill-term-1"></script>
   <script src="js/spec-workshop.js?v=ws-reveal-1"></script>
 </body>
 </html>
