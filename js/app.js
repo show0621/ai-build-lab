@@ -941,6 +941,11 @@ function openParam(i) {
     hide(wrap);
   }
   show(paramDetail);
+  if (deckMode) {
+    requestAnimationFrame(() => {
+      paramDetail.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  }
 }
 
 function updateSliderNote(p) {
@@ -1123,6 +1128,13 @@ function showTool(key) {
   if (title) title.textContent = data.title;
   if (body) body.textContent = data.body;
   if (list) list.innerHTML = data.items.map((t) => `<li>${t}</li>`).join("");
+  const detail = $("#toolDetail");
+  if (deckMode && detail) {
+    requestAnimationFrame(() => {
+      detail.scrollTop = 0;
+      detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  }
 }
 
 $all(".tool-card").forEach((card) => {
