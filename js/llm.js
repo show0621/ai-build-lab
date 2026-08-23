@@ -347,7 +347,7 @@ initRerank();
 
 /* ---------- pipeline animation ---------- */
 const PIPE_TOKENS = ["受測", "個體", "應", "如何", "選擇"];
-const PIPE_GEN = ["功能", "較", "單純"];
+const PIPE_GEN = ["較", "單純"]; // 「功能」已在第 5 步選出，這裡只接續後續 token
 
 let pipeTimer = null;
 let pipePaused = false;
@@ -454,7 +454,7 @@ function runPipeline(fromStep = 0) {
       setPipeStatus("5/6 選出「功能」");
       highlightChain(5);
       renderBars(bars, BASE_PROBS, { pick: "功能", dimOthers: true });
-      if (out) out.textContent = "受測個體應如何選擇？ → 功能";
+      if (out) out.textContent = "受測個體應如何選擇？功能";
       schedule(() => runStep(5), 1000);
     },
     () => {
