@@ -347,14 +347,14 @@
     </section>
 
     <!-- 05 API -->
-    <section class="section" id="api" data-minutes="5">
+    <section class="section" id="api" data-minutes="8">
       <div class="section-head">
         <span class="section-num">05</span>
         <div>
           <h2>API 細節怎麼說明</h2>
-          <p>給協作者與 AI 一份「怎麼呼叫、怎麼失敗」的地圖。</p>
+          <p>接口地圖＋模型網址／驗證／API Key 怎麼貼、怎麼存——寫進 SPEC 才能接得上。</p>
         </div>
-        <span class="min-badge">約 5 分</span>
+        <span class="min-badge">約 8 分</span>
       </div>
 
       <div class="api-teach glass">
@@ -365,10 +365,46 @@
           <li><strong>後端／AI／知識庫</strong>＝廚房（真正做事）</li>
         </ul>
         <p>所以 API 細節＝寫清楚：客人要點什麼、廚房會端什麼、點錯或廚房忙時怎麼回覆。寫給人看，也寫給 Claude 實作時照著做。</p>
-        <p class="api-teach-goal"><strong>教學目的：</strong>學會在 SPEC 裡附上「接口地圖」，避免 AI 只做出漂亮畫面卻接不上後端，或接上了卻不知道失敗時該顯示什麼。</p>
+        <p class="api-teach-goal"><strong>教學目的：</strong>學會在 SPEC／PROMPT 裡附上「接口地圖」＋「模型對接設定」（網址、模型名、驗證、Key 存放），避免 AI 只做出漂亮畫面卻接不上模型，或 Key 亂存造成外洩。</p>
       </div>
 
-      <p class="section-note">下面三張是常見知識庫問答系統的「三個窗口」。點卡片看白話解說。</p>
+      <div class="api-teach glass api-connect-box">
+        <h3>對接 AI 模型時，規格一定要寫的四件事</h3>
+        <ol class="api-connect-steps">
+          <li><strong>Base URL／端點網址</strong> — 例如 OpenAI 相容 <code>https://api.openai.com/v1</code>，或單位內部閘道。前端／後端打哪裡要寫死欄位，不要口頭講「接一下 API」。</li>
+          <li><strong>模型名稱</strong> — 例如 <code>gpt-4o</code>、<code>claude-sonnet-4-…</code>、或內部部署模型 id。頂欄「模型下拉」的選項要從設定來，可改。</li>
+          <li><strong>驗證機制</strong> — 常見：HTTP Header <code>Authorization: Bearer &lt;API_KEY&gt;</code>；有的用 <code>x-api-key</code>。寫清「放哪個 header、有沒有額外 org／專案 id」。</li>
+          <li><strong>API Key 載入與存放</strong> — 誰輸入、存在哪、誰看得到、能不能進 Git。教學示範可用「設定頁貼上 → 本機 localStorage」；正式環境 Key 只放伺服器環境變數（<code>.env</code>），瀏覽器不要長期明文存正式金鑰。</li>
+        </ol>
+        <p class="api-teach-note">對接邏輯口訣：<strong>畫面按下提問 → 組請求（URL＋模型＋Header＋body）→ 呼叫 → 解析回覆／錯誤 → 更新 UI 狀態</strong>。這整段要寫進 SPEC，Claude 才知道設定頁與問答區怎麼串。</p>
+      </div>
+
+      <p class="section-note">先點下面四張「模型對接」卡片，再點三張「業務窗口」卡片。</p>
+
+      <div class="api-grid api-grid-4">
+        <article class="glass api-card" data-api="baseurl">
+          <div class="method get">設定</div>
+          <h3>Base URL</h3>
+          <p>模型／閘道網址要貼哪、怎麼測通。</p>
+        </article>
+        <article class="glass api-card" data-api="model">
+          <div class="method get">設定</div>
+          <h3>模型名稱</h3>
+          <p>下拉選什麼、請求 body 帶哪個欄位。</p>
+        </article>
+        <article class="glass api-card" data-api="auth">
+          <div class="method post">驗證</div>
+          <h3>驗證機制</h3>
+          <p>Bearer／x-api-key／額外標頭怎麼寫。</p>
+        </article>
+        <article class="glass api-card" data-api="apikey">
+          <div class="method put">金鑰</div>
+          <h3>API Key 存放</h3>
+          <p>設定頁貼上、本機暫存 vs 伺服器 .env。</p>
+        </article>
+      </div>
+
+      <p class="section-note">業務窗口：常見知識庫問答系統的三個呼叫口。</p>
 
       <div class="api-grid">
         <article class="glass api-card" data-api="chat">
@@ -1225,7 +1261,7 @@ owner: HR
       </div>
 
       <div class="workshop-banner glass">
-        <p>示範會要求 Claude 做出<strong>四個一級功能 Tab</strong>（知識問答｜專業翻譯｜去識別化｜筆記本），<strong>一次只顯示一個完整畫面</strong>，避免全部擠在同一頁變亂。請按「載入示範」→「產生」→複製 PROMPT。</p>
+        <p>示範會要求 Claude 做出<strong>四個一級功能 Tab</strong>（一次只顯示一個畫面），並寫入<strong>API 對接</strong>（Base URL、模型、驗證、API Key 存放與測試連線）。請按「載入示範」→「產生」→複製 PROMPT。</p>
       </div>
 
       <div class="workshop-layout">
@@ -1244,8 +1280,28 @@ owner: HR
           </label>
           <label class="field">
             <span>技術偏好（可改）</span>
-            <input type="text" id="wsStack" value="第1回合先交完整 HTML/CSS/JS：四 Tab 切換＋各功能完整 UI（可 mock）。繁中。深頂欄、玻璃面板、藍／綠／琥珀" />
+            <input type="text" id="wsStack" value="第1回合先交完整 HTML/CSS/JS：四 Tab 切換＋各功能完整 UI（可 mock）。第2回合接 API。繁中。深頂欄、玻璃面板、藍／綠／琥珀" />
           </label>
+
+          <fieldset class="ws-api-fieldset">
+            <legend>API 對接（會寫進 SPEC／PROMPT）</legend>
+            <label class="field">
+              <span>API Base URL</span>
+              <input type="text" id="wsApiBase" value="https://api.openai.com/v1（可改成單位閘道或相容端點）" />
+            </label>
+            <label class="field">
+              <span>預設模型名稱</span>
+              <input type="text" id="wsApiModel" value="gpt-4o（可改；頂欄模型下拉由此設定）" />
+            </label>
+            <label class="field">
+              <span>驗證機制</span>
+              <input type="text" id="wsApiAuth" value="Authorization: Bearer &lt;API_KEY&gt;（若供應商用 x-api-key 請改寫）" />
+            </label>
+            <label class="field">
+              <span>API Key 載入／存放</span>
+              <textarea id="wsApiKeyStore" rows="3">示範：設定頁密碼框貼上 Key → 儲存至 localStorage（畫面只顯示遮罩）→ 請求時讀出組 Header；提供清除金鑰。正式：Key 改放伺服器 .env／密鑰庫，前端只打自家後端；.env 勿進 Git。</textarea>
+            </label>
+          </fieldset>
 
           <div class="ws-blocks-head">
             <h3>功能區塊（可編輯／新增）</h3>

@@ -1319,6 +1319,10 @@ body.modal-open {
   margin-bottom: 1rem;
 }
 
+.api-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 .api-teach {
   padding: 1.15rem 1.3rem;
   margin-bottom: 1rem;
@@ -1345,6 +1349,35 @@ body.modal-open {
   background: rgba(13, 159, 147, 0.08);
   border-left: 3px solid var(--teal);
   color: var(--ink) !important;
+}
+
+.api-connect-box .api-connect-steps {
+  margin: 0.4rem 0 0.85rem;
+  padding-left: 1.2rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.api-connect-box .api-connect-steps li {
+  margin-bottom: 0.55rem;
+}
+
+.api-connect-box .api-connect-steps code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  background: rgba(15, 23, 42, 0.06);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+.api-teach-note {
+  margin: 0 !important;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  background: rgba(14, 165, 233, 0.08);
+  border-left: 3px solid var(--sky, #0ea5e9);
+  color: var(--ink) !important;
+  font-size: 0.95rem;
 }
 
 .api-plain {
@@ -1755,6 +1788,7 @@ body.pulse-demo .glass {
   .canvas-grid,
   .tip-row,
   .api-grid,
+  .api-grid-4,
   .kb-steps,
   .compare-row,
   .closing-grid,
@@ -3034,6 +3068,21 @@ body.deck-mode .panel.open .panel-body {
   margin-bottom: 0.85rem;
   font-size: 0.9rem;
   color: var(--ink-soft);
+}
+
+.ws-api-fieldset {
+  margin: 0 0 1rem;
+  padding: 0.85rem 0.95rem 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(14, 165, 233, 0.05);
+}
+
+.ws-api-fieldset legend {
+  padding: 0 0.35rem;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: var(--ink);
 }
 
 .workshop-form .field span {

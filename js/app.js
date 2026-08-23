@@ -64,6 +64,63 @@ const PROMPT_LAYERS = {
 };
 
 const API_COPY = {
+  baseurl: {
+    title: "Base URL｜模型／閘道網址",
+    html: `
+      <p class="api-plain"><strong>白話：</strong>告訴程式「廚房在哪個地址」。沒寫網址，畫面再漂亮也叫不到 AI。</p>
+      <dl class="kv">
+        <dt>常見例子</dt><dd>OpenAI 相容：<code>https://api.openai.com/v1</code>；Anthropic、Azure、單位內部閘道則換成各自文件上的 Base URL</dd>
+        <dt>設定頁欄位</dt><dd>「API Base URL」輸入框＋「測試連線」按鈕（打 health 或 list models）</dd>
+        <dt>寫進 SPEC</dt><dd>預設值、可否由使用者改、結尾要不要帶 <code>/v1</code>、CORS／代理注意</dd>
+        <dt>失敗</dt><dd>網址錯、HTTPS 憑證、被防火牆擋 → UI 顯示「連線失敗：請檢查網址」</dd>
+      </dl>
+      <pre class="code-block">設定例：
+API Base URL = https://api.openai.com/v1
+測試：GET {base}/models 或你們的 /health</pre>`,
+  },
+  model: {
+    title: "模型名稱｜請求要帶哪個 model",
+    html: `
+      <p class="api-plain"><strong>白話：</strong>同一間餐廳可能有多個主廚。模型名告訴伺服器「這次請哪一位」。頂欄下拉的選項應來自設定，不要寫死在程式裡。</p>
+      <dl class="kv">
+        <dt>設定頁</dt><dd>「預設模型」文字欄或下拉（可手動貼 model id）</dd>
+        <dt>請求哪裡帶</dt><dd>通常在 JSON body：<code>{"model":"gpt-4o","messages":[…]}</code></dd>
+        <dt>寫進 SPEC</dt><dd>預設模型、允許清單、與 Max Output／Context 建議值的對應</dd>
+        <dt>失敗</dt><dd>404／model_not_found → 提示「模型名稱無效，請到設定修改」</dd>
+      </dl>`,
+  },
+  auth: {
+    title: "驗證機制｜誰有資格叫廚房",
+    html: `
+      <p class="api-plain"><strong>白話：</strong>服務生要看通行證。沒帶對的驗證標頭，伺服器會回 401／403。</p>
+      <dl class="kv">
+        <dt>最常見</dt><dd><code>Authorization: Bearer &lt;API_KEY&gt;</code></dd>
+        <dt>其他</dt><dd><code>x-api-key: &lt;KEY&gt;</code>；Azure 可能還要 <code>api-key</code> 或資源名稱；有的要額外 org／project header</dd>
+        <dt>寫進 SPEC</dt><dd>用哪一種、標頭名稱、是否還要第二道內部登入（使用者 JWT）與模型金鑰分開</dd>
+        <dt>教學口訣</dt><dd><strong>業務 API</strong>（問答／入庫）可以要「登入 token」；<strong>叫外部模型</strong>要「供應商 API Key」——兩者不要混成同一個欄位說明不清。</dd>
+      </dl>
+      <pre class="code-block">Authorization: Bearer sk-••••••••
+Content-Type: application/json</pre>`,
+  },
+  apikey: {
+    title: "API Key｜怎麼貼上、載入、存放",
+    html: `
+      <p class="api-plain"><strong>白話：</strong>金鑰像廚房密碼。要讓使用者在「設定頁」貼上；程式啟動時載入；存的地方要分「教學示範」與「正式上線」。</p>
+      <dl class="kv">
+        <dt>載入方式（教學／本機 Demo）</dt><dd>設定頁密碼框貼上 Key → 按「儲存」→ 寫入 <code>localStorage</code>（或 sessionStorage）→ 之後請求從記憶體／storage 讀出組 Header。畫面只顯示遮罩（sk-••••）</dd>
+        <dt>正式建議</dt><dd>Key 只放<strong>伺服器</strong>環境變數（<code>.env</code>／密鑰庫），前端只打自家後端；瀏覽器<strong>不要</strong>長期存正式生產金鑰。<code>.env</code> 加入 <code>.gitignore</code>，絕不可提交</dd>
+        <dt>UI 必做</dt><dd>貼上框、顯示／隱藏、儲存、清除、連線測試；頂欄顯示「AI：就緒／未設定 Key／驗證失敗」</dd>
+        <dt>安全</dt><dd>日誌與錯誤訊息不可印出完整 Key；匯出設定檔預設不含 Key</dd>
+      </dl>
+      <pre class="code-block">// Demo 流程（寫進 PROMPT 給 Claude）
+1. 設定頁輸入 API Key
+2. localStorage.setItem("app_api_key", key)  // 僅示範
+3. fetch(base + "/chat/completions", {
+     headers: { Authorization: "Bearer " + key }
+   })
+4. 提供「清除金鑰」按鈕</pre>
+      <p class="api-plain"><strong>寫進 SPEC 的一句話：</strong>「示範版允許設定頁貼 Key 存本機；正式版改走後端代理＋環境變數，並在 README 註明差異。」</p>`,
+  },
   chat: {
     title: "POST /v1/chat/query｜問答窗口",
     html: `
@@ -73,7 +130,7 @@ const API_COPY = {
         <dt>誰能用</dt><dd>要登入（Bearer token）；不同角色可能只能查自己權限內的知識</dd>
         <dt>你送什麼</dt><dd><code>{"query":"年假怎麼算？","top_k":20,"rerank":true}</code>＝問題文字＋要抓幾筆＋要不要重排</dd>
         <dt>成功時</dt><dd>回答案、引用出處、信心高低、用量（方便對帳）</dd>
-        <dt>失敗例子</dt><dd>422：問題空白或太長；429：問太快被限流</dd>
+        <dt>失敗例子</dt><dd>422：問題空白或太長；429：問太快被限流；401：Key／登入無效</dd>
         <dt>教學重點</dt><dd>寫進 SPEC 時要附「範例請求／範例成功回覆／常見錯誤」，Claude 才知道畫面要接什麼欄位、失敗要顯示什麼。</dd>
       </dl>
       <pre class="code-block">{
@@ -86,7 +143,7 @@ const API_COPY = {
     title: "PUT /v1/kb/documents｜入庫窗口",
     html: `
       <p class="api-plain"><strong>白話：</strong>這是「把法令 Markdown 放進知識庫」的窗口。沒有這個，問答系統就沒書可查。</p>
-      <p class="api-plain"><strong>廚房在做什麼？</strong>收到檔案後：切開段落 → 做成向量 → 存進資料庫（之後才能搜）。</p>
+      <p class="api-plain"><strong>廚房在做什麼？</strong>收到檔案後：切開段落 → 做成向量 → 存進資料庫（之後就能搜）。</p>
       <dl class="kv">
         <dt>誰能用</dt><dd>編輯者角色（不是人人都能改知識庫）</dd>
         <dt>你送什麼</dt><dd>檔案（markdown）＋標籤／版本／負責人等 metadata</dd>
@@ -102,7 +159,7 @@ const API_COPY = {
       <dl class="kv">
         <dt>成功</dt><dd><code>{"llm":"ok","vector":"ok","reranker":"ok"}</code></dd>
         <dt>失敗</dt><dd>503：任一關鍵服務掛掉</dd>
-        <dt>教學重點</dt><dd>SPEC 裡寫「依賴檢查」與前端對應畫面，比等使用者回報「不能用了」更專業。</dd>
+        <dt>教學重點</dt><dd>SPEC 裡寫「依賴檢查」與前端對應畫面，比等使用者回報「不能用了」更專業。設定頁「測試連線」也可打這支。</dd>
       </dl>`,
   },
 };

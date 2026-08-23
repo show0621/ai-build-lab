@@ -131,8 +131,39 @@ Temperature 0.15、Context 32K、Max Output 一般 3K／複雜 9K
     title: "區塊6｜設定／參數（次要頁）",
     body: `齒輪進入，不要塞進四個主 Tab。
 
-分組表單：RAG 參數｜模型連線｜匯出樣板（浮水印）｜健康檢查（llm／vector／reranker）
+分組表單：
+1) **API 對接**（欄位細節見區塊7）
+2) RAG 參數｜匯出樣板（浮水印）｜健康檢查（llm／vector／reranker）
 數字欄顯示建議值；儲存成功 toast`,
+  },
+  {
+    title: "區塊7｜API 對接邏輯＋模型網址／驗證／API Key",
+    body: `【對接邏輯（必寫進程式與 README）】
+畫面操作 → 組請求（Base URL + path、model、Authorization header、JSON body）
+→ fetch／呼叫 → 解析成功 JSON 或錯誤碼 → 更新 UI（就緒／連線中／失敗）
+→ 問答區顯示答案或紅底錯誤說明。
+
+■ 設定頁必備欄位（可貼上、可改）
+1. API Base URL（例：https://api.openai.com/v1 或單位閘道）
+2. 預設模型名稱（例：gpt-4o；頂欄模型下拉同步此值）
+3. 驗證方式：預設 Authorization: Bearer <API_KEY>（若供應商要 x-api-key，設定裡可選驗證類型）
+4. API Key：密碼輸入框、顯示／隱藏、儲存、清除、測試連線
+
+■ API Key 載入與存放
+- 示範／教學：設定頁貼上 → localStorage（或 sessionStorage）→ 請求時讀出組 Header；畫面只顯示 sk-••••；可一鍵清除
+- 正式：Key 只放伺服器 .env／密鑰庫；前端只打自家後端；.env 進 .gitignore，絕不可提交
+- 日誌與錯誤訊息不可印出完整 Key；匯出設定預設不含 Key
+
+■ 業務窗口（可與模型呼叫分開或由後端代理）
+- POST /v1/chat/query（問答）
+- PUT /v1/kb/documents（入庫）
+- GET /v1/health（健康檢查／測試連線）
+各附：誰能用、請求範例、成功欄位、401／422／429／503 時 UI 文案
+
+■ 頂欄狀態
+- 未設定 Key →「AI：未設定金鑰」
+- 測試成功 →「AI：就緒」
+- 401／網路錯 →「AI：驗證失敗／連線失敗」`,
   },
 ];
 
@@ -193,17 +224,61 @@ function buildSystemChecklist() {
 - 另外三個各有獨立全頁工作區
 - 禁止只交目錄樹、空殼、未設計頁
 
-### B. 知識庫
+### B. API 對接（模型網址／驗證／Key）
+- 設定頁：Base URL、模型名、驗證方式、API Key（貼上／儲存／清除／測試連線）
+- 對接流程：組請求 → 呼叫 → 解析 → 更新頂欄狀態與問答 UI
+- Demo 可用 localStorage 存 Key；正式改後端 .env；Key 不進 Git、不進日誌
+
+### C. 知識庫
 - 入庫、metadata、版本、引用回原文
 
-### C. Markdown／切塊與 RAG 參數
+### D. Markdown／切塊與 RAG 參數
 - Chunk／Overlap／Top-K／Reranker／Temperature／Max Output 可配置
 
-### D. 上傳下載與匯出
+### E. 上傳下載與匯出
 - 上傳用模態；Word／ODT／PDF 匯出
 
-### E. 安全與驗收
-- 對照表敏感提示；四 Tab 都能點通；失敗狀態 UX
+### F. 安全與驗收
+- 對照表敏感提示；四 Tab 都能點通；401／連線失敗有明確 UX
+`;
+}
+
+function buildApiSpec() {
+  const base = wsEl("wsApiBase")?.value.trim() || "（未填 Base URL）";
+  const model = wsEl("wsApiModel")?.value.trim() || "（未填模型）";
+  const auth = wsEl("wsApiAuth")?.value.trim() || "Authorization: Bearer <API_KEY>";
+  const keyStore = wsEl("wsApiKeyStore")?.value.trim() || "";
+
+  return `## API 對接規格（必做）
+
+### 對接邏輯
+1. 使用者在設定頁填好 Base URL、模型、API Key 並儲存／測試連線
+2. 問答等功能觸發時：組請求（URL + Header + body，含 model）
+3. 呼叫 API → 成功則解析 JSON 更新 UI；失敗則依狀態碼顯示可讀錯誤
+4. 頂欄即時反映：未設定金鑰／連線中／就緒／驗證失敗／連線失敗
+
+### 本專案填寫值（可改）
+| 項目 | 值 |
+|---|---|
+| API Base URL | ${base} |
+| 預設模型 | ${model} |
+| 驗證機制 | ${auth} |
+| Key 載入／存放 | ${keyStore || "見下方預設策略"} |
+
+### 設定頁 UI
+- 欄位：Base URL、模型名稱、驗證類型（Bearer／x-api-key）、API Key（密碼框＋顯示／隱藏）
+- 按鈕：儲存、清除金鑰、測試連線（建議打 health 或 list models）
+- Key 畫面只顯示遮罩；不可在 console／錯誤訊息印出完整 Key
+
+### Key 策略
+- **示範**：設定頁 → localStorage／sessionStorage → 請求時讀出組 Header
+- **正式**：僅伺服器 .env／密鑰庫；前端打自家後端；.env ∈ .gitignore
+
+### 業務窗口（範例）
+- \`POST /v1/chat/query\` — 問答（body 含 query、top_k、rerank；回 answer、citations）
+- \`PUT /v1/kb/documents\` — 入庫
+- \`GET /v1/health\` — 健康檢查
+- 錯誤 UX：401 金鑰／登入無效；422 參數錯；429 限流；503 服務未就緒
 `;
 }
 
@@ -263,9 +338,12 @@ ${goal}
 - 頂部可見四個一級功能 Tab，點哪個只顯示哪個
 - 【知識問答】：左點節點→右上內容；右下四段回答＋引用
 - 【專業翻譯】【去識別化】【筆記本】各為獨立完整工作頁
+- 設定頁可貼 Base URL／模型／API Key；可儲存、清除、測試連線；頂欄顯示 AI 狀態
 - 上傳模態、參數可配置；畫面不亂、不四功能同屏堆疊
 
 ${buildUiSpec()}
+
+${buildApiSpec()}
 
 ## 4. 功能區塊明細
 
@@ -275,15 +353,16 @@ ${blocksMd}
 ${stack}
 
 ## 6. 非功能
-- 繁中；內部工具安全；參數不寫死
+- 繁中；內部工具安全；參數不寫死；API Key 不進 Git／日誌
 
 ## 7. 排除
 - 不取代正式法律意見；不可無依據臆測
 - 不交只有結構沒有介面；不交四功能擠同一頁的亂版
+- 不在前端程式碼或倉庫提交明文生產 API Key
 
 ## 8. 交付物
 1. 可打開的漂亮工作台（第 1 優先）
-2. README
+2. README（含如何貼 API Key、Base URL、模型）
 3. 示範資料＋匯出樣張
 4. 實作對照清單
 
@@ -291,9 +370,9 @@ ${buildSystemChecklist()}
 
 ## 9. 實作順序（強制）
 1. **第 1 回合**：殼層＋四 Tab 切換＋四個畫面的完整 UI（可用 mock）
-2. 第 2 回合：知識問答接真 RAG＋引用
+2. **第 2 回合**：設定頁 API 對接（URL／模型／Key 存取／測試連線）＋問答改打真 API（或先 mock 再接）
 3. 第 3 回合：去識別化即時同步＋匯出
-4. 第 4 回合：翻譯、筆記本串接、上傳模態、設定頁
+4. 第 4 回合：翻譯、筆記本串接、上傳模態、RAG 參數頁
 `;
 }
 
@@ -302,11 +381,16 @@ function buildPrompt() {
   const goal = wsEl("wsGoal")?.value.trim() || "";
   const users = wsEl("wsUsers")?.value.trim() || "";
   const stack = wsEl("wsStack")?.value.trim() || "";
+  const base = wsEl("wsApiBase")?.value.trim() || "";
+  const model = wsEl("wsApiModel")?.value.trim() || "";
+  const auth = wsEl("wsApiAuth")?.value.trim() || "";
+  const keyStore = wsEl("wsApiKeyStore")?.value.trim() || "";
 
   const blockList = wsBlocks.map((b) => `【${b.title}】\n${b.body}`).join("\n\n");
 
   return `你是資深全端工程師 + 產品級 UI 設計師。
 請做一個專業單頁「知識庫工作台」。**介面必須清楚：四種功能用四個 Tab 分開，一次只顯示一個，禁止全部擠在 index 同一畫面。**
+並實作 **API 對接**：設定頁可貼 Base URL、模型、API Key；請求帶驗證 Header；頂欄顯示連線狀態。
 
 # 專案：${name}
 
@@ -352,6 +436,26 @@ ${stack}
 
 ---
 
+## ⚠ 第 2 回合必做 — API 對接（請寫進程式，不要只寫 README）
+
+### 本專案對接參數
+- Base URL：${base}
+- 模型：${model}
+- 驗證：${auth}
+- Key 存放策略：${keyStore}
+
+### 設定頁必做
+- 輸入：Base URL、模型名、API Key（密碼框＋顯示／隱藏）
+- 按鈕：儲存、清除金鑰、測試連線
+- Demo：Key 存 localStorage（遮罩顯示）；正式路徑在 README 註明改 .env／後端代理
+- 頂欄狀態：未設定金鑰／就緒／驗證失敗／連線失敗
+
+### 呼叫邏輯
+組請求（URL＋Header＋body 含 model）→ fetch → 更新 UI；401／422／429／503 要有人話錯誤。
+業務窗口至少規劃：chat/query、kb/documents、health。
+
+---
+
 ## 功能明細
 
 ${blockList}
@@ -359,12 +463,15 @@ ${blockList}
 ---
 
 ## 實作規則
-- 第 1 回合直接交可打開的 HTML/CSS/JS（或同等前端），**四 Tab 都能點出不同完整畫面**
-- 之後再接真 RAG／匯出；法令不得臆測；去識別化甲乙丙丁→ABCD 即時同步
-- 回覆寫清：怎麼打開、如何點四個 Tab 驗收
+- 第 1 回合：可打開的 HTML/CSS/JS，**四 Tab 都能點出不同完整畫面**
+- 第 2 回合：設定頁 API 對接可操作；問答可接真 API 或先接通再換 RAG
+- 法令不得臆測；去識別化甲乙丙丁→ABCD 即時同步；**完整 Key 不進 Git／日誌**
+- 回覆寫清：怎麼打開、怎麼貼 Key、如何點四個 Tab 與測試連線驗收
 
 ## 開始前
-用 ≤5 點複述，必須包含：「會做四個一級 Tab、一次只顯示一個功能畫面，不會把四種功能擠在同一頁」。
+用 ≤5 點複述，必須包含：
+1) 四個一級 Tab、一次只顯示一個功能畫面
+2) 會做設定頁貼 Base URL／模型／API Key 並能測試連線
 然後立刻做第 1 回合。`;
 }
 
