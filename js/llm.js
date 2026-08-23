@@ -697,9 +697,174 @@ function highlightChain(step) {
   });
 }
 
+/* ---- Cinematic: UI type → AI brain word-cloud universe ---- */
+const CINE_QUERY = "受測個體應如何選擇？";
+
+function cineEls() {
+  return {
+    stage: $("#cineStage"),
+    ui: $("#cineUi"),
+    brain: $("#cineBrain"),
+    type: $("#cineTypeText"),
+    caret: $("#cineCaret"),
+    label: $("#cineBrainLabel"),
+  };
+}
+
+function showCineAct(act) {
+  const { stage, ui, brain } = cineEls();
+  if (!stage) return;
+  stage.dataset.act = act;
+  if (act === "ui" || act === "idle") {
+    if (ui) ui.hidden = false;
+    if (brain) brain.hidden = true;
+  } else {
+    if (ui) ui.classList.add("cine-fade-out");
+    setTimeout(() => {
+      if (pipePaused) return;
+      if (ui) {
+        ui.hidden = true;
+        ui.classList.remove("cine-fade-out");
+      }
+      if (brain) {
+        brain.hidden = false;
+        brain.classList.add("cine-fade-in");
+      }
+    }, act === "warp" ? 0 : 50);
+  }
+}
+
+function typeCineQuery(onDone) {
+  const { type, caret, stage } = cineEls();
+  if (!type) {
+    if (onDone) onDone();
+    return;
+  }
+  showCineAct("ui");
+  type.textContent = "";
+  if (caret) caret.classList.add("blink");
+  setPipeStatus("介面輸入中…");
+  let i = 0;
+  const tick = () => {
+    if (pipePaused) return;
+    if (i <= CINE_QUERY.length) {
+      type.textContent = CINE_QUERY.slice(0, i);
+      i += 1;
+      schedule(tick, 70 + (i % 3) * 15);
+      return;
+    }
+    setPipeStatus("等待輸入…（游標閃爍）");
+    // hold with blinking caret
+    schedule(() => {
+      if (pipePaused) return;
+      if (caret) caret.classList.remove("blink");
+      if (onDone) onDone();
+    }, 1200);
+  };
+  tick();
+}
+
+function warpToBrain(onDone) {
+  const { stage, ui, brain, label } = cineEls();
+  setPipeStatus("進入 AI 頭腦…");
+  if (stage) stage.dataset.act = "warp";
+  if (ui) ui.classList.add("cine-warp-out");
+  schedule(() => {
+    if (pipePaused) return;
+    if (ui) {
+      ui.hidden = true;
+      ui.classList.remove("cine-warp-out");
+    }
+    if (brain) {
+      brain.hidden = false;
+      brain.classList.add("cine-warp-in");
+    }
+    if (label) label.textContent = "畫面② AI 頭腦 · 文字雲宇宙";
+    drawAttnSvg(4, "scan");
+    schedule(() => {
+      if (brain) brain.classList.remove("cine-warp-in");
+      if (onDone) onDone();
+    }, 700);
+  }, 650);
+}
+
+function runCinematicJourney() {
+  pipePaused = false;
+  const out = $("#pipeOut");
+  const bars = $("#probBars");
+  const { ui, brain, type, caret } = cineEls();
+
+  // reset stage
+  if (type) type.textContent = "";
+  if (caret) caret.classList.add("blink");
+  if (ui) {
+    ui.hidden = false;
+    ui.classList.remove("cine-fade-out", "cine-warp-out");
+  }
+  if (brain) {
+    brain.hidden = true;
+    brain.classList.remove("cine-fade-in", "cine-warp-in");
+  }
+  if (out) out.textContent = "（尚未開始）";
+  renderPipeTokens(-1);
+  renderBars(bars, BASE_PROBS.map((x) => ({ ...x, p: 0.02 })));
+
+  typeCineQuery(() => {
+    // tokenize sync panel
+    PIPE_TOKENS.forEach((_, i) => {
+      setTimeout(() => {
+        if (!pipePaused) renderPipeTokens(i);
+      }, 120 * (i + 1));
+    });
+    warpToBrain(() => {
+      const { label } = cineEls();
+      runAttnSearchAnimation(4, () => {
+        if (pipePaused) return;
+        if (label) label.textContent = "畫面③ 神經連結完成 · 下一步可能性已標註";
+        highlightChain(4);
+        renderBars(bars, BASE_PROBS, { pick: "功能" });
+        if (out) out.textContent = "受測個體應如何選擇？功能";
+        schedule(() => {
+          if (pipePaused) return;
+          setPipeStatus("生成下一 Token…");
+          let built = "受測個體應如何選擇？功能";
+          let i = 0;
+          const tick = () => {
+            if (pipePaused) return;
+            if (i >= PIPE_GEN.length) {
+              setPipeStatus("完成 · 可再按播放");
+              if (out) out.textContent = built + "…（示意）";
+              renderBars(bars, NEXT_PROBS, { pick: "單純" });
+              highlightChain(6);
+              return;
+            }
+            built += PIPE_GEN[i];
+            if (out) out.textContent = built;
+            renderBars(
+              bars,
+              i === PIPE_GEN.length - 1
+                ? NEXT_PROBS
+                : [
+                    { t: PIPE_GEN[i], p: 0.51 },
+                    { t: "及", p: 0.17 },
+                    { t: "與", p: 0.12 },
+                    { t: "其他", p: 0.2 },
+                  ],
+              { pick: PIPE_GEN[i], dimOthers: true }
+            );
+            i += 1;
+            schedule(tick, 750);
+          };
+          tick();
+        }, 800);
+      });
+    });
+  });
+}
+
 $("#pipePlay")?.addEventListener("click", () => {
   clearPipeTimer();
-  runPipeline(0);
+  runCinematicJourney();
 });
 $("#pipePause")?.addEventListener("click", () => {
   pipePaused = true;
@@ -710,16 +875,36 @@ $("#pipeReset")?.addEventListener("click", () => {
   pipePaused = true;
   clearPipeTimer();
   renderPipeTokens(-1);
-  $("#attnSvg").innerHTML = "";
+  const svg = $("#attnSvg");
+  if (svg) svg.innerHTML = "";
   renderBars($("#probBars"), BASE_PROBS.map((x) => ({ ...x, p: 0 })));
   if ($("#pipeOut")) $("#pipeOut").textContent = "（尚未開始）";
   setPipeStatus("就緒");
   $$("#llmChain .llm-chain-step").forEach((el) => el.classList.remove("active"));
+  const ui = $("#cineUi");
+  const brain = $("#cineBrain");
+  const type = $("#cineTypeText");
+  const caret = $("#cineCaret");
+  if (type) type.textContent = "";
+  if (caret) caret.classList.add("blink");
+  if (ui) {
+    ui.hidden = false;
+    ui.classList.remove("cine-fade-out", "cine-warp-out");
+  }
+  if (brain) {
+    brain.hidden = true;
+    brain.classList.remove("cine-fade-in", "cine-warp-in");
+  }
+  const stage = $("#cineStage");
+  if (stage) stage.dataset.act = "idle";
 });
 
 $("#llmPlayAll")?.addEventListener("click", () => {
   document.getElementById("pipeline")?.scrollIntoView({ behavior: "smooth" });
-  setTimeout(() => runPipeline(0), 400);
+  setTimeout(() => {
+    clearPipeTimer();
+    runCinematicJourney();
+  }, 400);
 });
 
 // initial empty bars

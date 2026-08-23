@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="stylesheet" href="css/llm.css?v=spread-cloud-2" />
+  <link rel="stylesheet" href="css/llm.css?v=cine-1" />
 </head>
 <body class="llm-page">
   <div class="bg-layer" aria-hidden="true">
@@ -112,25 +112,49 @@
       <div class="section-head">
         <span class="section-num">B</span>
         <div>
-          <h2>互動：一句 TP 問題怎麼被「一個 Token 一個 Token」生成</h2>
-          <p>例：「受測個體應如何選擇？」——按播放看 Token → Attention → 機率 → 選字。</p>
+          <h2>一氣呵成：從輸入畫面進入 AI 頭腦</h2>
+          <p>介面打字 → 游標閃爍 → 跳進文字雲宇宙 → 神經搜尋連結與機率 → 下一步可能。</p>
         </div>
       </div>
-      <div class="llm-demo glass">
+      <div class="llm-demo glass llm-cinematic">
         <div class="llm-demo-toolbar">
-          <button type="button" class="btn btn-primary" id="pipePlay">播放</button>
+          <button type="button" class="btn btn-primary" id="pipePlay">播放完整動畫</button>
           <button type="button" class="btn btn-ghost" id="pipePause">暫停</button>
           <button type="button" class="btn btn-ghost" id="pipeReset">重來</button>
           <span class="llm-demo-status" id="pipeStatus">就緒</span>
         </div>
-        <p class="llm-demo-q">輸入：<code>受測個體應如何選擇？</code></p>
-        <div class="llm-tokens" id="pipeTokens" aria-live="polite"></div>
-        <div class="llm-attn-wrap">
-          <svg class="llm-attn-svg llm-attn-literary attn-spread" id="attnSvg" viewBox="0 0 860 480" role="img" aria-label="密佈文字雲搜尋與串接機率"></svg>
-          <p class="llm-caption">大量文字雲散落各處（不往中心縮）。動畫：快速掃描 → 相關變亮／無關淡化 → 字與字串接連線＋機率 → 下一字在原位置標註。</p>
+
+        <div class="cine-stage" id="cineStage" data-act="idle">
+          <!-- Act 1: transparent UI typing -->
+          <div class="cine-act cine-ui" id="cineUi">
+            <div class="cine-ui-panel">
+              <div class="cine-ui-bar">
+                <span class="cine-dot"></span><span class="cine-dot"></span><span class="cine-dot"></span>
+                <span class="cine-ui-title">專業知識庫工作台</span>
+              </div>
+              <div class="cine-chat">
+                <div class="cine-bubble cine-ai">你好，我可以依知識庫回答移轉訂價相關問題。</div>
+                <div class="cine-bubble cine-user">
+                  <span id="cineTypeText"></span><span class="cine-caret" id="cineCaret" aria-hidden="true"></span>
+                </div>
+              </div>
+              <div class="cine-input-hint">使用者正在輸入…</div>
+            </div>
+            <p class="cine-act-label">畫面① 介面輸入</p>
+          </div>
+
+          <!-- Act 2+: brain word-cloud universe -->
+          <div class="cine-act cine-brain" id="cineBrain" hidden>
+            <svg class="llm-attn-svg llm-attn-literary attn-spread" id="attnSvg" viewBox="0 0 860 480" role="img" aria-label="AI 頭腦文字雲宇宙"></svg>
+            <p class="cine-act-label" id="cineBrainLabel">畫面② AI 頭腦 · 文字雲宇宙</p>
+          </div>
         </div>
+
+        <p class="llm-caption">一氣呵成示意：打字＋閃爍游標 → 進入頭腦詞庫 → Token 神經連結與機率 → 下一步可能性串接。</p>
+
         <div class="llm-prob-panel">
-          <h3>下一步 Token 機率（示意）</h3>
+          <h3>同步解說：下一步 Token 機率</h3>
+          <div class="llm-tokens" id="pipeTokens" aria-live="polite"></div>
           <div class="llm-prob-bars" id="probBars"></div>
           <p class="llm-out-line">目前生成：<strong id="pipeOut">（尚未開始）</strong></p>
         </div>
@@ -383,6 +407,6 @@
     </footer>
   </main>
 
-  <script src="js/llm.js?v=spread-cloud-2"></script>
+  <script src="js/llm.js?v=cine-1"></script>
 </body>
 </html>
