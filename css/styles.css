@@ -2355,18 +2355,39 @@ body.pulse-demo .glass {
 }
 
 .when-table-wrap {
-  padding: 1.15rem 1.3rem;
+  padding: 1rem 1.15rem;
   margin-bottom: 1rem;
 }
 
 .when-table-wrap h3 {
-  margin: 0 0 0.75rem;
-  font-size: 1.05rem;
+  margin: 0 0 0.55rem;
+  font-size: 1.02rem;
 }
 
-.when-table .term-btn.term-inline {
-  font-size: inherit;
-  white-space: nowrap;
+.when-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.when-table th,
+.when-table td {
+  padding: 0.45rem 0.65rem;
+  vertical-align: top;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.when-table th {
+  width: 38%;
+  color: var(--muted);
+  font-weight: 560;
+  white-space: normal;
+}
+
+.when-table td {
+  width: 62%;
+  color: var(--ink-soft);
 }
 
 .wf-board {
@@ -3268,8 +3289,9 @@ body.deck-mode #collab.deck-active > .when-table-wrap h3 {
 
 body.deck-mode #collab.deck-active .when-table th,
 body.deck-mode #collab.deck-active .when-table td {
-  padding: 0.4rem 0.5rem;
-  font-size: 0.85rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.84rem;
+  line-height: 1.35;
 }
 
 body.deck-mode #collab.deck-active > .wf-board {
