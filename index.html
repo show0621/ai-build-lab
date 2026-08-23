@@ -1225,18 +1225,18 @@ owner: HR
       </div>
 
       <div class="workshop-banner glass">
-        <p><strong>示範已對齊 TP AI NOTE：</strong>產出會詳細寫「頂欄＋左拓撲＋右上詳情＋右下問答」版面、配色、按鈕與操作動線。請按「載入示範」再「產生」，複製 PROMPT 貼給 Claude，目標是做出同類專業工作台，而非只有結構檔。</p>
+        <p>產出會詳細寫「頂欄＋左拓撲＋右上詳情＋右下問答」版面、配色、按鈕與操作動線。請按「載入示範」再「產生」，複製 PROMPT 貼給 Claude，目標是做出專業知識庫工作台，而非只有結構檔。</p>
       </div>
 
       <div class="workshop-layout">
         <div class="workshop-form glass">
           <label class="field">
             <span>專案名稱</span>
-            <input type="text" id="wsProjectName" value="專業知識庫工作台（對齊 TP AI NOTE 體驗）" />
+            <input type="text" id="wsProjectName" value="專業知識庫工作台" />
           </label>
           <label class="field">
             <span>一句話目的（幫誰在什麼情境完成什麼）</span>
-            <textarea id="wsGoal" rows="2">幫查核／稅務同仁在單一工作台完成：知識拓撲瀏覽、節點精讀、有引用的內部問答、翻譯對照、去識別化與筆記匯出——體驗與完成度對齊 TP AI NOTE。</textarea>
+            <textarea id="wsGoal" rows="2">幫查核／稅務同仁在單一工作台完成：知識拓撲瀏覽、節點精讀、有引用的內部問答、翻譯對照、去識別化與筆記匯出。</textarea>
           </label>
           <label class="field">
             <span>目標讀者／使用者</span>
@@ -1244,13 +1244,13 @@ owner: HR
           </label>
           <label class="field">
             <span>技術偏好（可改）</span>
-            <input type="text" id="wsStack" value="第1回合先交完整 HTML/CSS/JS 工作台 UI（可 mock）；再接 RAG／匯出。繁中。視覺對齊 TP AI NOTE：深頂欄、玻璃面板、藍／綠／琥珀語意色" />
+            <input type="text" id="wsStack" value="第1回合先交完整 HTML/CSS/JS 工作台 UI（可 mock）；再接 RAG／匯出。繁中。深頂欄、玻璃面板、藍／綠／琥珀語意色" />
           </label>
 
           <div class="ws-blocks-head">
             <h3>功能區塊（可編輯／新增）</h3>
             <div class="ws-block-actions">
-              <button type="button" class="btn btn-ghost" id="wsLoadDemo">載入 TP NOTE 風格示範</button>
+              <button type="button" class="btn btn-ghost" id="wsLoadDemo">載入示範</button>
               <button type="button" class="btn btn-ghost" id="wsAddBlock">＋ 新增區塊</button>
             </div>
           </div>
