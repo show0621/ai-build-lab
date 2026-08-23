@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM 核心骨架｜Token → Attention → 機率｜AI Build Lab</title>
+  <meta name="description" content="用 TP 知識庫比喻理解 ChatGPT／Gemma／Claude：Token、Transformer、Attention、機率分布，以及 Context／Temperature／Top-K／Top-P／Reranker／Fine-tuning" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/llm.css" />
+</head>
+<body class="llm-page">
+  <div class="bg-layer" aria-hidden="true">
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <nav class="top-nav" id="topNav">
+    <a class="brand" href="index.html#hero">
+      <span class="brand-mark"></span>
+      <span class="brand-text">AI Build Lab</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="開啟選單" aria-expanded="false">
+      <span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html#plan">主課</a></li>
+      <li><a href="index.html#params">參數</a></li>
+      <li><a href="index.html#workshop">SPEC工坊</a></li>
+      <li><a class="nav-current" href="llm.html" aria-current="page">LLM進階</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a class="btn btn-ghost" href="index.html">回主課</a>
+    </div>
+  </nav>
+
+  <aside class="llm-side" id="llmSide" aria-label="本頁章節">
+    <p class="llm-side-label">進階說明</p>
+    <a href="#map">總地圖</a>
+    <a href="#pipeline">流水線動畫</a>
+    <a href="#token">Token</a>
+    <a href="#embed">向量</a>
+    <a href="#attention">Attention</a>
+    <a href="#prob">機率分布</a>
+    <a href="#knobs">六個旋鈕</a>
+    <a href="#stack">接回 RAG</a>
+    <a href="#memo">一句話記住</a>
+  </aside>
+
+  <main class="llm-main">
+    <header class="llm-hero glass">
+      <p class="eyebrow">進階分頁 · 先懂骨架，再調參數</p>
+      <h1>理解 LLM 的核心骨架</h1>
+      <p class="llm-hero-lead">
+        ChatGPT、Gemma、Claude 外表不同，骨架相近：
+        <strong>文字 → Token → Transformer／Attention → 機率分布 → 下一個 Token → 重複</strong>。
+        下面用你熟悉的「TP 知識庫」比喻，少算式、多圖解。
+      </p>
+      <div class="llm-hero-actions">
+        <button type="button" class="btn btn-primary" id="llmPlayAll">播放總流程</button>
+        <a class="btn btn-ghost" href="#knobs">跳到六個旋鈕</a>
+      </div>
+    </header>
+
+    <!-- MAP -->
+    <section class="llm-section" id="map">
+      <div class="section-head">
+        <span class="section-num">A</span>
+        <div>
+          <h2>先給你一張總地圖</h2>
+          <p>先記住這條鏈；後面每一節都在拆它。</p>
+        </div>
+      </div>
+      <div class="llm-chain glass" id="llmChain" aria-label="LLM 總流程">
+        <span class="llm-chain-step" data-step="0">文字</span>
+        <span class="llm-chain-arrow" aria-hidden="true">→</span>
+        <span class="llm-chain-step" data-step="1">Token</span>
+        <span class="llm-chain-arrow" aria-hidden="true">→</span>
+        <span class="llm-chain-step" data-step="2">Transformer</span>
+        <span class="llm-chain-arrow" aria-hidden="true">→</span>
+        <span class="llm-chain-step" data-step="3">Attention</span>
+        <span class="llm-chain-arrow" aria-hidden="true">→</span>
+        <span class="llm-chain-step" data-step="4">機率分布</span>
+        <span class="llm-chain-arrow" aria-hidden="true">→</span>
+        <span class="llm-chain-step" data-step="5">下一個 Token</span>
+        <span class="llm-chain-arrow" aria-hidden="true">→</span>
+        <span class="llm-chain-step" data-step="6">重複…</span>
+      </div>
+      <p class="llm-note">Transformer <strong>不是</strong>答案資料庫；它是很會處理「各個 Token 彼此關係」的神經網路架構。真正「查 TP 法規原文」靠的是你的 RAG／知識庫。</p>
+    </section>
+
+    <!-- PIPELINE LIVE -->
+    <section class="llm-section" id="pipeline">
+      <div class="section-head">
+        <span class="section-num">B</span>
+        <div>
+          <h2>互動：一句 TP 問題怎麼被「一個 Token 一個 Token」生成</h2>
+          <p>例：「受測個體應如何選擇？」——按播放看 Token → Attention → 機率 → 選字。</p>
+        </div>
+      </div>
+      <div class="llm-demo glass">
+        <div class="llm-demo-toolbar">
+          <button type="button" class="btn btn-primary" id="pipePlay">播放</button>
+          <button type="button" class="btn btn-ghost" id="pipePause">暫停</button>
+          <button type="button" class="btn btn-ghost" id="pipeReset">重來</button>
+          <span class="llm-demo-status" id="pipeStatus">就緒</span>
+        </div>
+        <p class="llm-demo-q">輸入：<code>受測個體應如何選擇？</code></p>
+        <div class="llm-tokens" id="pipeTokens" aria-live="polite"></div>
+        <div class="llm-attn-wrap">
+          <svg class="llm-attn-svg" id="attnSvg" viewBox="0 0 640 220" role="img" aria-label="Attention 連線示意"></svg>
+          <p class="llm-caption">動態圖：當焦點落在「一方／選擇」時，Attention 會加亮「受測個體」「功能」「單純」等相關 Token（示意，非真實權重）。</p>
+        </div>
+        <div class="llm-prob-panel">
+          <h3>下一步 Token 機率（示意）</h3>
+          <div class="llm-prob-bars" id="probBars"></div>
+          <p class="llm-out-line">目前生成：<strong id="pipeOut">（尚未開始）</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOKEN -->
+    <section class="llm-section" id="token">
+      <div class="section-head">
+        <span class="section-num">01</span>
+        <div>
+          <h2>Token 是什麼？</h2>
+          <p>LLM 通常不把整句當「一個單位」處理，而是先切成 Token。</p>
+        </div>
+      </div>
+      <div class="llm-two">
+        <article class="glass llm-card">
+          <h3>中文例</h3>
+          <p class="llm-muted">受測個體應如何選擇？</p>
+          <div class="llm-chip-row" id="tokenZh"></div>
+          <p class="llm-caption">Token ≠ 一定等於一個中文字；怎麼切取決於 tokenizer。</p>
+        </article>
+        <article class="glass llm-card">
+          <h3>英文例</h3>
+          <p class="llm-muted">Transfer pricing report</p>
+          <div class="llm-chip-row" id="tokenEn"></div>
+          <p class="llm-caption">一個英文單字可能是 1～數個 token。</p>
+        </article>
+      </div>
+      <p class="llm-takeaway"><strong>記住：</strong>Token = LLM 處理文字時的基本單位。</p>
+    </section>
+
+    <!-- EMBED -->
+    <section class="llm-section" id="embed">
+      <div class="section-head">
+        <span class="section-num">02</span>
+        <div>
+          <h2>Token 變成什麼？→ Embedding</h2>
+          <p>Token 先是編號；編號再變成一串數字（向量）——數學上的「意思座標」。</p>
+        </div>
+      </div>
+      <div class="glass llm-card llm-embed-demo">
+        <div class="llm-embed-flow">
+          <div class="llm-embed-box">
+            <span class="llm-label">Token</span>
+            <strong>受測</strong>
+          </div>
+          <span class="llm-chain-arrow">→</span>
+          <div class="llm-embed-box">
+            <span class="llm-label">ID</span>
+            <code>18372</code>
+          </div>
+          <span class="llm-chain-arrow">→</span>
+          <div class="llm-embed-box llm-embed-vec">
+            <span class="llm-label">向量</span>
+            <code id="embedVec">[0.12, -0.31, 0.82, …]</code>
+          </div>
+        </div>
+        <canvas id="embedCanvas" width="720" height="180" aria-label="向量空間示意"></canvas>
+        <p class="llm-caption">相近意思的詞，在向量空間裡往往較靠近——這也是 RAG 用 Embedding 做向量搜尋的基礎。</p>
+      </div>
+    </section>
+
+    <!-- ATTENTION -->
+    <section class="llm-section" id="attention">
+      <div class="section-head">
+        <span class="section-num">03</span>
+        <div>
+          <h2>Transformer 與 Attention</h2>
+          <p>Transformer＝很會分析句子裡 Token 關係的架構；Attention＝「現在該注意哪些 Token？」</p>
+        </div>
+      </div>
+      <div class="llm-two">
+        <article class="glass llm-card">
+          <h3>代名詞要靠上下文</h3>
+          <p>「小明把報告交給主任，<mark>他</mark>要求修改。」——「他」是誰？</p>
+          <p>TP：「受測個體應選擇功能較單純之一方，並考量<strong>其</strong>承擔之功能及風險。」——「其」指誰？</p>
+          <p class="llm-muted">模型必須看：受測個體 ↔ 其。這正是 Transformer 擅長的事。</p>
+        </article>
+        <article class="glass llm-card">
+          <h3>為什麼叫 Attention？</h3>
+          <p>像人閱讀：看到「他」會回頭看小明、主任、報告、錯誤，再判斷指誰。</p>
+          <p class="llm-takeaway"><strong>Attention</strong>＝在一大堆資訊裡，找出現在最值得注意的部分——不是平均看每個字。</p>
+        </article>
+      </div>
+      <div class="glass llm-card">
+        <h3>互動：點一個 Token，看它「注意」誰</h3>
+        <div class="llm-focus-tokens" id="focusTokens"></div>
+        <svg class="llm-focus-svg" id="focusSvg" viewBox="0 0 640 160" aria-hidden="true"></svg>
+        <p class="llm-caption" id="focusCaption">點上方 Token 試看看。</p>
+      </div>
+    </section>
+
+    <!-- PROB -->
+    <section class="llm-section" id="prob">
+      <div class="section-head">
+        <span class="section-num">04</span>
+        <div>
+          <h2>機率分布：不是「查答案」，是「猜下一個 Token」</h2>
+          <p>某種程度上 ChatGPT 確實是一直預測下一個 Token——但預測前已用 Attention 消化整個上下文。</p>
+        </div>
+      </div>
+      <div class="glass llm-card">
+        <p>Context：<code>受測個體應選擇功能較</code></p>
+        <div class="llm-prob-bars" id="probStatic"></div>
+        <p class="llm-muted">選出「單純」→ 再以新句子當 Context，重複整段流程。答案是<strong>一個 Token 一個 Token 長出來的</strong>。</p>
+        <p class="llm-takeaway">「只是在猜下一個字」容易低估模型：猜之前，內部表示與 Attention 已經很複雜。</p>
+      </div>
+    </section>
+
+    <!-- KNOBS -->
+    <section class="llm-section" id="knobs">
+      <div class="section-head">
+        <span class="section-num">05</span>
+        <div>
+          <h2>六個旋鈕：Context／Reranker／Temperature／Top-K／Top-P／Fine-tuning</h2>
+          <p>懂了骨架之後，這些參數就只是在管「餵多少、挑什麼、怎麼抽樣、要不要改性格」。</p>
+        </div>
+      </div>
+
+      <div class="llm-knob-map glass">
+        <pre class="llm-ascii" aria-label="參數總地圖">使用者問題
+    ↓ Token
+    ↓ Context Window ← 一次最多能看多少
+    ↓ RAG／Vector Search
+    ↓ Reranker ← 哪些資料最值得給 LLM
+    ↓ Transformer + Attention
+    ↓ 機率分布
+    ↓ Temperature ← 穩定 vs 有變化
+    ↓ Top-K／Top-P ← 允許從哪些候選選
+    ↓ 輸出答案</pre>
+      </div>
+
+      <div class="llm-knob-grid">
+        <article class="glass llm-card" id="knob-context">
+          <h3>1. Context Window＝工作記憶</h3>
+          <p>一次能塞進的 Token 總量：系統提示＋問題＋RAG＋歷史＋輸出預算，大家一起搶。</p>
+          <div class="llm-ctx" id="ctxViz" aria-label="Context 佔用示意">
+            <div class="llm-ctx-seg" style="--w:18%" data-label="System 3K"></div>
+            <div class="llm-ctx-seg" style="--w:8%" data-label="問題 0.5K"></div>
+            <div class="llm-ctx-seg" style="--w:35%" data-label="RAG 8K"></div>
+            <div class="llm-ctx-seg" style="--w:22%" data-label="歷史 5K"></div>
+            <div class="llm-ctx-seg llm-ctx-free" style="--w:17%" data-label="餘裕"></div>
+          </div>
+          <p class="llm-caption">你調 Chunk Size、Top-K、Context Length，本質是在管「餵多少 TP 知識給模型」。</p>
+        </article>
+
+        <article class="glass llm-card" id="knob-rerank">
+          <h3>2. Reranker＝第二輪裁判</h3>
+          <p>向量相似 ≠ 最能回答問題。先寬抓，再精準挑——法令／OECD 尤其需要。</p>
+          <div class="llm-rerank" id="rerankViz">
+            <div class="llm-rerank-col">
+              <span class="llm-label">Vector Top-10</span>
+              <ul id="rerankBefore"></ul>
+            </div>
+            <div class="llm-rerank-arrow">→ Rerank →</div>
+            <div class="llm-rerank-col">
+              <span class="llm-label">留給 LLM 的 Top-5</span>
+              <ul id="rerankAfter"></ul>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost" id="rerankPlay">播放重排</button>
+        </article>
+
+        <article class="glass llm-card llm-card-span" id="knob-sample">
+          <h3>3–5. Temperature · Top-K · Top-P（抽樣）</h3>
+          <p>三者都作用在「機率分布 → 選出下一個 Token」這一步。拖動旋鈕看候選怎麼變。</p>
+          <div class="llm-sliders">
+            <label>Temperature <output id="tempOut">0.15</output>
+              <input type="range" id="tempRange" min="0" max="1.2" step="0.05" value="0.15" />
+            </label>
+            <label>Top-K <output id="topkOut">5</output>
+              <input type="range" id="topkRange" min="1" max="8" step="1" value="5" />
+            </label>
+            <label>Top-P <output id="toppOut">0.90</output>
+              <input type="range" id="toppRange" min="0.5" max="1" step="0.05" value="0.90" />
+            </label>
+          </div>
+          <div class="llm-prob-bars" id="sampleBars"></div>
+          <p class="llm-caption" id="sampleHint">低溫＋適度 Top-K／P → 查核語氣較穩；高溫 → 較多變化（也較易飄）。</p>
+          <div class="llm-compare-mini">
+            <div><strong>Top-K</strong>：固定留前 K 名</div>
+            <div><strong>Top-P</strong>：從高到低加總到累積機率 P</div>
+            <div><strong>Temperature</strong>：把分布變尖（穩）或變平（隨機）</div>
+          </div>
+        </article>
+
+        <article class="glass llm-card" id="knob-ft">
+          <h3>6. Fine-tuning vs RAG</h3>
+          <div class="llm-vs">
+            <div>
+              <h4>RAG</h4>
+              <p>給模型<strong>可查的資料</strong>（準則、OECD、函釋）。知識更新＝改知識庫。</p>
+            </div>
+            <div>
+              <h4>Fine-tuning</h4>
+              <p>用大量「問題→專業答案」教模型<strong>回答方式／風格</strong>。比較像改性格與格式習慣。</p>
+            </div>
+          </div>
+          <p class="llm-takeaway">做 TP 助理：多數情況先把 RAG＋Reranker＋低溫做好；Fine-tuning 是加分，不是第一步。</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- STACK -->
+    <section class="llm-section" id="stack">
+      <div class="section-head">
+        <span class="section-num">06</span>
+        <div>
+          <h2>接回你的 TP／RAG 系統</h2>
+          <p>外部找資料（Embedding＋搜尋＋Rerank）＋內部理解生成（Transformer＋機率）。</p>
+        </div>
+      </div>
+      <div class="glass llm-stack" id="stackFlow">
+        <div class="llm-stack-node" data-i="0">使用者問題</div>
+        <div class="llm-stack-node" data-i="1">Embedding</div>
+        <div class="llm-stack-node" data-i="2">Vector Search<br /><small>Top-K 20～30</small></div>
+        <div class="llm-stack-node" data-i="3">Reranker<br /><small>留 3～6</small></div>
+        <div class="llm-stack-node" data-i="4">塞進 Context Window</div>
+        <div class="llm-stack-node" data-i="5">Transformer＋Attention</div>
+        <div class="llm-stack-node" data-i="6">機率＋Temp／Top-K／P</div>
+        <div class="llm-stack-node" data-i="7">逐 Token 輸出答案</div>
+      </div>
+      <button type="button" class="btn btn-primary" id="stackPlay">動畫走一遍</button>
+    </section>
+
+    <!-- MEMO -->
+    <section class="llm-section" id="memo">
+      <div class="section-head">
+        <span class="section-num">★</span>
+        <div>
+          <h2>最後用一句話記住</h2>
+          <p>把整套 LLM 收成這句，之後看參數就不會散。</p>
+        </div>
+      </div>
+      <blockquote class="llm-memo glass">
+        <p><strong>Token</strong> 是「字」；<strong>Embedding</strong> 是「把字變成數學表示」；<strong>Attention</strong> 是「現在該注意哪些字」；<strong>Transformer</strong> 是「處理這些關係的神經網路」；<strong>機率分布</strong> 是「下一個 Token 各有多大可能」。</p>
+        <p>接回 RAG：Embedding＋向量搜尋＝去外部知識庫找資料；Transformer＋Attention＝把找到的資料和問題一起理解；Token＋機率＝一個字一個字長出答案。</p>
+      </blockquote>
+      <div class="llm-footer-links">
+        <a class="btn btn-primary" href="index.html#params">回主課 · 參數調校</a>
+        <a class="btn btn-ghost" href="index.html#workshop">SPEC／PROMPT 工坊</a>
+        <a class="btn btn-ghost" href="index.html#api">API 對接</a>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <p class="footer-note">AI Build Lab · LLM 進階分頁 · 教學示意（機率／Attention 權重為教學動畫，非真實模型輸出）</p>
+      <p class="footer-author">作者：<strong>李孟霖</strong> · <a href="mailto:nh17528@ntbna.gov.tw">nh17528@ntbna.gov.tw</a></p>
+    </footer>
+  </main>
+
+  <script src="js/llm.js"></script>
+</body>
+</html>

@@ -386,9 +386,11 @@ navLinks?.addEventListener("click", (e) => {
 
 /* ---------- path strip + fab ---------- */
 $all(".path-node").forEach((btn) => {
-  btn.addEventListener("click", () => {
+  btn.addEventListener("click", (e) => {
     const id = btn.dataset.target;
+    if (!id) return; // e.g. external page link
     if (deckMode) {
+      e.preventDefault();
       const idx = SECTIONS.indexOf(id);
       if (idx >= 0) goDeck(idx);
       return;

@@ -18,6 +18,8 @@
 9. 總結：RAG 問答流程
 10. HOOK · MCP · Subagent · 如何建立 Workflow
 11. AI 回饋迴路（錯誤可被發現、分類、量化、修正）
+12. SPEC／PROMPT 工坊
+13. **LLM 進階分頁**（`llm.html`）：Token → Transformer／Attention → 機率；Context／Temperature／Top-K／Top-P／Reranker／Fine-tuning（含動態圖解）
 
 ## 使用方式
 
@@ -26,6 +28,8 @@
 ```bash
 npx --yes serve .
 ```
+
+進階說明另開：`llm.html`
 
 ## 投影片全螢幕模式
 

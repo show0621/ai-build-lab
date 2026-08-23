@@ -422,6 +422,12 @@ main {
   box-shadow: 0 8px 24px rgba(13, 159, 147, 0.12);
 }
 
+a.path-node-link {
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+
 .path-node.active {
   transform: translateY(-3px);
 }
