@@ -431,6 +431,35 @@
   box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
 }
 
+.llm-attn-svg.llm-attn-literary {
+  background: #f7f3ea;
+  border: 1px solid rgba(120, 113, 108, 0.22);
+  box-shadow: 0 10px 36px rgba(87, 83, 78, 0.08);
+}
+
+.llm-attn-svg .attn-cloud-word {
+  animation: attnFloat var(--d, 5s) ease-in-out var(--delay, 0s) infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.llm-attn-svg .attn-cloud-word.on {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.5));
+}
+
+.llm-attn-svg .attn-ink {
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 1.5px rgba(13, 148, 136, 0.25));
+}
+
+.llm-attn-svg .attn-ink-pulse {
+  stroke: #14b8a6;
+  stroke-linecap: round;
+  stroke-dasharray: 5 8;
+  animation: attnPulse 1.15s linear infinite;
+  opacity: 0.65;
+}
+
 .llm-attn-svg .attn-web {
   stroke: rgba(148, 163, 184, 0.28);
   fill: none;

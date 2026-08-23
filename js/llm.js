@@ -362,158 +362,186 @@ function drawAttnSvg(focusIdx, mode = "highlight") {
   const svg = $("#attnSvg");
   if (!svg) return;
   const tokens = PIPE_TOKENS;
-  const W = 760;
-  const H = 420;
+  const W = 800;
+  const H = 460;
   const focus = Math.min(Math.max(focusIdx, 0), tokens.length - 1);
-  const query = tokens.join("");
   const focusTok = tokens[focus];
+  const query = tokens.join("");
 
-  // Word cloud: related (to TP / query) + unrelated distractors
+  // Pastel literary palette (文青文字雲)
+  const palette = ["#1e3a5f", "#0d9488", "#c2410c", "#4d7c0f", "#a16207", "#0369a1", "#be123c", "#6d28d9"];
+
+  // Packed cloud: related TP terms + distractors (size ≈ importance)
   const cloud = [
-    { t: "受測個體", rel: 0.92, x: 0.52, y: 0.42, s: 22 },
-    { t: "功能", rel: 0.88, x: 0.38, y: 0.36, s: 20 },
-    { t: "風險", rel: 0.78, x: 0.64, y: 0.34, s: 18 },
-    { t: "單純", rel: 0.74, x: 0.44, y: 0.52, s: 17 },
-    { t: "TNMM", rel: 0.62, x: 0.7, y: 0.48, s: 16 },
-    { t: "可比公司", rel: 0.58, x: 0.3, y: 0.48, s: 15 },
-    { t: "利潤率", rel: 0.5, x: 0.58, y: 0.58, s: 14 },
-    { t: "OECD", rel: 0.48, x: 0.24, y: 0.32, s: 14 },
-    { t: "移轉訂價", rel: 0.7, x: 0.48, y: 0.28, s: 16 },
-    { t: "查核準則", rel: 0.42, x: 0.72, y: 0.3, s: 13 },
-    { t: "一方", rel: 0.55, x: 0.34, y: 0.6, s: 13 },
-    { t: "資產", rel: 0.4, x: 0.66, y: 0.62, s: 12 },
-    // unrelated distractors
-    { t: "疫苗", rel: 0.04, x: 0.14, y: 0.18, s: 13 },
-    { t: "ETF", rel: 0.05, x: 0.86, y: 0.2, s: 14 },
-    { t: "台積電", rel: 0.06, x: 0.12, y: 0.72, s: 15 },
-    { t: "永續", rel: 0.07, x: 0.88, y: 0.7, s: 14 },
-    { t: "高股息", rel: 0.03, x: 0.18, y: 0.55, s: 12 },
-    { t: "貼文", rel: 0.02, x: 0.82, y: 0.55, s: 12 },
+    { t: "受測個體", rel: 0.94, x: 0.5, y: 0.4, s: 28 },
+    { t: "功能", rel: 0.9, x: 0.36, y: 0.34, s: 24 },
+    { t: "風險", rel: 0.82, x: 0.64, y: 0.32, s: 22 },
+    { t: "移轉訂價", rel: 0.86, x: 0.5, y: 0.26, s: 20 },
+    { t: "單純", rel: 0.76, x: 0.42, y: 0.5, s: 20 },
+    { t: "TNMM", rel: 0.64, x: 0.68, y: 0.46, s: 18 },
+    { t: "可比公司", rel: 0.6, x: 0.3, y: 0.48, s: 16 },
+    { t: "利潤率", rel: 0.52, x: 0.58, y: 0.54, s: 15 },
+    { t: "OECD", rel: 0.48, x: 0.24, y: 0.3, s: 15 },
+    { t: "一方", rel: 0.55, x: 0.34, y: 0.58, s: 14 },
+    { t: "資產", rel: 0.42, x: 0.66, y: 0.58, s: 14 },
+    { t: "查核準則", rel: 0.4, x: 0.74, y: 0.28, s: 13 },
+    { t: "函釋", rel: 0.38, x: 0.26, y: 0.2, s: 13 },
+    { t: "BAPA", rel: 0.36, x: 0.78, y: 0.4, s: 13 },
+    { t: "選擇", rel: 0.7, x: 0.5, y: 0.62, s: 18 },
+    // distractors
+    { t: "台積電", rel: 0.05, x: 0.12, y: 0.18, s: 16 },
+    { t: "永續", rel: 0.06, x: 0.88, y: 0.16, s: 15 },
+    { t: "ETF", rel: 0.04, x: 0.1, y: 0.72, s: 14 },
+    { t: "疫苗", rel: 0.03, x: 0.88, y: 0.72, s: 13 },
+    { t: "高股息", rel: 0.04, x: 0.14, y: 0.52, s: 12 },
+    { t: "美食", rel: 0.02, x: 0.86, y: 0.54, s: 12 },
+    { t: "旅遊", rel: 0.02, x: 0.2, y: 0.84, s: 12 },
+    { t: "籃球", rel: 0.02, x: 0.78, y: 0.84, s: 11 },
+    { t: "天氣", rel: 0.01, x: 0.5, y: 0.88, s: 11 },
     { t: "零碳", rel: 0.05, x: 0.08, y: 0.4, s: 12 },
-    { t: "公司治理", rel: 0.08, x: 0.9, y: 0.42, s: 11 },
-    { t: "美食", rel: 0.01, x: 0.22, y: 0.82, s: 12 },
-    { t: "旅遊", rel: 0.02, x: 0.78, y: 0.82, s: 12 },
-    { t: "天氣", rel: 0.01, x: 0.5, y: 0.86, s: 11 },
-    { t: "籃球", rel: 0.01, x: 0.36, y: 0.78, s: 11 },
-    { t: "指數", rel: 0.06, x: 0.62, y: 0.78, s: 12 },
-    { t: "函釋", rel: 0.35, x: 0.28, y: 0.22, s: 12 },
-    { t: "BAPA", rel: 0.38, x: 0.76, y: 0.4, s: 13 },
+    { t: "貼文", rel: 0.02, x: 0.92, y: 0.32, s: 11 },
+    { t: "指數", rel: 0.05, x: 0.62, y: 0.78, s: 12 },
+    { t: "鴻海", rel: 0.04, x: 0.38, y: 0.16, s: 13 },
   ];
 
-  // Boost words that literally match query tokens
-  cloud.forEach((w) => {
-    if (query.includes(w.t) || w.t.includes(focusTok)) w.rel = Math.min(0.98, w.rel + 0.15);
+  cloud.forEach((w, i) => {
+    w.color = palette[i % palette.length];
+    if (query.includes(w.t) || w.t.includes(focusTok)) w.rel = Math.min(0.98, w.rel + 0.12);
   });
 
   const related = [...cloud].filter((w) => w.rel >= 0.35).sort((a, b) => b.rel - a.rel);
-  const threshold = mode === "web" ? 1.1 : 0.35; // web mode: no strong links yet
+  const nextPred = [
+    { t: "功能", p: 0.35 },
+    { t: "較", p: 0.18 },
+    { t: "單純", p: 0.14 },
+    { t: "風險", p: 0.1 },
+    { t: "一方", p: 0.08 },
+  ];
 
   const cx = W * 0.5;
-  const cy = H * 0.48;
+  const cy = H * 0.42;
 
   const defs = `<defs>
-    <radialGradient id="cloudGlow" cx="50%" cy="48%" r="55%">
-      <stop offset="0%" stop-color="rgba(13,159,147,0.22)"/>
-      <stop offset="55%" stop-color="rgba(2,132,199,0.08)"/>
-      <stop offset="100%" stop-color="rgba(11,18,32,0)"/>
-    </radialGradient>
-    <filter id="attnGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="2.6" result="b"/>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-    <pattern id="attnGrid" width="28" height="28" patternUnits="userSpaceOnUse">
-      <path d="M28 0H0V28" fill="none" stroke="rgba(148,163,184,0.1)" stroke-width="1"/>
+    <linearGradient id="paperGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7f3ea"/>
+      <stop offset="100%" stop-color="#efe8dc"/>
+    </linearGradient>
+    <pattern id="paperGrain" width="4" height="4" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.4" fill="rgba(120,100,70,0.06)"/>
     </pattern>
   </defs>
-  <rect width="${W}" height="${H}" fill="#0b1220" rx="16"/>
-  <rect width="${W}" height="${H}" fill="url(#attnGrid)" rx="16"/>
-  <rect width="${W}" height="${H}" fill="url(#cloudGlow)" rx="16"/>`;
+  <rect width="${W}" height="${H}" fill="url(#paperGrad)" rx="18"/>
+  <rect width="${W}" height="${H}" fill="url(#paperGrain)" rx="18" opacity="0.7"/>
+  <circle cx="${cx}" cy="${cy}" r="118" fill="none" stroke="rgba(30,58,95,0.08)" stroke-width="1"/>
+  <circle cx="${cx}" cy="${cy}" r="78" fill="none" stroke="rgba(13,148,136,0.1)" stroke-width="1" stroke-dasharray="3 5"/>`;
 
-  // Center query capsule
-  const qLabel = `焦點：「${focusTok}」`;
-  const center = `<g filter="url(#attnGlow)">
-    <rect x="${cx - 118}" y="${cy - 28}" width="236" height="56" rx="16"
-      fill="rgba(13,159,147,0.2)" stroke="#2dd4bf" stroke-width="2"/>
-    <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="12" fill="rgba(226,232,240,0.7)" font-family="Outfit,sans-serif">輸入語境（示意）</text>
-    <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="16" font-weight="600" fill="#ecfdf5" font-family="JetBrains Mono,monospace">${qLabel}</text>
-  </g>
-  <text x="${cx}" y="28" text-anchor="middle" font-size="13" fill="rgba(226,232,240,0.75)" font-family="Outfit,sans-serif">語意文字雲 · 相關加亮／不相關淡化 · 神經連線標機率</text>`;
+  const title = `<text x="${cx}" y="32" text-anchor="middle" font-family="Outfit,sans-serif" font-size="15" fill="#1e3a5f" font-weight="600">腦內文字雲 · 語意連結 · 預測下一個字</text>
+  <text x="${cx}" y="52" text-anchor="middle" font-family="Outfit,sans-serif" font-size="12" fill="#78716c">龐大詞庫裡，模型先「注意」相關概念，再對下一個 Token 給出機率</text>`;
 
-  // Soft web among nearby related words (brain mesh), only in highlight
+  // Center focus — thin ink ring, not frosted slab
+  const center = `<g>
+    <circle cx="${cx}" cy="${cy}" r="46" fill="rgba(255,255,255,0.45)" stroke="#1e3a5f" stroke-width="1.4"/>
+    <circle cx="${cx}" cy="${cy}" r="40" fill="none" stroke="#0d9488" stroke-width="1" opacity="0.45"/>
+    <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="11" fill="#78716c" font-family="Outfit,sans-serif">焦點詞</text>
+    <text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="20" font-weight="700" fill="#1e3a5f" font-family="Outfit,sans-serif">${focusTok}</text>
+  </g>`;
+
+  // Soft mesh among related (brain associations)
   let mesh = "";
   if (mode === "highlight") {
-    const top = related.slice(0, 7);
+    const top = related.slice(0, 8);
     for (let i = 0; i < top.length; i++) {
-      for (let j = i + 1; j < top.length; j++) {
-        if ((i * 7 + j) % 3 !== 0) continue;
+      for (let j = i + 1; j < Math.min(top.length, i + 3); j++) {
         const a = top[i];
         const b = top[j];
-        mesh += `<path class="attn-web" d="M${a.x * W} ${a.y * H} L${b.x * W} ${b.y * H}" opacity="0.25"/>`;
+        mesh += `<path d="M${a.x * W} ${a.y * H} Q${cx} ${cy} ${b.x * W} ${b.y * H}" fill="none" stroke="rgba(13,148,136,0.12)" stroke-width="1"/>`;
       }
     }
   }
 
-  // Links from center → related words with probability
+  // Analysis links: focus → related with %
   let links = "";
-  let pulses = "";
   let pills = "";
+  let pulses = "";
   if (mode === "highlight") {
     related.slice(0, 8).forEach((w, idx) => {
       const x = w.x * W;
       const y = w.y * H;
       const p = w.rel;
-      const midX = (cx + x) / 2 + (idx % 2 === 0 ? -18 : 18);
-      const midY = (cy + y) / 2;
-      const d = `M${cx} ${cy - 28} Q${midX} ${midY} ${x} ${y}`;
-      links += `<path class="attn-link hot" d="${d}" stroke-width="${1.2 + p * 5}" opacity="${0.35 + p * 0.55}"/>`;
-      pulses += `<path class="attn-pulse" d="${d}" stroke-width="${1 + p * 2}" opacity="${0.5 + p * 0.4}"/>`;
-      const lx = midX;
-      const ly = midY;
-      pills += `<g class="attn-prob-pill">
-        <rect x="${lx - 22}" y="${ly - 10}" width="44" height="18" rx="9" fill="rgba(15,23,42,0.82)" stroke="rgba(45,212,191,0.7)"/>
-        <text class="attn-prob" x="${lx}" y="${ly + 1}" text-anchor="middle" dominant-baseline="middle">${Math.round(p * 100)}%</text>
-      </g>`;
+      const bend = idx % 2 === 0 ? -22 : 22;
+      const mx = (cx + x) / 2 + bend;
+      const my = (cy + y) / 2;
+      const d = `M${cx + 40 * Math.cos(Math.atan2(y - cy, x - cx))} ${cy + 40 * Math.sin(Math.atan2(y - cy, x - cx))} Q${mx} ${my} ${x} ${y}`;
+      links += `<path class="attn-ink" d="${d}" stroke-width="${1 + p * 3.2}" opacity="${0.45 + p * 0.4}" fill="none" stroke="#0d9488"/>`;
+      if (idx < 6) {
+        pulses += `<path class="attn-ink-pulse" d="${d}" stroke-width="${1.2 + p}" fill="none"/>`;
+        pills += `<g>
+          <rect x="${mx - 18}" y="${my - 9}" width="36" height="16" rx="8" fill="#fffaf3" stroke="#99f6e4"/>
+          <text x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="#0f766e" font-weight="600">${Math.round(p * 100)}%</text>
+        </g>`;
+      }
     });
   } else {
-    // web mode: faint spokes to everything (searching)
-    cloud.forEach((w, idx) => {
-      if (idx % 2 === 1) return;
-      const x = w.x * W;
-      const y = w.y * H;
-      links += `<path class="attn-web" d="M${cx} ${cy} L${x} ${y}" opacity="0.2"/>`;
+    // searching: faint feelers
+    cloud.forEach((w, i) => {
+      if (i % 3 !== 0) return;
+      links += `<path d="M${cx} ${cy} L${w.x * W} ${w.y * H}" fill="none" stroke="rgba(120,113,108,0.15)" stroke-width="0.8"/>`;
     });
   }
 
-  // Word cloud nodes
+  // Word cloud typography (no heavy chips)
   let words = "";
   cloud.forEach((w, i) => {
     const x = w.x * W;
     const y = w.y * H;
-    const on = mode === "highlight" && w.rel >= threshold;
-    const dim = mode === "highlight" && w.rel < threshold;
-    const fill = on ? "#ccfbf1" : dim ? "rgba(148,163,184,0.28)" : "rgba(226,232,240,0.55)";
-    const stroke = on ? "rgba(45,212,191,0.85)" : "rgba(148,163,184,0.2)";
-    const bg = on ? "rgba(13,159,147,0.22)" : "rgba(255,255,255,0.04)";
-    const bw = Math.max(40, w.t.length * (w.s * 0.7));
-    const bh = w.s + 10;
-    words += `<g class="attn-float${on ? " close" : ""}" style="--d:${4.5 + (i % 5) * 0.45}s;--delay:${(i % 7) * 0.18}s">
-      <rect x="${x - bw / 2}" y="${y - bh / 2}" width="${bw}" height="${bh}" rx="${bh / 2}"
-        fill="${bg}" stroke="${stroke}" stroke-width="${on ? 1.4 : 0.8}" opacity="${dim ? 0.55 : 1}"/>
-      <text x="${x}" y="${y + 1}" text-anchor="middle" dominant-baseline="middle"
-        font-size="${w.s}" font-family="Outfit,sans-serif" font-weight="${on ? 650 : 500}" fill="${fill}">${w.t}</text>
-    </g>`;
+    const on = mode === "highlight" && w.rel >= 0.35;
+    const dim = mode === "highlight" && w.rel < 0.35;
+    const opacity = dim ? 0.28 : 1;
+    const weight = on ? 700 : w.s >= 18 ? 650 : 500;
+    const fill = dim ? "#a8a29e" : on ? w.color : w.color;
+    words += `<text class="attn-cloud-word${on ? " on" : ""}" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle"
+      font-size="${w.s}" font-family="Outfit,'Noto Sans TC',sans-serif" font-weight="${weight}"
+      fill="${fill}" opacity="${opacity}" style="--d:${5 + (i % 6) * 0.4}s;--delay:${(i % 8) * 0.12}s">${w.t}</text>`;
   });
 
+  // Next-token prediction strip (subsequent neural step)
+  let predict = "";
+  if (mode === "highlight") {
+    const baseY = H - 78;
+    predict = `<g>
+      <text x="36" y="${baseY - 14}" font-size="12" fill="#57534e" font-family="Outfit,sans-serif">下一步：預測下一個 Token／知識答案機率</text>
+      ${nextPred
+        .map((n, i) => {
+          const x = 36 + i * 148;
+          const bw = 28 + n.p * 90;
+          return `<g>
+            <text x="${x}" y="${baseY + 6}" font-size="13" fill="#1e3a5f" font-family="Outfit,sans-serif" font-weight="600">${n.t}</text>
+            <text x="${x + 52}" y="${baseY + 6}" font-size="11" fill="#0d9488" font-family="JetBrains Mono,monospace">${Math.round(n.p * 100)}%</text>
+            <rect x="${x}" y="${baseY + 14}" width="120" height="6" rx="3" fill="rgba(30,58,95,0.08)"/>
+            <rect x="${x}" y="${baseY + 14}" width="${bw}" height="6" rx="3" fill="#0d9488" opacity="0.85"/>
+            ${i < nextPred.length - 1 ? `<path d="M${x + 128} ${baseY + 4} L${x + 140} ${baseY + 4}" stroke="#a8a29e" stroke-width="1" marker-end=""/>` : ""}
+          </g>`;
+        })
+        .join("")}
+      <path d="M36 ${baseY - 28} Q${cx} ${baseY - 48} ${W - 40} ${baseY - 28}" fill="none" stroke="rgba(13,148,136,0.25)" stroke-width="1.2" stroke-dasharray="4 4" class="attn-ink-pulse"/>
+      <text x="${W - 40}" y="${baseY - 34}" text-anchor="end" font-size="11" fill="#0d9488" font-family="Outfit,sans-serif">→ 生成鏈繼續</text>
+    </g>`;
+  } else {
+    predict = `<text x="${cx}" y="${H - 36}" text-anchor="middle" font-size="12" fill="#78716c" font-family="Outfit,sans-serif">掃描文字雲中…稍後標出相關連結與下一字機率</text>`;
+  }
+
   const legend = `<g>
-    <rect x="24" y="${H - 46}" width="12" height="12" rx="3" fill="rgba(13,159,147,0.35)" stroke="#2dd4bf"/>
-    <text x="42" y="${H - 36}" font-size="11" fill="rgba(226,232,240,0.7)" font-family="Outfit,sans-serif">相關（加亮＋連線＋機率）</text>
-    <rect x="210" y="${H - 46}" width="12" height="12" rx="3" fill="rgba(255,255,255,0.04)" stroke="rgba(148,163,184,0.35)"/>
-    <text x="228" y="${H - 36}" font-size="11" fill="rgba(226,232,240,0.55)" font-family="Outfit,sans-serif">不相關（淡化、不連線）</text>
+    <text x="28" y="${H - 12}" font-size="11" fill="#78716c" font-family="Outfit,sans-serif">彩色大字＝較可能被注意的概念　灰色小字＝無關雜訊　線上％＝語意相關機率</text>
   </g>`;
 
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  svg.classList.add("llm-attn-tech");
-  svg.innerHTML = defs + mesh + links + pulses + words + center + pills + legend;
+  svg.classList.remove("llm-attn-tech");
+  svg.classList.add("llm-attn-literary");
+  svg.innerHTML = defs + title + mesh + links + pulses + words + center + pills + predict + legend;
 }
 
 function renderPipeTokens(active = -1) {
@@ -558,19 +586,19 @@ function runPipeline(fromStep = 0) {
       schedule(() => runStep(1), 1200);
     },
     () => {
-      setPipeStatus("2/6 文字雲展開：相關＋不相關詞圍繞");
+      setPipeStatus("2/6 文字雲腦庫展開（相關＋雜訊）");
       highlightChain(2);
       drawAttnSvg(4, "web");
       schedule(() => runStep(2), 1100);
     },
     () => {
-      setPipeStatus("3/6 依輸入加亮相關詞，連線並標機率");
+      setPipeStatus("3/6 語意連線＋預測下一字機率");
       highlightChain(3);
       drawAttnSvg(4, "highlight");
       $$("#pipeTokens .llm-tok").forEach((el, i) => {
         el.classList.toggle("on", i === 0 || i === 1 || i === 4);
       });
-      schedule(() => runStep(3), 1600);
+      schedule(() => runStep(3), 1700);
     },
     () => {
       setPipeStatus("4/6 計算下一個 Token 機率");

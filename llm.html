@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="stylesheet" href="css/llm.css?v=wordcloud-attn-1" />
+  <link rel="stylesheet" href="css/llm.css?v=literary-cloud-1" />
 </head>
 <body class="llm-page">
   <div class="bg-layer" aria-hidden="true">
@@ -126,8 +126,8 @@
         <p class="llm-demo-q">輸入：<code>受測個體應如何選擇？</code></p>
         <div class="llm-tokens" id="pipeTokens" aria-live="polite"></div>
         <div class="llm-attn-wrap">
-          <svg class="llm-attn-svg" id="attnSvg" viewBox="0 0 760 420" role="img" aria-label="語意文字雲與 Attention 連線示意"></svg>
-          <p class="llm-caption">像文字雲一樣：相關詞與不相關詞一起圍繞。依輸入焦點加亮相關詞、淡化無關詞，並拉出帶機率的神經連線（教學示意）。</p>
+          <svg class="llm-attn-svg llm-attn-literary" id="attnSvg" viewBox="0 0 800 460" role="img" aria-label="文青風格語意文字雲與預測連線"></svg>
+          <p class="llm-caption">文青文字雲：相關詞放大加色、無關詞淡化；墨線連到焦點並標機率；底部是「預測下一個 Token」的後續神經鏈（教學示意）。</p>
         </div>
         <div class="llm-prob-panel">
           <h3>下一步 Token 機率（示意）</h3>
@@ -383,6 +383,6 @@
     </footer>
   </main>
 
-  <script src="js/llm.js?v=wordcloud-attn-1"></script>
+  <script src="js/llm.js?v=literary-cloud-1"></script>
 </body>
 </html>
