@@ -359,67 +359,71 @@ function setPipeStatus(t) {
 }
 
 function buildCloudData(focusTok) {
-  // Related + unrelated interleaved across the nebula (not clustered by type)
+  // z: 0 near (big/sharp) → 1 far (small/soft). Unrelated can also be large when near.
   const cloud = [
-    { t: "受測個體", rel: 0.94, x: 0.18, y: 0.32, s: 32, c: "#0f766e" },
-    { t: "台積電", rel: 0.04, x: 0.34, y: 0.22, s: 15, c: "#78716c" },
-    { t: "功能", rel: 0.9, x: 0.72, y: 0.28, s: 28, c: "#0369a1" },
-    { t: "ETF", rel: 0.04, x: 0.52, y: 0.18, s: 16, c: "#78716c" },
-    { t: "風險", rel: 0.84, x: 0.86, y: 0.48, s: 24, c: "#c2410c" },
-    { t: "鴻海", rel: 0.04, x: 0.12, y: 0.16, s: 14, c: "#78716c" },
-    { t: "移轉訂價", rel: 0.88, x: 0.42, y: 0.38, s: 26, c: "#15803d" },
-    { t: "美食", rel: 0.02, x: 0.28, y: 0.58, s: 12, c: "#78716c" },
-    { t: "單純", rel: 0.78, x: 0.58, y: 0.62, s: 22, c: "#a16207" },
-    { t: "旅遊", rel: 0.02, x: 0.78, y: 0.16, s: 13, c: "#78716c" },
-    { t: "選擇", rel: 0.86, x: 0.64, y: 0.42, s: 26, c: "#1e3a5f" },
-    { t: "疫苗", rel: 0.03, x: 0.22, y: 0.78, s: 12, c: "#78716c" },
-    { t: "TNMM", rel: 0.66, x: 0.14, y: 0.55, s: 18, c: "#0284c7" },
-    { t: "高股息", rel: 0.04, x: 0.48, y: 0.78, s: 13, c: "#78716c" },
-    { t: "可比公司", rel: 0.62, x: 0.88, y: 0.24, s: 16, c: "#be123c" },
-    { t: "永續", rel: 0.05, x: 0.36, y: 0.48, s: 14, c: "#78716c" },
-    { t: "利潤率", rel: 0.55, x: 0.76, y: 0.68, s: 17, c: "#0d9488" },
-    { t: "籃球", rel: 0.02, x: 0.08, y: 0.72, s: 11, c: "#78716c" },
-    { t: "OECD", rel: 0.5, x: 0.3, y: 0.14, s: 15, c: "#1d4ed8" },
-    { t: "天氣", rel: 0.01, x: 0.92, y: 0.72, s: 10, c: "#78716c" },
-    { t: "一方", rel: 0.58, x: 0.2, y: 0.68, s: 16, c: "#b45309" },
-    { t: "指數", rel: 0.05, x: 0.56, y: 0.32, s: 14, c: "#78716c" },
-    { t: "資產", rel: 0.45, x: 0.9, y: 0.56, s: 14, c: "#475569" },
-    { t: "咖啡", rel: 0.01, x: 0.44, y: 0.66, s: 11, c: "#78716c" },
-    { t: "查核準則", rel: 0.42, x: 0.5, y: 0.1, s: 14, c: "#0e7490" },
-    { t: "半導體", rel: 0.04, x: 0.68, y: 0.78, s: 15, c: "#78716c" },
-    { t: "函釋", rel: 0.4, x: 0.38, y: 0.7, s: 14, c: "#7c3aed" },
-    { t: "Podcast", rel: 0.02, x: 0.82, y: 0.38, s: 11, c: "#78716c" },
-    { t: "BAPA", rel: 0.38, x: 0.46, y: 0.86, s: 13, c: "#0369a1" },
-    { t: "國泰", rel: 0.03, x: 0.1, y: 0.42, s: 12, c: "#78716c" },
-    { t: "個體", rel: 0.72, x: 0.54, y: 0.5, s: 18, c: "#0f766e" },
-    { t: "設計", rel: 0.03, x: 0.7, y: 0.54, s: 13, c: "#78716c" },
-    { t: "交易", rel: 0.44, x: 0.26, y: 0.4, s: 14, c: "#57534e" },
-    { t: "富邦", rel: 0.03, x: 0.6, y: 0.86, s: 12, c: "#78716c" },
-    { t: "利潤", rel: 0.4, x: 0.16, y: 0.86, s: 13, c: "#15803d" },
-    { t: "較", rel: 0.22, x: 0.66, y: 0.2, s: 16, c: "#0d9488", isNext: true },
-    { t: "零碳", rel: 0.05, x: 0.84, y: 0.84, s: 12, c: "#78716c" },
-    { t: "貼文", rel: 0.02, x: 0.4, y: 0.28, s: 10, c: "#78716c" },
-    { t: "公司治理", rel: 0.06, x: 0.94, y: 0.36, s: 11, c: "#78716c" },
-    { t: "定期定額", rel: 0.03, x: 0.32, y: 0.88, s: 10, c: "#78716c" },
-    { t: "Usability", rel: 0.02, x: 0.74, y: 0.46, s: 9, c: "#78716c" },
-    { t: "RSS", rel: 0.02, x: 0.48, y: 0.42, s: 10, c: "#78716c" },
-    { t: "AJAX", rel: 0.02, x: 0.08, y: 0.28, s: 10, c: "#78716c" },
-    { t: "簡報", rel: 0.02, x: 0.58, y: 0.74, s: 12, c: "#78716c" },
-    { t: "股市", rel: 0.03, x: 0.8, y: 0.58, s: 14, c: "#78716c" },
-    { t: "房價", rel: 0.02, x: 0.24, y: 0.24, s: 12, c: "#78716c" },
-    { t: "Participation", rel: 0.02, x: 0.92, y: 0.64, s: 8, c: "#78716c" },
+    { t: "受測個體", rel: 0.94, x: 0.18, y: 0.32, s: 34, z: 0.12, c: "#0f766e" },
+    { t: "台積電", rel: 0.04, x: 0.34, y: 0.22, s: 28, z: 0.2, c: "#6b7280" },
+    { t: "功能", rel: 0.9, x: 0.72, y: 0.28, s: 30, z: 0.15, c: "#0369a1" },
+    { t: "ETF", rel: 0.04, x: 0.52, y: 0.18, s: 26, z: 0.25, c: "#78716c" },
+    { t: "風險", rel: 0.84, x: 0.86, y: 0.48, s: 24, z: 0.35, c: "#c2410c" },
+    { t: "鴻海", rel: 0.04, x: 0.12, y: 0.16, s: 11, z: 0.82, c: "#9ca3af" },
+    { t: "移轉訂價", rel: 0.88, x: 0.42, y: 0.38, s: 28, z: 0.18, c: "#15803d" },
+    { t: "美食", rel: 0.02, x: 0.28, y: 0.58, s: 20, z: 0.4, c: "#78716c" },
+    { t: "單純", rel: 0.78, x: 0.58, y: 0.62, s: 22, z: 0.3, c: "#a16207" },
+    { t: "旅遊", rel: 0.02, x: 0.78, y: 0.16, s: 10, z: 0.88, c: "#a8a29e" },
+    { t: "選擇", rel: 0.86, x: 0.64, y: 0.42, s: 27, z: 0.22, c: "#1e3a5f" },
+    { t: "疫苗", rel: 0.03, x: 0.22, y: 0.78, s: 9, z: 0.9, c: "#a8a29e" },
+    { t: "TNMM", rel: 0.66, x: 0.14, y: 0.55, s: 18, z: 0.45, c: "#0284c7" },
+    { t: "高股息", rel: 0.04, x: 0.48, y: 0.78, s: 24, z: 0.28, c: "#6b7280" },
+    { t: "可比公司", rel: 0.62, x: 0.88, y: 0.24, s: 16, z: 0.5, c: "#be123c" },
+    { t: "永續", rel: 0.05, x: 0.36, y: 0.48, s: 12, z: 0.7, c: "#9ca3af" },
+    { t: "利潤率", rel: 0.55, x: 0.76, y: 0.68, s: 17, z: 0.42, c: "#0d9488" },
+    { t: "籃球", rel: 0.02, x: 0.08, y: 0.72, s: 8, z: 0.92, c: "#a8a29e" },
+    { t: "OECD", rel: 0.5, x: 0.3, y: 0.14, s: 15, z: 0.55, c: "#1d4ed8" },
+    { t: "天氣", rel: 0.01, x: 0.92, y: 0.72, s: 7, z: 0.95, c: "#d4d4d8" },
+    { t: "一方", rel: 0.58, x: 0.2, y: 0.68, s: 16, z: 0.48, c: "#b45309" },
+    { t: "指數", rel: 0.05, x: 0.56, y: 0.32, s: 22, z: 0.32, c: "#6b7280" },
+    { t: "資產", rel: 0.45, x: 0.9, y: 0.56, s: 14, z: 0.58, c: "#475569" },
+    { t: "咖啡", rel: 0.01, x: 0.44, y: 0.66, s: 10, z: 0.78, c: "#a8a29e" },
+    { t: "查核準則", rel: 0.42, x: 0.5, y: 0.1, s: 14, z: 0.6, c: "#0e7490" },
+    { t: "半導體", rel: 0.04, x: 0.68, y: 0.78, s: 30, z: 0.16, c: "#57534e" },
+    { t: "函釋", rel: 0.4, x: 0.38, y: 0.7, s: 14, z: 0.52, c: "#7c3aed" },
+    { t: "Podcast", rel: 0.02, x: 0.82, y: 0.38, s: 9, z: 0.85, c: "#a8a29e" },
+    { t: "BAPA", rel: 0.38, x: 0.46, y: 0.86, s: 13, z: 0.62, c: "#0369a1" },
+    { t: "國泰", rel: 0.03, x: 0.1, y: 0.42, s: 11, z: 0.75, c: "#9ca3af" },
+    { t: "個體", rel: 0.72, x: 0.54, y: 0.5, s: 20, z: 0.25, c: "#0f766e" },
+    { t: "設計", rel: 0.03, x: 0.7, y: 0.54, s: 18, z: 0.38, c: "#78716c" },
+    { t: "交易", rel: 0.44, x: 0.26, y: 0.4, s: 14, z: 0.55, c: "#57534e" },
+    { t: "富邦", rel: 0.03, x: 0.6, y: 0.86, s: 10, z: 0.8, c: "#a8a29e" },
+    { t: "利潤", rel: 0.4, x: 0.16, y: 0.86, s: 13, z: 0.65, c: "#15803d" },
+    { t: "較", rel: 0.22, x: 0.66, y: 0.2, s: 16, z: 0.4, c: "#334155", isNext: true },
+    { t: "零碳", rel: 0.05, x: 0.84, y: 0.84, s: 8, z: 0.9, c: "#a8a29e" },
+    { t: "貼文", rel: 0.02, x: 0.4, y: 0.28, s: 9, z: 0.84, c: "#a8a29e" },
+    { t: "公司治理", rel: 0.06, x: 0.94, y: 0.36, s: 10, z: 0.72, c: "#9ca3af" },
+    { t: "定期定額", rel: 0.03, x: 0.32, y: 0.88, s: 8, z: 0.88, c: "#a8a29e" },
+    { t: "Usability", rel: 0.02, x: 0.74, y: 0.46, s: 7, z: 0.93, c: "#d4d4d8" },
+    { t: "RSS", rel: 0.02, x: 0.48, y: 0.42, s: 8, z: 0.86, c: "#a8a29e" },
+    { t: "AJAX", rel: 0.02, x: 0.08, y: 0.28, s: 9, z: 0.8, c: "#a8a29e" },
+    { t: "簡報", rel: 0.02, x: 0.58, y: 0.74, s: 21, z: 0.34, c: "#6b7280" },
+    { t: "股市", rel: 0.03, x: 0.8, y: 0.58, s: 25, z: 0.22, c: "#57534e" },
+    { t: "房價", rel: 0.02, x: 0.24, y: 0.24, s: 12, z: 0.68, c: "#9ca3af" },
+    { t: "Participation", rel: 0.02, x: 0.92, y: 0.64, s: 7, z: 0.94, c: "#d4d4d8" },
+    { t: "區塊鏈", rel: 0.03, x: 0.15, y: 0.48, s: 23, z: 0.3, c: "#64748b" },
+    { t: "元宇宙", rel: 0.02, x: 0.88, y: 0.14, s: 19, z: 0.36, c: "#78716c" },
   ];
 
   cloud.forEach((w) => {
     if (w.t === focusTok || w.t.includes(focusTok)) {
       w.rel = Math.max(w.rel, 0.95);
       w.isFocus = true;
-      w.s = Math.max(w.s, 30);
+      w.z = Math.min(w.z ?? 0.2, 0.15);
+      w.s = Math.max(w.s, 32);
       w.c = "#0f172a";
     }
+    if (w.z == null) w.z = 0.5;
   });
   if (!cloud.some((w) => w.isFocus)) {
-    cloud.push({ t: focusTok, rel: 0.98, x: 0.5, y: 0.45, s: 30, c: "#0f172a", isFocus: true });
+    cloud.push({ t: focusTok, rel: 0.98, x: 0.5, y: 0.45, s: 32, z: 0.1, c: "#0f172a", isFocus: true });
   }
   return cloud;
 }
@@ -459,30 +463,45 @@ function drawAttnSvg(focusIdx, mode = "journey") {
 
   const defs = `<defs>
     <radialGradient id="queryHalo" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="rgba(13,148,136,0.28)"/>
-      <stop offset="55%" stop-color="rgba(13,148,136,0.08)"/>
-      <stop offset="100%" stop-color="rgba(13,148,136,0)"/>
+      <stop offset="0%" stop-color="rgba(15,23,42,0.18)"/>
+      <stop offset="55%" stop-color="rgba(71,85,105,0.06)"/>
+      <stop offset="100%" stop-color="rgba(15,23,42,0)"/>
+    </radialGradient>
+    <radialGradient id="nebulaMist" cx="48%" cy="46%" r="55%">
+      <stop offset="0%" stop-color="rgba(100,116,139,0.1)"/>
+      <stop offset="45%" stop-color="rgba(148,163,184,0.05)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
     </radialGradient>
     <filter id="neuralGlow" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="2.2" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
+    <filter id="farSoft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.1"/>
+    </filter>
   </defs>
-  <rect width="${W}" height="${H}" fill="#ffffff"/>`;
+  <rect width="${W}" height="${H}" fill="#ffffff"/>
+  <ellipse cx="${W * 0.48}" cy="${H * 0.46}" rx="${W * 0.42}" ry="${H * 0.38}" fill="url(#nebulaMist)"/>
+  <ellipse cx="${W * 0.28}" cy="${H * 0.3}" rx="120" ry="70" fill="rgba(148,163,184,0.06)"/>
+  <ellipse cx="${W * 0.72}" cy="${H * 0.62}" rx="140" ry="80" fill="rgba(100,116,139,0.05)"/>`;
 
   let ambient = "";
-  for (let i = 0; i < 22; i++) {
-    const ax = 40 + ((i * 97) % (W - 80));
-    const ay = 50 + ((i * 53) % (H - 80));
-    ambient += `<circle class="attn-float attn-nebula-dot" cx="${ax}" cy="${ay}" r="${1 + (i % 3)}" fill="rgba(13,148,136,${0.1 + (i % 4) * 0.04})" style="--d:${4 + (i % 5)}s;--delay:${T_WORD + (i % 12) * 0.08}s"/>`;
+  for (let i = 0; i < 36; i++) {
+    const ax = 30 + ((i * 89) % (W - 60));
+    const ay = 40 + ((i * 67) % (H - 70));
+    const zr = (i % 5) / 5;
+    const r = zr < 0.35 ? 2.2 : zr < 0.7 ? 1.4 : 0.8;
+    const op = 0.06 + (1 - zr) * 0.12;
+    ambient += `<circle class="attn-float attn-nebula-dot" cx="${ax}" cy="${ay}" r="${r}" fill="rgba(71,85,105,${op})" style="--d:${5 + (i % 6)}s;--delay:${T_WORD + (i % 14) * 0.07}s"/>`;
   }
 
-  // Query halo + similarity rays (appear once after nebula)
+  // Expanding rings: charcoal / black-gray (not teal)
   let vectorFx = `<g class="attn-phase-vec" style="--delay:${T_VEC}s">
     <circle class="attn-vec-ring" cx="${fx}" cy="${fy}" r="34" fill="url(#queryHalo)"/>
-    <circle class="attn-vec-ring r2" cx="${fx}" cy="${fy}" r="62" fill="none" stroke="rgba(13,148,136,0.35)" stroke-width="1.2"/>
-    <circle class="attn-vec-ring r3" cx="${fx}" cy="${fy}" r="102" fill="none" stroke="rgba(13,148,136,0.18)" stroke-width="1"/>
-    <circle cx="${fx}" cy="${fy}" r="5" fill="#0d9488" filter="url(#neuralGlow)"/>`;
+    <circle class="attn-vec-ring r2" cx="${fx}" cy="${fy}" r="62" fill="none" stroke="rgba(30,41,59,0.45)" stroke-width="1.3"/>
+    <circle class="attn-vec-ring r3" cx="${fx}" cy="${fy}" r="102" fill="none" stroke="rgba(71,85,105,0.28)" stroke-width="1.1"/>
+    <circle class="attn-vec-ring r4" cx="${fx}" cy="${fy}" r="140" fill="none" stroke="rgba(100,116,139,0.16)" stroke-width="0.9"/>
+    <circle cx="${fx}" cy="${fy}" r="4.5" fill="#1e293b" filter="url(#neuralGlow)"/>`;
   related
     .filter((w) => w !== focusNode)
     .slice(0, 9)
@@ -491,17 +510,17 @@ function drawAttnSvg(focusIdx, mode = "journey") {
       const y2 = b.y * H;
       const delay = `${T_VEC + 0.25 + i * 0.28}s`;
       const travel = 1.15 + (1 - b.rel) * 0.45;
-      const op = 0.25 + b.rel * 0.55;
+      const op = 0.22 + b.rel * 0.5;
       const mx = (fx + x2) / 2;
       const my = (fy + y2) / 2;
       vectorFx += `<line class="attn-vec-ray" x1="${fx}" y1="${fy}" x2="${x2}" y2="${y2}"
-        stroke="rgba(13,148,136,${op})" stroke-width="${1 + b.rel * 2}" stroke-dasharray="5 6"
+        stroke="rgba(51,65,85,${op})" stroke-width="${1 + b.rel * 2}" stroke-dasharray="5 6"
         style="--delay:${delay}"/>`;
-      vectorFx += `<circle class="attn-vec-dot" r="3.2" fill="#0d9488" filter="url(#neuralGlow)">
+      vectorFx += `<circle class="attn-vec-dot" r="3.2" fill="#334155" filter="url(#neuralGlow)">
         <animateMotion dur="${travel}s" begin="${delay}" fill="freeze" path="M${fx} ${fy} L${x2} ${y2}"/>
       </circle>`;
       vectorFx += `<text class="attn-sim-label" x="${mx}" y="${my - 8}" text-anchor="middle"
-        font-size="10" font-family="JetBrains Mono,monospace" fill="#0f766e" font-weight="600"
+        font-size="10" font-family="JetBrains Mono,monospace" fill="#334155" font-weight="600"
         style="--delay:${T_VEC + 0.55 + i * 0.28}s">${Math.round(b.rel * 100)}%</text>`;
     });
   vectorFx += `</g>`;
@@ -523,7 +542,7 @@ function drawAttnSvg(focusIdx, mode = "journey") {
     const p = b.rel;
     const d = `M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}`;
     const delay = `${T_LINK + i * 0.48}s`;
-    links += `<path class="attn-ink attn-draw attn-synapse" d="${d}" stroke-width="${1.8 + p * 3.2}" fill="none" stroke="#0d9488" style="--delay:${delay};--op:${0.6 + p * 0.35}"/>`;
+    links += `<path class="attn-ink attn-draw attn-synapse" d="${d}" stroke-width="${1.8 + p * 3.2}" fill="none" stroke="#334155" style="--delay:${delay};--op:${0.55 + p * 0.35}"/>`;
     pulses += `<path class="attn-ink-pulse" d="${d}" stroke-width="${1.3 + p}" fill="none" style="--delay:${delay}"/>`;
     pills += `<g class="attn-prob-reveal" style="--delay:${T_LINK + 0.55 + i * 0.48}s">
       <rect x="${mx - 22}" y="${my - 11}" width="44" height="20" rx="4" fill="#ffffff" stroke="${b.c}" stroke-width="1.5"/>
@@ -531,13 +550,20 @@ function drawAttnSvg(focusIdx, mode = "journey") {
     </g>`;
   }
 
+  // Draw far → near for 3D stacking
+  const byDepth = [...cloud].sort((a, b) => (b.z ?? 0.5) - (a.z ?? 0.5));
   let words = "";
-  cloud.forEach((w, i) => {
+  byDepth.forEach((w, i) => {
     const x = w.x * W;
     const y = w.y * H;
+    const z = w.z ?? 0.5;
+    const depthScale = 0.55 + (1 - z) * 0.7; // near bigger
+    const fontSize = Math.max(7, Math.round(w.s * depthScale));
+    const depthOp = (0.28 + (1 - z) * 0.72).toFixed(2);
     const isRel = w.rel >= 0.35;
     const nextHit = nextSpots.find((n) => n.t === w.t);
-    let cls = "attn-cloud-word attn-float is-awaken";
+    let zCls = z < 0.33 ? "z-near" : z < 0.66 ? "z-mid" : "z-far";
+    let cls = `attn-cloud-word attn-float is-awaken ${zCls}`;
     if (w.isFocus) cls += " is-focus";
     if (isRel) cls += " is-related is-linked";
     else cls += " is-gray-rest";
@@ -547,12 +573,13 @@ function drawAttnSvg(focusIdx, mode = "journey") {
     if (nextHit) fill = nextHit.c;
 
     const awaken = `${T_WORD + (i % 20) * 0.09}s`;
-    // gray-rest fades later during link phase
     const grayDelay = `${T_LINK}s`;
+    const floatDur = `${4.5 + z * 3.5}s`;
+    const filterAttr = z > 0.7 ? ' filter="url(#farSoft)"' : "";
     words += `<text class="${cls}" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle"
-      font-size="${w.s}" font-family="Georgia,'Noto Serif TC',serif" font-weight="${w.isFocus || isRel ? 700 : 500}"
-      fill="${fill}"
-      style="--d:${5.5 + (i % 6) * 0.4}s;--delay:${(i % 9) * 0.07}s;--i:${i};--awaken:${awaken};--gray:${grayDelay}">${w.t}</text>`;
+      font-size="${fontSize}" font-family="Georgia,'Noto Serif TC',serif" font-weight="${w.isFocus || (isRel && z < 0.4) ? 700 : 500}"
+      fill="${fill}"${filterAttr}
+      style="--d:${floatDur};--delay:${(i % 9) * 0.07}s;--i:${i};--awaken:${awaken};--gray:${grayDelay};--depth-op:${depthOp}">${w.t}</text>`;
   });
 
   let predict = nextSpots
