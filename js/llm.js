@@ -362,114 +362,169 @@ function drawAttnSvg(focusIdx, mode = "highlight") {
   const svg = $("#attnSvg");
   if (!svg) return;
   const tokens = PIPE_TOKENS;
-  const W = 640;
-  const H = 280;
+  const W = 720;
+  const H = 360;
+  const padX = 78;
   const n = tokens.length;
   const focus = Math.min(Math.max(focusIdx, 0), n - 1);
 
-  // Layer Y positions
-  const yIn = 42;
-  const yHid = 130;
-  const yOut = 230;
-  const xIn = tokens.map((_, i) => 56 + (i * (W - 112)) / Math.max(n - 1, 1));
-  const hidN = 7;
-  const xHid = Array.from({ length: hidN }, (_, i) => 70 + (i * (W - 140)) / Math.max(hidN - 1, 1));
+  const yIn = 88;
+  const yHid = 185;
+  const yOut = 300;
+  const xIn = tokens.map((_, i) => padX + (i * (W - padX * 2)) / Math.max(n - 1, 1));
+  const hidN = 8;
+  const xHid = Array.from(
+    { length: hidN },
+    (_, i) => padX + 20 + (i * (W - padX * 2 - 40)) / Math.max(hidN - 1, 1)
+  );
   const xOut = W / 2;
 
-  // Softmax-ish attention from focus → each token (self gets residual)
   const raw = tokens.map((_, i) => {
-    if (i === focus) return 0.55;
+    if (i === focus) return 1.25;
     const dist = Math.abs(i - focus);
-    return Math.exp(-dist * 0.85) * (i < focus ? 1.15 : 0.9);
+    return Math.exp(-dist * 0.72) * (i <= focus ? 1.1 : 0.95);
   });
-  const sum = raw.reduce((a, b) => a + b, 0);
-  const probs = raw.map((v) => v / sum);
+  const sumRaw = raw.reduce((a, b) => a + b, 0);
+  const probs = raw.map((v) => v / sumRaw);
 
-  // Dense web: every input → every hidden (dim)
+  const floatWords = [
+    { t: "功能", x: 110, y: 34, d: 5.2, delay: 0 },
+    { t: "風險", x: 230, y: 26, d: 6.1, delay: 0.4 },
+    { t: "TNMM", x: 360, y: 22, d: 4.8, delay: 0.8 },
+    { t: "可比公司", x: 500, y: 30, d: 5.5, delay: 0.2 },
+    { t: "利潤率", x: 620, y: 36, d: 6.4, delay: 1.1 },
+    { t: "OECD", x: 140, y: 330, d: 5.0, delay: 0.6 },
+    { t: "受測個體", x: 560, y: 334, d: 5.8, delay: 0.3 },
+    { t: "單純", x: 400, y: 342, d: 4.5, delay: 0.9 },
+  ];
+  const focusSemantic = {
+    0: ["受測個體", "功能", "風險"],
+    1: ["受測個體", "功能", "單純"],
+    2: ["功能", "風險"],
+    3: ["功能", "單純", "可比公司"],
+    4: ["功能", "單純", "風險", "受測個體"],
+  };
+  const closeSet = new Set(focusSemantic[focus] || ["功能", "風險"]);
+  const semProbs = {
+    功能: 0.28,
+    風險: 0.16,
+    單純: 0.22,
+    受測個體: 0.18,
+    可比公司: 0.1,
+    TNMM: 0.08,
+    OECD: 0.07,
+    利潤率: 0.09,
+  };
+
+  let floatHtml = "";
+  floatWords.forEach((f) => {
+    const close = mode === "highlight" && closeSet.has(f.t);
+    const bw = f.t.length > 3 ? 68 : 56;
+    floatHtml += `<g class="attn-float${close ? " close" : ""}" style="--d:${f.d}s;--delay:${f.delay}s">
+      <rect x="${f.x - bw / 2}" y="${f.y - 11}" width="${bw}" height="22" rx="11"
+        fill="${close ? "rgba(13,159,147,0.22)" : "rgba(255,255,255,0.07)"}"
+        stroke="${close ? "rgba(45,212,191,0.9)" : "rgba(148,163,184,0.35)"}" stroke-width="1"/>
+      <text x="${f.x}" y="${f.y + 1}" text-anchor="middle" dominant-baseline="middle"
+        font-size="11" font-family="Outfit,sans-serif"
+        fill="${close ? "#ccfbf1" : "rgba(226,232,240,0.5)"}">${f.t}</text>
+    </g>`;
+  });
+
   let web = "";
   xIn.forEach((x0) => {
     xHid.forEach((x1) => {
-      web += `<path class="attn-web" d="M${x0} ${yIn + 14} L${x1} ${yHid - 8}" />`;
+      web += `<path class="attn-web" d="M${x0} ${yIn + 16} C${x0} ${yIn + 55},${x1} ${yHid - 55},${x1} ${yHid - 10}" />`;
     });
   });
   xHid.forEach((x0) => {
-    web += `<path class="attn-web" d="M${x0} ${yHid + 8} L${xOut} ${yOut - 16}" />`;
+    web += `<path class="attn-web" d="M${x0} ${yHid + 10} C${x0} ${yHid + 50},${xOut} ${yOut - 60},${xOut} ${yOut - 22}" />`;
   });
 
-  // Strong paths: focus token fans through hidden to output, weighted by probs to other tokens
   let hot = "";
   let pulses = "";
   let labels = "";
-
-  // Rank links for labeling (top connections from focus perspective)
+  let semantic = "";
   const ranked = probs
     .map((p, i) => ({ i, p, t: tokens[i] }))
     .sort((a, b) => b.p - a.p);
 
-  if (mode === "web") {
-    // only dense web + idle neurons
-  } else {
-    // Highlight: from each token (esp. high prob) through nearest hidden to output
+  if (mode !== "web") {
     ranked.forEach((r, rank) => {
       const p = r.p;
       const x0 = xIn[r.i];
       const hidIdx = Math.min(hidN - 1, Math.round((r.i / Math.max(n - 1, 1)) * (hidN - 1)));
       const x1 = xHid[hidIdx];
-      const w = 0.8 + p * 5.5;
-      const op = mode === "highlight" ? 0.25 + p * 0.75 : 0.12;
-      const midY = (yIn + yHid) / 2;
-      hot += `<path class="attn-link hot" d="M${x0} ${yIn + 14} Q${(x0 + x1) / 2} ${midY} ${x1} ${yHid - 8}" stroke-width="${w}" opacity="${op}" />`;
-      hot += `<path class="attn-link hot" d="M${x1} ${yHid + 8} Q${(x1 + xOut) / 2} ${(yHid + yOut) / 2} ${xOut} ${yOut - 16}" stroke-width="${Math.max(0.7, w * 0.85)}" opacity="${op * 0.9}" />`;
-      if (rank < 4 && p > 0.08) {
-        pulses += `<path class="attn-pulse" d="M${x0} ${yIn + 14} Q${(x0 + x1) / 2} ${midY} ${x1} ${yHid - 8}" stroke-width="${1.2 + p * 2}" opacity="${0.5 + p * 0.4}" />`;
-        const lx = (x0 + x1) / 2;
-        const ly = midY - 6;
-        labels += `<rect x="${lx - 18}" y="${ly - 10}" width="36" height="14" rx="4" fill="rgba(255,255,255,0.92)" stroke="#99f6e4"/>`;
-        labels += `<text class="attn-prob" x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle">${Math.round(p * 100)}%</text>`;
+      const w = 1 + p * 6;
+      const op = 0.22 + p * 0.78;
+      const c1 = `M${x0} ${yIn + 16} C${x0} ${yIn + 58},${x1} ${yHid - 58},${x1} ${yHid - 10}`;
+      const c2 = `M${x1} ${yHid + 10} C${x1} ${yHid + 52},${xOut} ${yOut - 62},${xOut} ${yOut - 22}`;
+      hot += `<path class="attn-link hot" d="${c1}" stroke-width="${w}" opacity="${op}" />`;
+      hot += `<path class="attn-link hot" d="${c2}" stroke-width="${Math.max(0.85, w * 0.8)}" opacity="${op * 0.85}" />`;
+      if (rank < 4) {
+        pulses += `<path class="attn-pulse" d="${c1}" stroke-width="${1.4 + p * 2.2}" opacity="${0.55 + p * 0.4}" />`;
+        const lx = x0 * 0.42 + x1 * 0.58;
+        const ly = (yIn + yHid) / 2 - 2;
+        labels += `<g class="attn-prob-pill"><rect x="${lx - 20}" y="${ly - 9}" width="40" height="18" rx="9" fill="rgba(15,23,42,0.78)" stroke="rgba(45,212,191,0.7)"/><text class="attn-prob" x="${lx}" y="${ly + 1}" text-anchor="middle" dominant-baseline="middle">${Math.round(p * 100)}%</text></g>`;
       }
+    });
+
+    floatWords.forEach((f) => {
+      if (!closeSet.has(f.t)) return;
+      const sp = semProbs[f.t] ?? 0.1;
+      const lx = (xIn[focus] + f.x) / 2;
+      const ly = (yIn - 20 + f.y + 11) / 2;
+      semantic += `<path class="attn-semantic" d="M${xIn[focus]} ${yIn - 18} Q${lx} ${ly - 16} ${f.x} ${f.y + 11}" stroke-width="${1.2 + sp * 7}" opacity="${0.4 + sp}" />`;
+      labels += `<g class="attn-prob-pill"><rect x="${lx - 18}" y="${ly - 20}" width="36" height="16" rx="8" fill="rgba(15,23,42,0.8)" stroke="rgba(56,189,248,0.6)"/><text class="attn-prob sky" x="${lx}" y="${ly - 11}" text-anchor="middle" dominant-baseline="middle">${Math.round(sp * 100)}%</text></g>`;
     });
   }
 
-  // Nodes
   let nodes = "";
   tokens.forEach((t, i) => {
     const on = i === focus && mode !== "web";
-    const glow = on ? `filter="url(#attnGlow)"` : "";
-    nodes += `<g ${glow}>
-      <rect x="${xIn[i] - 30}" y="${yIn - 16}" width="60" height="28" rx="9" fill="${on ? "#ecfdf5" : "#fff"}" stroke="${on ? "#0d9f93" : "#cbd5e1"}" stroke-width="${on ? 2 : 1}"/>
-      <text x="${xIn[i]}" y="${yIn}" text-anchor="middle" dominant-baseline="middle" font-size="12" font-family="JetBrains Mono,monospace" fill="#0f172a">${t}</text>
+    nodes += `<g ${on ? 'filter="url(#attnGlow)"' : ""}>
+      <rect x="${xIn[i] - 32}" y="${yIn - 15}" width="64" height="30" rx="10"
+        fill="${on ? "rgba(13,159,147,0.28)" : "rgba(255,255,255,0.1)"}"
+        stroke="${on ? "#2dd4bf" : "rgba(148,163,184,0.45)"}" stroke-width="${on ? 2 : 1}"/>
+      <text x="${xIn[i]}" y="${yIn + 1}" text-anchor="middle" dominant-baseline="middle"
+        font-size="13" font-family="JetBrains Mono,monospace" fill="${on ? "#ecfdf5" : "#e2e8f0"}">${t}</text>
     </g>`;
   });
-
-  xHid.forEach((x, i) => {
+  xHid.forEach((x) => {
     const active = mode !== "web";
-    nodes += `<circle cx="${x}" cy="${yHid}" r="${active ? 7 : 5.5}" fill="${active ? "#14b8a6" : "#94a3b8"}" opacity="${active ? 0.85 : 0.45}" />`;
-    nodes += `<circle cx="${x}" cy="${yHid}" r="2.2" fill="#fff" opacity="0.9"/>`;
+    nodes += `<g><circle cx="${x}" cy="${yHid}" r="${active ? 9 : 6}" fill="url(#nodeGrad)" opacity="${active ? 1 : 0.4}"/><circle cx="${x}" cy="${yHid}" r="2.5" fill="#fff" opacity="0.95"/></g>`;
   });
+  nodes += `<g filter="url(#attnGlow)"><circle cx="${xOut}" cy="${yOut}" r="22" fill="rgba(13,159,147,0.22)" stroke="#2dd4bf" stroke-width="2"/><circle cx="${xOut}" cy="${yOut}" r="10" fill="url(#nodeGrad)"/><text x="${xOut}" y="${yOut + 40}" text-anchor="middle" class="attn-out-label">注意力加權向量</text></g>`;
 
-  nodes += `<g>
-    <circle cx="${xOut}" cy="${yOut}" r="18" fill="#ecfdf5" stroke="#0d9f93" stroke-width="2"/>
-    <circle cx="${xOut}" cy="${yOut}" r="8" fill="#0d9f93" opacity="0.85"/>
-    <text x="${xOut}" y="${yOut + 34}" text-anchor="middle" class="attn-layer-label">注意力加權向量</text>
+  const badges = `<g class="attn-badges">
+    <rect x="78" y="52" width="58" height="20" rx="6" fill="rgba(56,189,248,0.14)" stroke="rgba(56,189,248,0.45)"/>
+    <text x="107" y="63" text-anchor="middle" class="attn-badge-t">Token 層</text>
+    <rect x="310" y="158" width="58" height="18" rx="6" fill="rgba(45,212,191,0.12)" stroke="rgba(45,212,191,0.4)"/>
+    <text x="339" y="168" text-anchor="middle" class="attn-badge-t">隱藏層</text>
+    <rect x="328" y="252" width="44" height="18" rx="6" fill="rgba(45,212,191,0.12)" stroke="rgba(45,212,191,0.4)"/>
+    <text x="350" y="262" text-anchor="middle" class="attn-badge-t">輸出</text>
   </g>`;
 
-  const layerLabels = `
-    <text class="attn-layer-label" x="16" y="${yIn}">Token</text>
-    <text class="attn-layer-label" x="16" y="${yHid}">隱藏層</text>
-    <text class="attn-layer-label" x="16" y="${yOut}">輸出</text>
-  `;
-
-  const defs = `
-    <defs>
-      <filter id="attnGlow" x="-40%" y="-40%" width="180%" height="180%">
-        <feGaussianBlur stdDeviation="2.2" result="b"/>
-        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-    </defs>
-  `;
+  const defs = `<defs>
+    <linearGradient id="nodeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5eead4"/><stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <radialGradient id="attnBgGlow" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="rgba(13,159,147,0.2)"/><stop offset="100%" stop-color="rgba(15,23,42,0)"/>
+    </radialGradient>
+    <filter id="attnGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="attnGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="rgba(148,163,184,0.12)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="${W}" height="${H}" fill="#0b1220" rx="14"/>
+  <rect width="${W}" height="${H}" fill="url(#attnGrid)" rx="14"/>
+  <rect width="${W}" height="${H}" fill="url(#attnBgGlow)" rx="14"/>`;
 
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  svg.innerHTML = defs + layerLabels + web + hot + pulses + nodes + labels;
+  svg.classList.add("llm-attn-tech");
+  svg.innerHTML = defs + floatHtml + web + semantic + hot + pulses + nodes + labels + badges;
 }
 
 function renderPipeTokens(active = -1) {
