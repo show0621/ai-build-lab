@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=deck-scroll-1" />
+  <link rel="stylesheet" href="css/styles.css?v=ws-reveal-1" />
 </head>
 <body>
   <div class="bg-layer" aria-hidden="true">
@@ -1319,19 +1319,22 @@ owner: HR
           </div>
         </div>
 
-        <div class="workshop-out glass">
+        <div class="workshop-out glass" id="workshopOut" data-ready="false">
           <div class="ws-out-tabs" role="tablist">
             <button type="button" class="active" data-ws-tab="spec" role="tab" aria-selected="true">SPEC</button>
             <button type="button" data-ws-tab="prompt" role="tab" aria-selected="false">PROMPT（貼給 Claude）</button>
             <button type="button" data-ws-tab="system" role="tab" aria-selected="false">整套系統清單</button>
           </div>
           <div class="ws-out-toolbar">
-            <button type="button" class="btn btn-ghost" id="wsCopy">複製目前分頁</button>
-            <button type="button" class="btn btn-ghost" id="wsCopyAll">複製全部</button>
+            <button type="button" class="btn btn-ghost" id="wsCopy" disabled>複製目前分頁</button>
+            <button type="button" class="btn btn-ghost" id="wsCopyAll" disabled>複製全部</button>
             <span class="ws-copy-status" id="wsCopyStatus" hidden>已複製</span>
           </div>
-          <pre class="code-block ws-output" id="wsOutput"><code>先編輯左側區塊，再按「產生給 Claude 的 SPEC＋PROMPT」。
-也可先按「載入示範六區塊」看完整範例。</code></pre>
+          <div class="ws-empty" id="wsEmpty">
+            <p class="ws-empty-title">右側尚未產生內容</p>
+            <p>先編輯左側（或按「載入示範」），再按<br /><strong>產生給 Claude 的 SPEC＋PROMPT</strong><br />結果會出現在這裡。</p>
+          </div>
+          <pre class="code-block ws-output" id="wsOutput" hidden></pre>
         </div>
       </div>
     </section>
@@ -1465,6 +1468,6 @@ owner: HR
   </div>
 
   <script src="js/app.js?v=term-html-1"></script>
-  <script src="js/spec-workshop.js"></script>
+  <script src="js/spec-workshop.js?v=ws-reveal-1"></script>
 </body>
 </html>

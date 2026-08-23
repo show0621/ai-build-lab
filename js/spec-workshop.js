@@ -170,6 +170,7 @@ Temperature 0.15、Context 32K、Max Output 一般 3K／複雜 9K
 let wsBlocks = [];
 let wsCache = { spec: "", prompt: "", system: "" };
 let wsActiveTab = "spec";
+let wsHasOutput = false;
 
 function wsEl(id) {
   return document.getElementById(id);
@@ -477,9 +478,26 @@ ${blockList}
 
 function refreshWsOutput() {
   const out = wsEl("wsOutput");
+  const empty = wsEl("wsEmpty");
+  const panel = wsEl("workshopOut");
   if (!out) return;
-  const text = wsCache[wsActiveTab] || "尚未產生。請先按「產生給 Claude 的 SPEC＋PROMPT」。";
-  out.textContent = text;
+
+  if (!wsHasOutput) {
+    if (panel) panel.dataset.ready = "false";
+    if (empty) empty.hidden = false;
+    out.hidden = true;
+    out.textContent = "";
+    wsEl("wsCopy")?.setAttribute("disabled", "");
+    wsEl("wsCopyAll")?.setAttribute("disabled", "");
+    return;
+  }
+
+  if (panel) panel.dataset.ready = "true";
+  if (empty) empty.hidden = true;
+  out.hidden = false;
+  out.textContent = wsCache[wsActiveTab] || "";
+  wsEl("wsCopy")?.removeAttribute("disabled");
+  wsEl("wsCopyAll")?.removeAttribute("disabled");
 }
 
 function generateWs() {
@@ -488,7 +506,17 @@ function generateWs() {
   wsCache.spec = buildSpec();
   wsCache.prompt = buildPrompt();
   wsCache.system = buildSystemChecklist();
+  wsHasOutput = true;
   refreshWsOutput();
+
+  const panel = wsEl("workshopOut");
+  if (panel) {
+    panel.classList.remove("ws-pop");
+    void panel.offsetWidth;
+    panel.classList.add("ws-pop");
+    panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
   const status = wsEl("wsCopyStatus");
   if (status) {
     status.hidden = false;
@@ -554,6 +582,7 @@ function initSpecWorkshop() {
   });
 
   wsEl("wsCopy")?.addEventListener("click", async () => {
+    if (!wsHasOutput) return;
     const ok = await copyText(wsCache[wsActiveTab] || wsEl("wsOutput")?.textContent || "");
     const status = wsEl("wsCopyStatus");
     if (status) {
@@ -566,6 +595,7 @@ function initSpecWorkshop() {
   });
 
   wsEl("wsCopyAll")?.addEventListener("click", async () => {
+    if (!wsHasOutput) return;
     const all = `===== SPEC =====\n\n${wsCache.spec}\n\n===== PROMPT =====\n\n${wsCache.prompt}\n\n===== 整套系統清單 =====\n\n${wsCache.system}`;
     const ok = await copyText(all);
     const status = wsEl("wsCopyStatus");
@@ -578,7 +608,7 @@ function initSpecWorkshop() {
     }
   });
 
-  generateWs();
+  refreshWsOutput();
 }
 
 if (document.readyState === "loading") {

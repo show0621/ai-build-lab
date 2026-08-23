@@ -3648,6 +3648,56 @@ body.deck-mode .panel.open .panel-body {
   font-size: 0.78rem;
 }
 
+.ws-empty {
+  display: grid;
+  place-content: center;
+  gap: 0.45rem;
+  min-height: min(42vh, 360px);
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+  color: var(--ink-soft);
+  border-radius: 14px;
+  border: 1px dashed rgba(15, 23, 42, 0.14);
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.ws-empty[hidden] {
+  display: none !important;
+}
+
+.ws-empty-title {
+  margin: 0;
+  font-weight: 650;
+  color: var(--ink);
+  font-size: 1.02rem;
+}
+
+.ws-empty p {
+  margin: 0;
+  line-height: 1.55;
+  font-size: 0.92rem;
+}
+
+.ws-out-toolbar .btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.workshop-out.ws-pop #wsOutput {
+  animation: wsReveal 0.35s ease;
+}
+
+@keyframes wsReveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* 工坊投影片：寬版雙欄鋪滿，左右各自捲動，方便簡報 */
 body.deck-mode #workshop.deck-active {
   display: grid !important;
