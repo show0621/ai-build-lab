@@ -548,7 +548,7 @@ function drawAttnSvg(focusIdx, mode = "journey") {
     links += `<path class="attn-dash" d="${d}" fill="none" style="--delay:${dashDelay};--op:${e.kind === "hub" ? 0.7 : 0.45}"/>`;
     if (e.kind === "hub" && e.p >= 0.55) {
       const hotDelay = `${T_HOT + (i % 8) * 0.06}s`;
-      links += `<path class="attn-dash-hot" d="${d}" fill="none" style="--delay:${hotDelay};--w:${2.4 + e.p * 3}"/>`;
+      links += `<path class="attn-dash-hot" d="${d}" fill="none" style="--delay:${hotDelay};--w:${1.8 + e.p * 1.2}"/>`;
       pulses += `<path class="attn-ink-pulse attn-hot-pulse" d="${d}" fill="none" style="--delay:${hotDelay}"/>`;
     }
   });
