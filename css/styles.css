@@ -2940,7 +2940,7 @@ body.deck-mode main {
 }
 
 body.deck-mode .section {
-  display: none;
+  display: none !important;
   flex: 1 1 auto;
   width: 100%;
   max-width: 1120px;
@@ -2948,7 +2948,7 @@ body.deck-mode .section {
   min-height: 0; /* allow flex child to shrink and scroll */
   height: auto;
   max-height: 100%;
-  padding: 3.5rem 6vw 8rem;
+  padding: 1.75rem 5vw 6.5rem;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -2958,21 +2958,24 @@ body.deck-mode .section {
 }
 
 body.deck-mode.deck-chrome-hidden .section {
-  padding-bottom: 5.5rem;
+  padding-bottom: 4rem;
 }
 
 body.deck-mode .section.deck-active {
-  display: block;
+  display: flex !important;
+  flex-direction: column;
   outline: none;
 }
 
+/* Hero only shows when it is the active deck slide — never stacked above themes */
 body.deck-mode .hero {
   min-height: 0;
   height: 100%;
   max-height: 100%;
-  display: flex;
-  align-items: flex-start;
-  padding-top: 4rem;
+  align-items: center;
+  justify-content: center;
+  padding-top: 1.5rem;
+  padding-bottom: 6rem;
 }
 
 body.deck-mode .hero.deck-active {
@@ -2983,8 +2986,23 @@ body.deck-mode .hero-title {
   font-size: clamp(2.2rem, 5.5vw, 3.8rem);
 }
 
+body.deck-mode .section-head {
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
 body.deck-mode .section-head h2 {
-  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-size: clamp(1.65rem, 3.2vw, 2.35rem);
+}
+
+body.deck-mode .section.deck-active > .canvas-grid,
+body.deck-mode .section.deck-active > .tip-row,
+body.deck-mode .section.deck-active > .panel,
+body.deck-mode .section.deck-active > .glass,
+body.deck-mode .section.deck-active > .api-grid,
+body.deck-mode .section.deck-active > .kb-steps {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 body.deck-mode .canvas-grid,
@@ -3036,7 +3054,7 @@ body.deck-mode .panel.open .panel-body {
   }
 
   body.deck-mode .section {
-    padding: 2.5rem 1.1rem 7rem;
+    padding: 1.25rem 1.1rem 6rem;
   }
 
   .deck-bar {
