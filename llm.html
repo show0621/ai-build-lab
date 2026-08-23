@@ -38,17 +38,31 @@
     </div>
   </nav>
 
-  <aside class="llm-side" id="llmSide" aria-label="本頁章節">
-    <p class="llm-side-label">進階說明</p>
-    <a href="#map">總地圖</a>
-    <a href="#pipeline">流水線動畫</a>
-    <a href="#token">Token</a>
-    <a href="#embed">向量</a>
-    <a href="#attention">Attention</a>
-    <a href="#prob">機率分布</a>
-    <a href="#knobs">六個旋鈕</a>
-    <a href="#stack">接回 RAG</a>
-    <a href="#memo">一句話記住</a>
+  <aside class="llm-assist" id="llmSide" data-open="false" aria-label="本頁章節導覽">
+    <button type="button" class="llm-assist-orb" id="llmSideOrb" aria-expanded="false" aria-controls="llmSidePanel" title="展開章節導覽">
+      <span class="llm-assist-orb-glass" aria-hidden="true"></span>
+      <span class="llm-assist-orb-dot" aria-hidden="true"></span>
+      <span class="visually-hidden">章節選單</span>
+    </button>
+    <div class="llm-assist-panel" id="llmSidePanel" role="navigation" aria-hidden="true">
+      <div class="llm-assist-panel-inner">
+        <div class="llm-assist-head">
+          <p class="llm-side-label">進階說明</p>
+          <button type="button" class="llm-assist-collapse" id="llmSideCollapse" title="收成小圓點" aria-label="收合選單">−</button>
+        </div>
+        <nav class="llm-assist-links" id="llmSideLinks">
+          <a href="#map">總地圖</a>
+          <a href="#pipeline">流水線動畫</a>
+          <a href="#token">Token</a>
+          <a href="#embed">向量</a>
+          <a href="#attention">Attention</a>
+          <a href="#prob">機率分布</a>
+          <a href="#knobs">六個旋鈕</a>
+          <a href="#stack">接回 RAG</a>
+          <a href="#memo">一句話記住</a>
+        </nav>
+      </div>
+    </div>
   </aside>
 
   <main class="llm-main">

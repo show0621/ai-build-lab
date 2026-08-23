@@ -11,13 +11,42 @@ navToggle?.addEventListener("click", () => {
   navToggle.setAttribute("aria-expanded", String(!!open));
 });
 
+/* ---------- AssistiveTouch-style side nav ---------- */
+const llmSide = $("#llmSide");
+const llmSideOrb = $("#llmSideOrb");
+const llmSidePanel = $("#llmSidePanel");
+const llmSideCollapse = $("#llmSideCollapse");
+const SIDE_KEY = "llm-assist-open";
+
+function setSideOpen(open) {
+  if (!llmSide) return;
+  llmSide.dataset.open = open ? "true" : "false";
+  llmSideOrb?.setAttribute("aria-expanded", String(open));
+  llmSidePanel?.setAttribute("aria-hidden", String(!open));
+  try {
+    localStorage.setItem(SIDE_KEY, open ? "1" : "0");
+  } catch (_) {}
+}
+
+llmSideOrb?.addEventListener("click", () => setSideOpen(true));
+llmSideCollapse?.addEventListener("click", () => setSideOpen(false));
+
+try {
+  if (localStorage.getItem(SIDE_KEY) === "1") setSideOpen(true);
+} catch (_) {}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && llmSide?.dataset.open === "true") setSideOpen(false);
+});
+
 /* ---------- side nav active ---------- */
-const sideLinks = $$(".llm-side a");
+const sideLinks = $$("#llmSideLinks a");
 const sections = sideLinks
   .map((a) => document.querySelector(a.getAttribute("href")))
   .filter(Boolean);
 
 function syncSide() {
+  if (!sections.length) return;
   let current = sections[0];
   const y = window.scrollY + 120;
   for (const s of sections) {
@@ -29,6 +58,15 @@ function syncSide() {
 }
 window.addEventListener("scroll", syncSide, { passive: true });
 syncSide();
+
+sideLinks.forEach((a) => {
+  a.addEventListener("click", () => {
+    // keep open after jump so user can keep navigating; optional auto-collapse on mobile
+    if (window.matchMedia("(max-width: 700px)").matches) {
+      setTimeout(() => setSideOpen(false), 280);
+    }
+  });
+});
 
 /* ---------- static token chips ---------- */
 function fillChips(el, tokens) {
