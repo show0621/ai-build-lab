@@ -154,7 +154,7 @@
             <table class="mini-table">
               <tr><th>輸入</th><td>使用者問題、上傳檔、帳號角色</td></tr>
               <tr><th>輸出</th><td>答案 + 引用來源 + 信心說明</td></tr>
-              <tr><th>約束</th><td>不可臆測（Hallucination）、需標出知識庫依據</td></tr>
+              <tr><th>約束</th><td>不可臆測／亂答（Hallucination）、需標出知識庫依據</td></tr>
             </table>
           </div>
         </article>
@@ -191,7 +191,7 @@
           <path d="M450 180 V210" />
         </svg>
         <button class="flow-node" data-flow="start" style="--x:8%;--y:42%">開始<br /><small>使用者提問</small></button>
-        <button class="flow-node" data-flow="retrieve" style="--x:28%;--y:42%">檢索<br /><small>向量索引</small></button>
+        <button class="flow-node" data-flow="retrieve" style="--x:28%;--y:42%">檢索<br /><small>向量索引／依意思找</small></button>
         <button class="flow-node diamond" data-flow="enough" style="--x:50%;--y:42%"><span class="diamond-label">足夠?</span></button>
         <button class="flow-node alt" data-flow="rerank" style="--x:50%;--y:8%">Rerank<br /><small>重排精煉</small></button>
         <button class="flow-node warn" data-flow="fallback" style="--x:50%;--y:76%">回退<br /><small>請澄清 / 拒答</small></button>
@@ -254,11 +254,11 @@
             </ol>
           </div>
           <div class="tab-panel" data-panel="example">
-            <p class="spec-plain-intro">先看「白話版」：這段 SPEC 是在跟 AI／工程師講清楚——使用者丟什麼進來、系統要吐什麼出去、什麼情況下不能臆測（Hallucination）、多快要回、什麼事不做。</p>
+            <p class="spec-plain-intro">先看「白話版」：這段 SPEC 是在跟 AI／工程師講清楚——使用者丟什麼進來、系統要吐什麼出去、什麼情況下不能臆測／亂答、多快要回、什麼事不做。</p>
             <div class="spec-plain-list">
               <article class="spec-plain-item glass-lite">
                 <h4>這功能叫什麼？</h4>
-                <p><strong>知識庫問答</strong>：使用者用平常說話的方式提問，系統先<strong>檢索</strong>知識庫相關段落，再請 LLM 依段落作答。</p>
+                <p><strong>知識庫問答</strong>：使用者用平常說話的方式提問，系統先<strong>檢索</strong>知識庫相關段落，再請語言模型（LLM）依段落作答。</p>
               </article>
               <article class="spec-plain-item glass-lite">
                 <h4>輸入（使用者給系統什麼）</h4>
@@ -275,7 +275,7 @@
               </article>
               <article class="spec-plain-item glass-lite">
                 <h4>規則（什麼情況下不准亂答）</h4>
-                <p>知識庫裡<strong>找不到夠用的依據</strong>時：<strong>不准臆測（Hallucination）</strong>。改成<strong>反問使用者</strong>（請講清楚一點），或<strong>直接說不知道／拒答</strong>。</p>
+                <p>知識庫裡<strong>找不到夠用的依據</strong>時：<strong>不准臆測／亂答</strong>。改成<strong>反問使用者</strong>（請講清楚一點），或<strong>直接說不知道／拒答</strong>。</p>
               </article>
               <article class="spec-plain-item glass-lite">
                 <h4>效能（要多快）</h4>
@@ -417,12 +417,12 @@
         <article class="glass api-card" data-api="ingest">
           <div class="method put">PUT</div>
           <h3>/v1/kb/documents</h3>
-          <p>入庫窗口：切塊 → Embedding → 寫入向量索引（Vector Store）。</p>
+          <p>入庫窗口：切塊 → Embedding（轉向量）→ 寫入向量索引（之後才能依意思檢索）。</p>
         </article>
         <article class="glass api-card" data-api="health">
           <div class="method get">GET</div>
           <h3>/v1/health</h3>
-          <p>健康檢查：模型與向量索引（Vector Store）有沒有準備好。</p>
+          <p>健康檢查：模型與向量索引（檢索用）有沒有準備好。</p>
         </article>
       </div>
 
@@ -747,7 +747,7 @@ owner: HR
             <div class="tab-panel" data-panel="flowmap">
               <ol class="numbered case-flow-list">
                 <li><strong>開始</strong>：使用者提問（例：BAPA 申請要注意什麼？）</li>
-                <li><strong>檢索</strong>：本機 TP 知識庫以向量索引／關鍵字命中段落</li>
+                <li><strong>檢索</strong>：本機 TP 知識庫以向量索引（依意思找）／關鍵字命中段落</li>
                 <li><strong>Rerank／篩選</strong>：依意圖（避風港、DEMPE、PE…）加權</li>
                 <li><strong>判斷</strong>：不足 → 澄清；足夠 → 生成</li>
                 <li><strong>生成</strong>：查核實務論述 +【參考依據】</li>
@@ -915,7 +915,7 @@ owner: HR
         <span class="min-badge">約 5 分</span>
       </div>
 
-      <p class="summary-lead glass">你可以把它理解成：使用者問一句話 → 系統先對知識庫做<strong>向量檢索／重排</strong> → 再把段落交給 LLM，並用 Prompt 規定「只能怎麼答」→ 最後用固定格式交作業。</p>
+      <p class="summary-lead glass">你可以把它理解成：使用者問一句話 → 系統先對知識庫做<strong>向量檢索／重排</strong>（依意思找相關段落，再精選）→ 再把段落交給語言模型（LLM），並用 Prompt 規定「只能怎麼答」→ 最後用固定格式交作業。</p>
 
       <div class="rag-flow glass" aria-label="RAG 流程">
         <div class="rag-step">使用者問題</div>
@@ -1024,7 +1024,7 @@ owner: HR
         <button type="button" class="glass tool-card" data-tool="mcp">
           <span class="tool-kicker">02</span>
           <h3>MCP</h3>
-          <p>讓 Agent 接上外部工具</p>
+          <p>讓 Agent（可呼叫工具的 AI）接上外部工具</p>
         </button>
         <button type="button" class="glass tool-card" data-tool="subagent">
           <span class="tool-kicker">03</span>

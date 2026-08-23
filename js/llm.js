@@ -667,7 +667,7 @@ function narrateJourneyBeats() {
     setPipeStatus("Transformer／Attention 加權 · 高機率路徑強化…")
   );
   afterMs(Math.round(JOURNEY.next * 1000), () =>
-    setPipeStatus("Softmax 推演下一個 Token…")
+    setPipeStatus("Softmax 推演下一個 Token（算出各候選機率）…")
   );
 }
 

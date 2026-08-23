@@ -25,7 +25,7 @@ const FLOW_COPY = {
   },
   retrieve: {
     title: "檢索 · 向量索引檢索",
-    body: "用 Embedding 在向量索引（Vector Store）找相近 chunk。Top-K 建議先 15～20，寧可多撈再交給 Reranker 精煉。",
+    body: "用 Embedding（文字→座標）在向量索引裡找意思相近的段落。Top-K 建議先 15～20，寧可多撈再交給 Reranker 精煉。",
     tip: "vector_search.top_k = 20\nchunk_size ≈ 1500\noverlap ≈ 100",
   },
   enough: {
@@ -97,7 +97,7 @@ API Base URL = https://api.openai.com/v1
         <dt>最常見</dt><dd><code>Authorization: Bearer &lt;API_KEY&gt;</code></dd>
         <dt>其他</dt><dd><code>x-api-key: &lt;KEY&gt;</code>；Azure 可能還要 <code>api-key</code> 或資源名稱；有的要額外 org／project header</dd>
         <dt>寫進 SPEC</dt><dd>用哪一種、標頭名稱、是否還要第二道內部登入（使用者 JWT）與模型金鑰分開</dd>
-        <dt>教學口訣</dt><dd><strong>業務 API</strong>（問答／入庫）可以要「登入 token（JWT）」；<strong>叫外部 LLM</strong>要「供應商 API Key」——兩者不要混成同一個欄位說明不清。</dd>
+        <dt>教學口訣</dt><dd><strong>業務 API</strong>（問答／入庫）可以要「登入 token（JWT＝身分憑證）」；<strong>叫外部語言模型（LLM）</strong>要「供應商 API Key」——兩者不要混成同一個欄位說明不清。</dd>
       </dl>
       <pre class="code-block">Authorization: Bearer sk-••••••••
 Content-Type: application/json</pre>`,
@@ -124,7 +124,7 @@ Content-Type: application/json</pre>`,
   chat: {
     title: "POST /v1/chat/query｜問答窗口",
     html: `
-      <p class="api-plain"><strong>白話：</strong>這是「使用者按下送出問題」時，網頁叫後端做事的窗口。網頁把問題送出去，後端對知識庫做向量檢索、Rerank，再請 LLM 生成答案，最後把答案＋引用送回來。</p>
+      <p class="api-plain"><strong>白話：</strong>這是「使用者按下送出問題」時，網頁叫後端做事的窗口。網頁把問題送出去，後端先依意思從知識庫撈相關段落並重排精選，再請語言模型寫答案＋引用送回來。</p>
       <p class="api-plain"><strong>為什麼叫 POST？</strong>因為你在「送一份資料進去請對方處理」，不是單純看看狀態。</p>
       <dl class="kv">
         <dt>誰能用</dt><dd>要登入（Bearer token）；不同角色可能只能查自己權限內的知識</dd>
@@ -142,8 +142,8 @@ Content-Type: application/json</pre>`,
   ingest: {
     title: "PUT /v1/kb/documents｜入庫（寫入向量索引）",
       html: `
-      <p class="api-plain"><strong>白話：</strong>這是「把法令 Markdown 切塊、Embedding、寫進向量索引」的窗口。沒有這個，問答系統就沒段落可檢索。</p>
-      <p class="api-plain"><strong>廚房在做什麼？</strong>收到檔案後：切開段落 → 做成 Embedding 向量 → 寫入向量索引（Vector Store，之後就能做相似度檢索）。</p>
+      <p class="api-plain"><strong>白話：</strong>這是「把法令 Markdown 切開、轉成向量、寫進向量索引」的窗口。沒有這個，問答系統就沒段落可撈。</p>
+      <p class="api-plain"><strong>廚房在做什麼？</strong>收到檔案後：切開段落 → 做成 Embedding 向量 → 寫入向量索引（之後就能依意思檢索）。</p>
       <dl class="kv">
         <dt>誰能用</dt><dd>編輯者角色（不是人人都能改知識庫）</dd>
         <dt>你送什麼</dt><dd>檔案（markdown）＋標籤／版本／負責人等 metadata</dd>
@@ -154,7 +154,7 @@ Content-Type: application/json</pre>`,
   health: {
     title: "GET /v1/health｜健康檢查",
     html: `
-      <p class="api-plain"><strong>白話：</strong>上課或上線前先問一聲：「廚房開了沒？」模型、向量索引（Vector Store）、重排器是否都活著。</p>
+      <p class="api-plain"><strong>白話：</strong>上課或上線前先問一聲：「廚房開了沒？」模型、向量索引（檢索用）、重排器是否都活著。</p>
       <p class="api-plain"><strong>為什麼重要？</strong>若 AI 掛了還讓使用者一直提問，只會得到錯誤或空白，體驗很差。前端可先打這支，掛了就顯示「維護中」。</p>
       <dl class="kv">
         <dt>成功</dt><dd><code>{"llm":"ok","vector":"ok","reranker":"ok"}</code></dd>
@@ -211,7 +211,7 @@ const PARAMS = [
     suggest: "建議 0.15",
     explain:
       "規章查核要穩定、可重現。溫度愈高愈會發揮，也愈容易加油添醋。創意寫作才需要拉高。",
-    slider: { min: 0, max: 1, step: 0.05, value: 0.15, unit: "", noteLow: "很穩、略死板", noteHigh: "活潑但易幻覺（Hallucination）" },
+    slider: { min: 0, max: 1, step: 0.05, value: 0.15, unit: "", noteLow: "很穩、略死板", noteHigh: "活潑但易幻覺／亂掰（Hallucination）" },
   },
   {
     name: "Context Length",
@@ -262,13 +262,13 @@ const KB_MAP = {
 const TERM_GLOSSARY = {
   embedding: {
     title: "Embedding（嵌入／向量化）",
-    metaphor: "比喻：把每段文字變成「Embedding 空間裡的座標」",
+    metaphor: "比喻：把每段文字變成「語意地圖上的座標」",
     body: "想像每份文件、每個段落都被標成地圖上的一個點。意思相近的內容，座標會比較靠近。這樣電腦才能用「距離遠近」做向量檢索，而不是只比對有沒有相同的字。",
   },
   "vector-search": {
     title: "Vector Search（向量檢索）",
     metaphor: "比喻：在向量索引地圖上找「味道相近」的段落",
-    body: "你問一句話後，系統先把問題做成 Embedding 座標，再到<strong>向量索引（Vector Store）</strong>裡找「離你最近」的那些段落。它找的是意思接近，不只是關鍵字完全一樣。",
+    body: "你問一句話後，系統先把問題做成 Embedding 座標，再到<strong>向量索引</strong>（存段落向量、方便依意思找）裡找「離你最近」的那些段落。它找的是意思接近，不只是關鍵字完全一樣。",
   },
   topk: {
     title: "Top-K",
@@ -278,17 +278,17 @@ const TERM_GLOSSARY = {
   reranker: {
     title: "Reranker（重排器）",
     metaphor: "比喻：先大量撈書，再請專員精準挑出最該讀的幾本",
-    body: "Top-K 先寬抓，Reranker 再用更仔細的標準重新排序，把真正能回答這題的段落排前面，通常再留下大約 5～8 段給 LLM 看。",
+    body: "Top-K 先寬抓，Reranker 再用更仔細的標準重新排序，把真正能回答這題的段落排前面，通常再留下大約 5～8 段給語言模型看。",
   },
   chunks: {
     title: "retrieved_chunks（找回來的知識片段）",
     metaphor: "比喻：考試時允許帶進考場的「重點紙條」",
-    body: "經過向量檢索與重排後，真正塞進 Prompt／Context 給 LLM 看的那幾段資料就叫 retrieved_chunks。LLM 原則上只能根據這些紙條作答，比較不容易幻覺（Hallucination）。",
+    body: "經過向量檢索與重排後，真正塞進 Prompt／Context 給語言模型看的那幾段資料就叫 retrieved_chunks。模型原則上只能根據這些紙條作答，比較不容易幻覺／亂答。",
   },
   prompt: {
     title: "Prompt（提示詞）",
     metaphor: "比喻：給廚師的「烹飪說明書」",
-    body: "不只告訴 LLM 要做什麼菜，還規定：只能用這些食材、衝突要講出來、找不到就別亂猜、一定要標出引用。Prompt 就是工作規則。",
+    body: "不只告訴語言模型要做什麼菜，還規定：只能用這些食材、衝突要講出來、找不到就別亂猜、一定要標出引用。Prompt 就是工作規則。",
   },
   citation: {
     title: "Citation／citations（引用）",
@@ -327,7 +327,7 @@ const TERM_GLOSSARY = {
   },
   mcp: {
     title: "MCP",
-    metaphor: "比喻：萬能轉接頭，讓 LLM／Agent 接到外面的工具",
+    metaphor: "比喻：萬能轉接頭，讓 Agent（可呼叫工具的 AI）接到外面的工具",
     body: "Model Context Protocol。沒有它，模型多半只能看你貼的文字；有了它，Agent 可以在你允許的範圍內查瀏覽器、資料庫或內部系統。",
   },
   subagent: {
@@ -1093,7 +1093,7 @@ const TOOL_COPY = {
   },
   mcp: {
     title: "MCP（Model Context Protocol）",
-    metaphor: "比喻：萬能轉接頭——讓 Agent 接到瀏覽器、資料庫、內部系統。",
+    metaphor: "比喻：萬能轉接頭——讓 Agent（可呼叫工具的 AI）接到瀏覽器、資料庫、內部系統。",
     body: "沒有 MCP，模型多半只能看你貼上的文字。有了 MCP，Agent 能在你允許的範圍內「自己去查、去呼叫被核准的工具」。",
     items: ["接瀏覽器看頁面、點按鈕", "接內部資料庫或 API（需權限）", "接專案裡已設定好的服務", "重點：能做什麼，由你安裝與授權決定"],
   },

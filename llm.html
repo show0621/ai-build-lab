@@ -113,7 +113,7 @@
         <span class="section-num">B</span>
         <div>
           <h2>從輸入進入向量空間（Embedding）</h2>
-          <p>文字經 Token／Embedding 進入模型內部的<strong>向量空間</strong>，再以 Attention 連結相關 Token，並用 Softmax 推演下一個 Token 的機率。</p>
+          <p>文字先切成 Token、再變成向量座標；接著用 Attention（決定「現在該看誰」）連結相關 Token，最後用 Softmax（把分數換成機率）推演下一個 Token。</p>
         </div>
       </div>
       <div class="llm-demo glass llm-cinematic">
@@ -226,7 +226,7 @@
           </div>
         </div>
         <canvas id="embedCanvas" width="720" height="180" aria-label="向量空間示意"></canvas>
-        <p class="llm-caption">相近意思的詞，在<strong>向量空間（Embedding space）</strong>裡往往較靠近——RAG 再把文件段落的向量存進<strong>向量索引（Vector Store）</strong>做相似度檢索。</p>
+        <p class="llm-caption">相近意思的詞，在<strong>向量空間（Embedding space）</strong>裡往往較靠近——RAG 再把文件段落的向量存進<strong>向量索引（Vector Store＝專門存段落向量、方便依意思查找）</strong>做相似度檢索。</p>
       </div>
     </section>
 
@@ -291,7 +291,7 @@
         <pre class="llm-ascii" aria-label="參數總地圖">使用者問題
     ↓ Token
     ↓ Context Window ← 一次最多能看多少
-    ↓ RAG／向量檢索（Vector Store）
+    ↓ RAG／向量檢索（依意思找）
     ↓ Reranker ← 哪些段落最值得進 Context
     ↓ Transformer + Attention
     ↓ 機率分布
@@ -377,7 +377,7 @@
         <span class="section-num">06</span>
         <div>
           <h2>接回你的 TP／RAG 系統</h2>
-          <p>外部檢索（Embedding＋向量索引＋Rerank）＋內部理解生成（Transformer＋機率）。</p>
+          <p>外部檢索（Embedding＋向量索引＋Rerank＝先變座標、撈相關段落、再精選）＋內部理解生成（Transformer＋機率）。</p>
         </div>
       </div>
       <div class="glass llm-stack" id="stackFlow">
@@ -419,6 +419,6 @@
     </footer>
   </main>
 
-  <script src="js/llm.js?v=terms-1"></script>
+  <script src="js/llm.js?v=terms-plain-1"></script>
 </body>
 </html>
