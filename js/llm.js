@@ -358,20 +358,22 @@ function setPipeStatus(t) {
   if (el) el.textContent = t;
 }
 
-function drawAttnSvg(focusIdx, mode = "highlight") {
+function drawAttnSvg(focusIdx, mode = "predict") {
   const svg = $("#attnSvg");
   if (!svg) return;
+  // mode: scan | filter | link | predict  (progressive search)
   const tokens = PIPE_TOKENS;
   const W = 800;
   const H = 460;
   const focus = Math.min(Math.max(focusIdx, 0), tokens.length - 1);
   const focusTok = tokens[focus];
   const query = tokens.join("");
+  const showFilter = mode === "filter" || mode === "link" || mode === "predict";
+  const showLinks = mode === "link" || mode === "predict";
+  const showPredict = mode === "predict";
 
-  // Pastel literary palette (文青文字雲)
   const palette = ["#1e3a5f", "#0d9488", "#c2410c", "#4d7c0f", "#a16207", "#0369a1", "#be123c", "#6d28d9"];
 
-  // Packed cloud: related TP terms + distractors (size ≈ importance)
   const cloud = [
     { t: "受測個體", rel: 0.94, x: 0.5, y: 0.4, s: 28 },
     { t: "功能", rel: 0.9, x: 0.36, y: 0.34, s: 24 },
@@ -388,7 +390,6 @@ function drawAttnSvg(focusIdx, mode = "highlight") {
     { t: "函釋", rel: 0.38, x: 0.26, y: 0.2, s: 13 },
     { t: "BAPA", rel: 0.36, x: 0.78, y: 0.4, s: 13 },
     { t: "選擇", rel: 0.7, x: 0.5, y: 0.62, s: 18 },
-    // distractors
     { t: "台積電", rel: 0.05, x: 0.12, y: 0.18, s: 16 },
     { t: "永續", rel: 0.06, x: 0.88, y: 0.16, s: 15 },
     { t: "ETF", rel: 0.04, x: 0.1, y: 0.72, s: 14 },
@@ -419,13 +420,18 @@ function drawAttnSvg(focusIdx, mode = "highlight") {
   ];
 
   const cx = W * 0.5;
-  const cy = H * 0.42;
+  const cy = H * 0.4;
+
+  const phaseHint =
+    mode === "scan"
+      ? "① 掃描腦內文字雲…"
+      : mode === "filter"
+        ? "② 找出相關／淡化無關…"
+        : mode === "link"
+          ? "③ 建立神經連結並計算機率…"
+          : "④ 預測下一個 Token 機率…";
 
   const defs = `<defs>
-    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="1.6" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
     <linearGradient id="paperGrad" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#f7f3ea"/>
       <stop offset="100%" stop-color="#efe8dc"/>
@@ -439,35 +445,32 @@ function drawAttnSvg(focusIdx, mode = "highlight") {
   <circle cx="${cx}" cy="${cy}" r="118" fill="none" stroke="rgba(30,58,95,0.08)" stroke-width="1"/>
   <circle cx="${cx}" cy="${cy}" r="78" fill="none" stroke="rgba(13,148,136,0.1)" stroke-width="1" stroke-dasharray="3 5"/>`;
 
-  const title = `<text x="${cx}" y="32" text-anchor="middle" font-family="Outfit,sans-serif" font-size="15" fill="#1e3a5f" font-weight="600">腦內文字雲 · 語意連結 · 預測下一個字</text>
-  <text x="${cx}" y="52" text-anchor="middle" font-family="Outfit,sans-serif" font-size="12" fill="#78716c">龐大詞庫裡，模型先「注意」相關概念，再對下一個 Token 給出機率</text>`;
+  const title = `<text x="${cx}" y="30" text-anchor="middle" font-family="Outfit,sans-serif" font-size="15" fill="#1e3a5f" font-weight="600">腦內文字雲 · 尋找 · 連結 · 預測</text>
+  <text x="${cx}" y="50" text-anchor="middle" font-family="Outfit,sans-serif" font-size="12" fill="#0d9488">${phaseHint}</text>`;
 
-  // Center focus — thin ink ring, not frosted slab
-  const center = `<g>
+  const center = `<g class="attn-focus-ring">
     <circle cx="${cx}" cy="${cy}" r="46" fill="rgba(255,255,255,0.45)" stroke="#1e3a5f" stroke-width="1.4"/>
     <circle cx="${cx}" cy="${cy}" r="40" fill="none" stroke="#0d9488" stroke-width="1" opacity="0.45"/>
     <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="11" fill="#78716c" font-family="Outfit,sans-serif">焦點詞</text>
     <text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="20" font-weight="700" fill="#1e3a5f" font-family="Outfit,sans-serif">${focusTok}</text>
   </g>`;
 
-  // Soft mesh among related (brain associations)
   let mesh = "";
-  if (mode === "highlight") {
+  if (showLinks) {
     const top = related.slice(0, 8);
     for (let i = 0; i < top.length; i++) {
       for (let j = i + 1; j < Math.min(top.length, i + 3); j++) {
         const a = top[i];
         const b = top[j];
-        mesh += `<path d="M${a.x * W} ${a.y * H} Q${cx} ${cy} ${b.x * W} ${b.y * H}" fill="none" stroke="rgba(13,148,136,0.12)" stroke-width="1"/>`;
+        mesh += `<path class="attn-mesh" d="M${a.x * W} ${a.y * H} Q${cx} ${cy} ${b.x * W} ${b.y * H}" fill="none" stroke="rgba(13,148,136,0.12)" stroke-width="1"/>`;
       }
     }
   }
 
-  // Analysis links: focus → related with %
   let links = "";
   let pills = "";
   let pulses = "";
-  if (mode === "highlight") {
+  if (showLinks) {
     related.slice(0, 8).forEach((w, idx) => {
       const x = w.x * W;
       const y = w.y * H;
@@ -475,73 +478,100 @@ function drawAttnSvg(focusIdx, mode = "highlight") {
       const bend = idx % 2 === 0 ? -22 : 22;
       const mx = (cx + x) / 2 + bend;
       const my = (cy + y) / 2;
-      const d = `M${cx + 40 * Math.cos(Math.atan2(y - cy, x - cx))} ${cy + 40 * Math.sin(Math.atan2(y - cy, x - cx))} Q${mx} ${my} ${x} ${y}`;
-      links += `<path class="attn-ink" d="${d}" stroke-width="${1 + p * 3.2}" opacity="${0.45 + p * 0.4}" fill="none" stroke="#0d9488"/>`;
+      const ang = Math.atan2(y - cy, x - cx);
+      const d = `M${cx + 40 * Math.cos(ang)} ${cy + 40 * Math.sin(ang)} Q${mx} ${my} ${x} ${y}`;
+      const delay = `${0.12 + idx * 0.18}s`;
+      links += `<path class="attn-ink attn-draw" d="${d}" stroke-width="${1 + p * 3.2}" fill="none" stroke="#0d9488" style="--delay:${delay};--op:${0.45 + p * 0.4}"/>`;
       if (idx < 6) {
-        pulses += `<path class="attn-ink-pulse" d="${d}" stroke-width="${1.2 + p}" fill="none"/>`;
-        pills += `<g>
+        pulses += `<path class="attn-ink-pulse" d="${d}" stroke-width="${1.2 + p}" fill="none" style="--delay:${delay}"/>`;
+        pills += `<g class="attn-prob-reveal" style="--delay:${0.28 + idx * 0.18}s">
           <rect x="${mx - 18}" y="${my - 9}" width="36" height="16" rx="8" fill="#fffaf3" stroke="#99f6e4"/>
           <text x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="#0f766e" font-weight="600">${Math.round(p * 100)}%</text>
         </g>`;
       }
     });
-  } else {
-    // searching: faint feelers
+  } else if (mode === "scan") {
     cloud.forEach((w, i) => {
       if (i % 3 !== 0) return;
-      links += `<path d="M${cx} ${cy} L${w.x * W} ${w.y * H}" fill="none" stroke="rgba(120,113,108,0.15)" stroke-width="0.8"/>`;
+      links += `<path class="attn-scan-ray" d="M${cx} ${cy} L${w.x * W} ${w.y * H}" fill="none" stroke="rgba(120,113,108,0.18)" stroke-width="0.8" style="--delay:${(i % 8) * 0.08}s"/>`;
     });
   }
 
-  // Word cloud typography (no heavy chips)
   let words = "";
   cloud.forEach((w, i) => {
     const x = w.x * W;
     const y = w.y * H;
-    const on = mode === "highlight" && w.rel >= 0.35;
-    const dim = mode === "highlight" && w.rel < 0.35;
-    const opacity = dim ? 0.28 : 1;
-    const weight = on ? 700 : w.s >= 18 ? 650 : 500;
-    const fill = dim ? "#a8a29e" : on ? w.color : w.color;
-    words += `<text class="attn-cloud-word${on ? " on" : ""}" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle"
+    const isRel = w.rel >= 0.35;
+    let cls = "attn-cloud-word";
+    if (showFilter) {
+      cls += isRel ? " is-related" : " is-unrelated";
+    } else {
+      cls += " is-scanning";
+    }
+    if (showLinks && isRel) cls += " is-linked";
+    const weight = isRel && showFilter ? 700 : w.s >= 18 ? 650 : 500;
+    const fill = showFilter && !isRel ? "#a8a29e" : w.color;
+    words += `<text class="${cls}" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle"
       font-size="${w.s}" font-family="Outfit,'Noto Sans TC',sans-serif" font-weight="${weight}"
-      fill="${fill}" opacity="${opacity}" style="--d:${5 + (i % 6) * 0.4}s;--delay:${(i % 8) * 0.12}s">${w.t}</text>`;
+      fill="${fill}" style="--d:${5 + (i % 6) * 0.4}s;--delay:${(i % 8) * 0.1}s;--i:${i}">${w.t}</text>`;
   });
 
-  // Next-token prediction strip (subsequent neural step)
   let predict = "";
-  if (mode === "highlight") {
+  if (showPredict) {
     const baseY = H - 78;
-    predict = `<g>
+    predict = `<g class="attn-predict-panel">
       <text x="36" y="${baseY - 14}" font-size="12" fill="#57534e" font-family="Outfit,sans-serif">下一步：預測下一個 Token／知識答案機率</text>
       ${nextPred
         .map((n, i) => {
           const x = 36 + i * 148;
           const bw = 28 + n.p * 90;
-          return `<g>
+          return `<g class="attn-pred-item" style="--delay:${0.15 + i * 0.12}s">
             <text x="${x}" y="${baseY + 6}" font-size="13" fill="#1e3a5f" font-family="Outfit,sans-serif" font-weight="600">${n.t}</text>
             <text x="${x + 52}" y="${baseY + 6}" font-size="11" fill="#0d9488" font-family="JetBrains Mono,monospace">${Math.round(n.p * 100)}%</text>
             <rect x="${x}" y="${baseY + 14}" width="120" height="6" rx="3" fill="rgba(30,58,95,0.08)"/>
-            <rect x="${x}" y="${baseY + 14}" width="${bw}" height="6" rx="3" fill="#0d9488" opacity="0.85"/>
-            ${i < nextPred.length - 1 ? `<path d="M${x + 128} ${baseY + 4} L${x + 140} ${baseY + 4}" stroke="#a8a29e" stroke-width="1" marker-end=""/>` : ""}
+            <rect class="attn-pred-bar" x="${x}" y="${baseY + 14}" width="${bw}" height="6" rx="3" fill="#0d9488" style="--bw:${bw}px"/>
           </g>`;
         })
         .join("")}
-      <path d="M36 ${baseY - 28} Q${cx} ${baseY - 48} ${W - 40} ${baseY - 28}" fill="none" stroke="rgba(13,148,136,0.25)" stroke-width="1.2" stroke-dasharray="4 4" class="attn-ink-pulse"/>
       <text x="${W - 40}" y="${baseY - 34}" text-anchor="end" font-size="11" fill="#0d9488" font-family="Outfit,sans-serif">→ 生成鏈繼續</text>
     </g>`;
   } else {
-    predict = `<text x="${cx}" y="${H - 36}" text-anchor="middle" font-size="12" fill="#78716c" font-family="Outfit,sans-serif">掃描文字雲中…稍後標出相關連結與下一字機率</text>`;
+    predict = `<text x="${cx}" y="${H - 36}" text-anchor="middle" font-size="12" fill="#78716c" font-family="Outfit,sans-serif">${
+      mode === "scan" ? "正在掃描龐大詞庫…" : mode === "filter" ? "無關詞後退淡化中…" : "連線與機率計算中…"
+    }</text>`;
   }
 
-  const legend = `<g>
-    <text x="28" y="${H - 12}" font-size="11" fill="#78716c" font-family="Outfit,sans-serif">彩色大字＝較可能被注意的概念　灰色小字＝無關雜訊　線上％＝語意相關機率</text>
-  </g>`;
+  const legend = `<text x="28" y="${H - 12}" font-size="11" fill="#78716c" font-family="Outfit,sans-serif">相關＝前層加亮　無關＝淡化後退　線上％＝語意相關機率　底部＝下一字預測</text>`;
 
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.classList.remove("llm-attn-tech");
   svg.classList.add("llm-attn-literary");
+  svg.dataset.phase = mode;
   svg.innerHTML = defs + title + mesh + links + pulses + words + center + pills + predict + legend;
+}
+
+/** Progressive: scan → filter → link → predict */
+function runAttnSearchAnimation(focusIdx, onDone) {
+  const phases = [
+    { mode: "scan", status: "掃描文字雲…", wait: 900 },
+    { mode: "filter", status: "相關留下、無關淡化後退…", wait: 1100 },
+    { mode: "link", status: "神經連結＋機率計算…", wait: 1600 },
+    { mode: "predict", status: "預測下一個 Token…", wait: 1200 },
+  ];
+  let i = 0;
+  const tick = () => {
+    if (pipePaused) return;
+    if (i >= phases.length) {
+      if (onDone) onDone();
+      return;
+    }
+    const ph = phases[i];
+    setPipeStatus(`語意搜尋 ${i + 1}/${phases.length} · ${ph.status}`);
+    drawAttnSvg(focusIdx, ph.mode);
+    i += 1;
+    schedule(tick, ph.wait);
+  };
+  tick();
 }
 
 function renderPipeTokens(active = -1) {
@@ -586,35 +616,32 @@ function runPipeline(fromStep = 0) {
       schedule(() => runStep(1), 1200);
     },
     () => {
-      setPipeStatus("2/6 文字雲腦庫展開（相關＋雜訊）");
+      setPipeStatus("語意搜尋開始…");
       highlightChain(2);
-      drawAttnSvg(4, "web");
-      schedule(() => runStep(2), 1100);
-    },
-    () => {
-      setPipeStatus("3/6 語意連線＋預測下一字機率");
-      highlightChain(3);
-      drawAttnSvg(4, "highlight");
-      $$("#pipeTokens .llm-tok").forEach((el, i) => {
-        el.classList.toggle("on", i === 0 || i === 1 || i === 4);
+      runAttnSearchAnimation(4, () => {
+        if (pipePaused) return;
+        highlightChain(3);
+        $$("#pipeTokens .llm-tok").forEach((el, i) => {
+          el.classList.toggle("on", i === 0 || i === 1 || i === 4);
+        });
+        schedule(() => runStep(2), 400);
       });
-      schedule(() => runStep(3), 1700);
     },
     () => {
-      setPipeStatus("4/6 計算下一個 Token 機率");
+      setPipeStatus("計算下一個 Token 機率分布");
       highlightChain(4);
       renderBars(bars, BASE_PROBS);
-      schedule(() => runStep(4), 1000);
+      schedule(() => runStep(3), 1000);
     },
     () => {
-      setPipeStatus("5/6 選出「功能」");
+      setPipeStatus("選出「功能」");
       highlightChain(5);
       renderBars(bars, BASE_PROBS, { pick: "功能", dimOthers: true });
       if (out) out.textContent = "受測個體應如何選擇？功能";
-      schedule(() => runStep(5), 1000);
+      schedule(() => runStep(4), 1000);
     },
     () => {
-      setPipeStatus("6/6 重複：再預測「較」「單純」…");
+      setPipeStatus("重複：再預測「較」「單純」…");
       highlightChain(6);
       let built = "受測個體應如何選擇？功能";
       let i = 0;

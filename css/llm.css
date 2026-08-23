@@ -441,6 +441,150 @@
   animation: attnFloat var(--d, 5s) ease-in-out var(--delay, 0s) infinite;
   transform-box: fill-box;
   transform-origin: center;
+  transition: opacity 0.7s ease, transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), fill 0.5s;
+}
+
+.llm-attn-svg .attn-cloud-word.is-scanning {
+  opacity: 0.85;
+}
+
+.llm-attn-svg .attn-cloud-word.is-related {
+  opacity: 1;
+  transform: scale(1.06);
+  animation: attnFloatRelated var(--d, 5s) ease-in-out var(--delay, 0s) infinite;
+}
+
+.llm-attn-svg .attn-cloud-word.is-unrelated {
+  opacity: 0.22;
+  transform: scale(0.78) translateY(10px);
+  filter: blur(0.35px);
+  animation: none;
+}
+
+.llm-attn-svg .attn-cloud-word.is-linked {
+  transform: scale(1.1);
+}
+
+@keyframes attnFloatRelated {
+  0%,
+  100% {
+    transform: scale(1.06) translateY(0);
+  }
+  50% {
+    transform: scale(1.06) translateY(-5px);
+  }
+}
+
+.llm-attn-svg .attn-draw {
+  stroke-dasharray: 420;
+  stroke-dashoffset: 420;
+  opacity: 0;
+  animation: attnDrawLine 0.85s ease forwards;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes attnDrawLine {
+  0% {
+    stroke-dashoffset: 420;
+    opacity: 0;
+  }
+  20% {
+    opacity: var(--op, 0.7);
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: var(--op, 0.7);
+  }
+}
+
+.llm-attn-svg .attn-ink-pulse {
+  stroke: #14b8a6;
+  stroke-linecap: round;
+  stroke-dasharray: 5 8;
+  opacity: 0;
+  animation: attnPulseFade 1.15s linear infinite;
+  animation-delay: var(--delay, 0.3s);
+}
+
+@keyframes attnPulseFade {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+  30% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0.55;
+    stroke-dashoffset: -28;
+  }
+}
+
+.llm-attn-svg .attn-prob-reveal {
+  opacity: 0;
+  transform-origin: center;
+  animation: attnProbIn 0.45s ease forwards;
+  animation-delay: var(--delay, 0.3s);
+}
+
+@keyframes attnProbIn {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.llm-attn-svg .attn-scan-ray {
+  stroke-dasharray: 8 10;
+  animation: attnScan 1.2s linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes attnScan {
+  to {
+    stroke-dashoffset: -36;
+  }
+}
+
+.llm-attn-svg .attn-predict-panel {
+  animation: attnPredictIn 0.55s ease forwards;
+}
+
+.llm-attn-svg .attn-pred-item {
+  opacity: 0;
+  animation: attnProbIn 0.4s ease forwards;
+  animation-delay: var(--delay, 0.1s);
+}
+
+.llm-attn-svg .attn-pred-bar {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: attnBarGrow 0.7s ease forwards;
+  animation-delay: var(--delay, 0.15s);
+}
+
+@keyframes attnPredictIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes attnBarGrow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 .llm-attn-svg .attn-cloud-word.on {
@@ -450,14 +594,6 @@
 .llm-attn-svg .attn-ink {
   stroke-linecap: round;
   filter: drop-shadow(0 0 1.5px rgba(13, 148, 136, 0.25));
-}
-
-.llm-attn-svg .attn-ink-pulse {
-  stroke: #14b8a6;
-  stroke-linecap: round;
-  stroke-dasharray: 5 8;
-  animation: attnPulse 1.15s linear infinite;
-  opacity: 0.65;
 }
 
 .llm-attn-svg .attn-web {
