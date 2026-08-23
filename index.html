@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>用 AI 做出你想要的程式｜構想 → SPEC → 知識庫 → 回饋迴路</title>
-  <meta name="description" content="60–70 分鐘互動教學：構想、SPEC、PROMPT、知識庫切塊、HOOK／MCP／Subagent、工作流與 AI 回饋迴路" />
+  <meta name="description" content="60–70 分鐘互動教學：構想、SPEC、PROMPT、知識庫切塊、Hook／MCP／Subagent、工作流與 AI 回饋迴路" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -59,7 +59,7 @@
           用 AI 做出<br /><span class="accent">你想要的成果</span>
         </h1>
         <p class="hero-lead reveal">
-          從構想、SPEC、PROMPT、知識庫切塊，到 HOOK／MCP／Subagent，
+          從構想、SPEC、PROMPT、知識庫切塊，到 Hook／MCP／Subagent，
           再到讓 AI 知道自己何時容易錯——一套可重複使用的實作路徑。
         </p>
         <p class="hero-author reveal">作者：李孟霖 · <a href="mailto:nh17528@ntbna.gov.tw">nh17528@ntbna.gov.tw</a></p>
@@ -154,7 +154,7 @@
             <table class="mini-table">
               <tr><th>輸入</th><td>使用者問題、上傳檔、帳號角色</td></tr>
               <tr><th>輸出</th><td>答案 + 引用來源 + 信心說明</td></tr>
-              <tr><th>約束</th><td>不可瞎編、需標出知識庫依據</td></tr>
+              <tr><th>約束</th><td>不可臆測（Hallucination）、需標出知識庫依據</td></tr>
             </table>
           </div>
         </article>
@@ -191,7 +191,7 @@
           <path d="M450 180 V210" />
         </svg>
         <button class="flow-node" data-flow="start" style="--x:8%;--y:42%">開始<br /><small>使用者提問</small></button>
-        <button class="flow-node" data-flow="retrieve" style="--x:28%;--y:42%">檢索<br /><small>向量搜尋</small></button>
+        <button class="flow-node" data-flow="retrieve" style="--x:28%;--y:42%">檢索<br /><small>向量索引</small></button>
         <button class="flow-node diamond" data-flow="enough" style="--x:50%;--y:42%"><span class="diamond-label">足夠?</span></button>
         <button class="flow-node alt" data-flow="rerank" style="--x:50%;--y:8%">Rerank<br /><small>重排精煉</small></button>
         <button class="flow-node warn" data-flow="fallback" style="--x:50%;--y:76%">回退<br /><small>請澄清 / 拒答</small></button>
@@ -254,11 +254,11 @@
             </ol>
           </div>
           <div class="tab-panel" data-panel="example">
-            <p class="spec-plain-intro">先看「白話版」：這段 SPEC 是在跟 AI／工程師講清楚——使用者丟什麼進來、系統要吐什麼出去、什麼情況下不能瞎掰、多快要回、什麼事不做。</p>
+            <p class="spec-plain-intro">先看「白話版」：這段 SPEC 是在跟 AI／工程師講清楚——使用者丟什麼進來、系統要吐什麼出去、什麼情況下不能臆測（Hallucination）、多快要回、什麼事不做。</p>
             <div class="spec-plain-list">
               <article class="spec-plain-item glass-lite">
                 <h4>這功能叫什麼？</h4>
-                <p><strong>知識庫問答</strong>：使用者用平常說話的方式提問，系統去知識庫找資料再回答。</p>
+                <p><strong>知識庫問答</strong>：使用者用平常說話的方式提問，系統先<strong>檢索</strong>知識庫相關段落，再請 LLM 依段落作答。</p>
               </article>
               <article class="spec-plain-item glass-lite">
                 <h4>輸入（使用者給系統什麼）</h4>
@@ -275,7 +275,7 @@
               </article>
               <article class="spec-plain-item glass-lite">
                 <h4>規則（什麼情況下不准亂答）</h4>
-                <p>知識庫裡<strong>找不到夠用的依據</strong>時：<strong>不准自己腦補</strong>。改成<strong>反問使用者</strong>（請講清楚一點），或<strong>直接說不知道／拒答</strong>。</p>
+                <p>知識庫裡<strong>找不到夠用的依據</strong>時：<strong>不准臆測（Hallucination）</strong>。改成<strong>反問使用者</strong>（請講清楚一點），或<strong>直接說不知道／拒答</strong>。</p>
               </article>
               <article class="spec-plain-item glass-lite">
                 <h4>效能（要多快）</h4>
@@ -417,12 +417,12 @@
         <article class="glass api-card" data-api="ingest">
           <div class="method put">PUT</div>
           <h3>/v1/kb/documents</h3>
-          <p>入庫窗口：把 Markdown 法令檔放進知識庫。</p>
+          <p>入庫窗口：切塊 → Embedding → 寫入向量索引（Vector Store）。</p>
         </article>
         <article class="glass api-card" data-api="health">
           <div class="method get">GET</div>
           <h3>/v1/health</h3>
-          <p>健康檢查：AI 與向量庫有沒有準備好。</p>
+          <p>健康檢查：模型與向量索引（Vector Store）有沒有準備好。</p>
         </article>
       </div>
 
@@ -546,7 +546,7 @@ owner: HR
                 <button type="button" class="copy-btn" data-copy-target="kbPromptMd">複製指令</button>
               </div>
               <pre class="code-block" id="kbPromptMd"><code>角色：你是知識庫工程師。
-任務：把我貼上的資料整理成「可入向量庫」的 Markdown。
+任務：把我貼上的資料整理成「可寫入向量索引、可被 Embedding 檢索」的 Markdown。
 規則：
 1. 一檔一事；檔名用主題，不要用「完整版」「彙整」
 2. 標題：# 主題、## 小節、### 例外／注意
@@ -747,7 +747,7 @@ owner: HR
             <div class="tab-panel" data-panel="flowmap">
               <ol class="numbered case-flow-list">
                 <li><strong>開始</strong>：使用者提問（例：BAPA 申請要注意什麼？）</li>
-                <li><strong>檢索</strong>：本機 TP 知識庫向量／關鍵字命中段落</li>
+                <li><strong>檢索</strong>：本機 TP 知識庫以向量索引／關鍵字命中段落</li>
                 <li><strong>Rerank／篩選</strong>：依意圖（避風港、DEMPE、PE…）加權</li>
                 <li><strong>判斷</strong>：不足 → 澄清；足夠 → 生成</li>
                 <li><strong>生成</strong>：查核實務論述 +【參考依據】</li>
@@ -915,7 +915,7 @@ owner: HR
         <span class="min-badge">約 5 分</span>
       </div>
 
-      <p class="summary-lead glass">你可以把它理解成：使用者問一句話 → 系統先去知識庫「找資料」→ 再把資料交給 AI，並規定它「只能怎麼答」→ 最後用固定格式交作業。</p>
+      <p class="summary-lead glass">你可以把它理解成：使用者問一句話 → 系統先對知識庫做<strong>向量檢索／重排</strong> → 再把段落交給 LLM，並用 Prompt 規定「只能怎麼答」→ 最後用固定格式交作業。</p>
 
       <div class="rag-flow glass" aria-label="RAG 流程">
         <div class="rag-step">使用者問題</div>
@@ -954,7 +954,7 @@ owner: HR
         <ol class="chain-list">
           <li>
             <button type="button" class="term-btn term-inline" data-term="embedding">Embedding</button>
-            <span>→ 把文件轉成向量</span>
+            <span>→ 把文件轉成 Embedding 向量</span>
           </li>
           <li>
             <button type="button" class="term-btn term-inline" data-term="vector-search">Vector Search</button>
@@ -997,12 +997,12 @@ owner: HR
       </div>
     </section>
 
-    <!-- 10 COLLAB: HOOK / MCP / SUBAGENT / WORKFLOW -->
+    <!-- 10 COLLAB: Hook / MCP / SUBAGENT / WORKFLOW -->
     <section class="section" id="collab" data-minutes="8">
       <div class="section-head">
         <span class="section-num">10</span>
         <div>
-          <h2>HOOK · MCP · Subagent · Workflow</h2>
+          <h2>Hook · MCP · Subagent · Workflow</h2>
           <p>AI 不只會寫字。把它接上工具、門禁與分工，才叫工作流。</p>
         </div>
         <span class="min-badge">約 8 分</span>
@@ -1018,13 +1018,13 @@ owner: HR
       <div class="tool-grid" id="toolGrid">
         <button type="button" class="glass tool-card active" data-tool="hook">
           <span class="tool-kicker">01</span>
-          <h3>HOOK</h3>
+          <h3>Hook</h3>
           <p>事件前後的自動門禁</p>
         </button>
         <button type="button" class="glass tool-card" data-tool="mcp">
           <span class="tool-kicker">02</span>
           <h3>MCP</h3>
-          <p>讓 AI 接上外部工具</p>
+          <p>讓 Agent 接上外部工具</p>
         </button>
         <button type="button" class="glass tool-card" data-tool="subagent">
           <span class="tool-kicker">03</span>
@@ -1039,8 +1039,8 @@ owner: HR
       </div>
 
       <aside class="tool-detail glass" id="toolDetail">
-        <p class="tool-metaphor" id="toolMetaphor">比喻：門口保全——AI 要出門或進門前，先檢查證件。</p>
-        <h3 id="toolTitle">HOOK（鉤子／事件攔截）</h3>
+        <p class="tool-metaphor" id="toolMetaphor">比喻：門口保全——Agent 要出門或進門前，先檢查證件。</p>
+        <h3 id="toolTitle">Hook（鉤子／事件攔截）</h3>
         <p id="toolBody">Hook 是「某件事發生之前或之後，自動跑一段檢查或後續動作」。不是讓人每次盯著看，而是把規則寫進事件裡。</p>
         <ul class="check-list" id="toolList">
           <li>改完檔自動格式化</li>

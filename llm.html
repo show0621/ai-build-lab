@@ -104,7 +104,7 @@
         <span class="llm-chain-arrow" aria-hidden="true">→</span>
         <span class="llm-chain-step" data-step="6">重複…</span>
       </div>
-      <p class="llm-note">Transformer <strong>不是</strong>答案資料庫；它是很會處理「各個 Token 彼此關係」的神經網路架構。真正「查 TP 法規原文」靠的是你的 RAG／知識庫。</p>
+      <p class="llm-note">Transformer <strong>不是</strong>答案資料庫；它是很會處理「各個 Token 彼此關係」的神經網路架構。真正「查 TP 法規原文」靠的是建立的 <strong>RAG</strong>（檢索＋把段落塞進 Context），不是模型權重本身。</p>
     </section>
 
     <!-- PIPELINE LIVE -->
@@ -112,8 +112,8 @@
       <div class="section-head">
         <span class="section-num">B</span>
         <div>
-          <h2>從輸入進入向量資料庫</h2>
-          <p>文字輸入後進入文字星雲，進行神經突觸連結與機率推演。</p>
+          <h2>從輸入進入向量空間（Embedding）</h2>
+          <p>文字經 Token／Embedding 進入模型內部的<strong>向量空間</strong>，再以 Attention 連結相關 Token，並用 Softmax 推演下一個 Token 的機率。</p>
         </div>
       </div>
       <div class="llm-demo glass llm-cinematic">
@@ -147,7 +147,7 @@
             </div>
           </div>
 
-          <!-- Act 2: vector DB word nebula -->
+          <!-- Act 2: embedding / attention space -->
           <div class="cine-act cine-brain" id="cineBrain" hidden>
             <div class="cine-brain-frame">
               <svg class="cine-brain-sil" viewBox="0 0 860 480" aria-hidden="true">
@@ -159,7 +159,7 @@
                 </defs>
                 <ellipse cx="430" cy="250" rx="320" ry="200" fill="url(#brainAtm)"/>
               </svg>
-              <svg class="llm-attn-svg llm-attn-literary attn-spread attn-white" id="attnSvg" viewBox="0 0 860 480" role="img" aria-label="向量資料庫文字星雲"></svg>
+              <svg class="llm-attn-svg llm-attn-literary attn-spread attn-white" id="attnSvg" viewBox="0 0 860 480" role="img" aria-label="Embedding 向量空間與 Attention"></svg>
             </div>
           </div>
         </div>
@@ -226,7 +226,7 @@
           </div>
         </div>
         <canvas id="embedCanvas" width="720" height="180" aria-label="向量空間示意"></canvas>
-        <p class="llm-caption">相近意思的詞，在向量空間裡往往較靠近——這也是 RAG 用 Embedding 做向量搜尋的基礎。</p>
+        <p class="llm-caption">相近意思的詞，在<strong>向量空間（Embedding space）</strong>裡往往較靠近——RAG 再把文件段落的向量存進<strong>向量索引（Vector Store）</strong>做相似度檢索。</p>
       </div>
     </section>
 
@@ -273,7 +273,7 @@
         <p>Context：<code>受測個體應選擇功能較</code></p>
         <div class="llm-prob-bars" id="probStatic"></div>
         <p class="llm-muted">選出「單純」→ 再以新句子當 Context，重複整段流程。答案是<strong>一個 Token 一個 Token 長出來的</strong>。</p>
-        <p class="llm-takeaway">「只是在猜下一個字」容易低估模型：猜之前，內部表示與 Attention 已經很複雜。</p>
+        <p class="llm-takeaway">「只是在猜下一個字」容易低估模型：猜之前，內部表示與 Attention 已經很複雜——而且猜的單位是 <strong>Token</strong>，不一定等於一個中文字。</p>
       </div>
     </section>
 
@@ -291,8 +291,8 @@
         <pre class="llm-ascii" aria-label="參數總地圖">使用者問題
     ↓ Token
     ↓ Context Window ← 一次最多能看多少
-    ↓ RAG／Vector Search
-    ↓ Reranker ← 哪些資料最值得給 LLM
+    ↓ RAG／向量檢索（Vector Store）
+    ↓ Reranker ← 哪些段落最值得進 Context
     ↓ Transformer + Attention
     ↓ 機率分布
     ↓ Temperature ← 穩定 vs 有變化
@@ -302,8 +302,8 @@
 
       <div class="llm-knob-grid">
         <article class="glass llm-card" id="knob-context">
-          <h3>1. Context Window＝工作記憶</h3>
-          <p>一次能塞進的 Token 總量：系統提示＋問題＋RAG＋歷史＋輸出預算，大家一起搶。</p>
+          <h3>1. Context Window＝上下文視窗</h3>
+          <p>一次能塞進的 Token 總量（不是長期記憶）：系統提示＋問題＋RAG 段落＋對話歷史＋輸出預算，大家一起搶。</p>
           <div class="llm-ctx" id="ctxViz" aria-label="Context 佔用示意">
             <div class="llm-ctx-seg" style="--w:18%" data-label="System 3K"></div>
             <div class="llm-ctx-seg" style="--w:8%" data-label="問題 0.5K"></div>
@@ -319,7 +319,7 @@
           <p>向量相似 ≠ 最能回答問題。先寬抓，再精準挑——法令／OECD 尤其需要。</p>
           <div class="llm-rerank" id="rerankViz">
             <div class="llm-rerank-col">
-              <span class="llm-label">Vector Top-10</span>
+              <span class="llm-label">向量檢索 Top-10</span>
               <ul id="rerankBefore"></ul>
             </div>
             <div class="llm-rerank-arrow">→ Rerank →</div>
@@ -333,7 +333,7 @@
 
         <article class="glass llm-card llm-card-span" id="knob-sample">
           <h3>3–5. Temperature · Top-K · Top-P（抽樣）</h3>
-          <p>三者都作用在「機率分布 → 選出下一個 Token」這一步。拖動旋鈕看候選怎麼變。</p>
+          <p>這三個作用在「機率分布 → 選出下一個 Token」——注意：這裡的 <strong>Top-K</strong> 是<strong>抽樣候選數</strong>，和 RAG 檢索的 Top-K（先撈幾段）不是同一個旋鈕。</p>
           <div class="llm-sliders">
             <label>Temperature <output id="tempOut">0.15</output>
               <input type="range" id="tempRange" min="0" max="1.2" step="0.05" value="0.15" />
@@ -377,13 +377,13 @@
         <span class="section-num">06</span>
         <div>
           <h2>接回你的 TP／RAG 系統</h2>
-          <p>外部找資料（Embedding＋搜尋＋Rerank）＋內部理解生成（Transformer＋機率）。</p>
+          <p>外部檢索（Embedding＋向量索引＋Rerank）＋內部理解生成（Transformer＋機率）。</p>
         </div>
       </div>
       <div class="glass llm-stack" id="stackFlow">
         <div class="llm-stack-node" data-i="0">使用者問題</div>
         <div class="llm-stack-node" data-i="1">Embedding</div>
-        <div class="llm-stack-node" data-i="2">Vector Search<br /><small>Top-K 20～30</small></div>
+        <div class="llm-stack-node" data-i="2">向量檢索<br /><small>Top-K 20～30</small></div>
         <div class="llm-stack-node" data-i="3">Reranker<br /><small>留 3～6</small></div>
         <div class="llm-stack-node" data-i="4">塞進 Context Window</div>
         <div class="llm-stack-node" data-i="5">Transformer＋Attention</div>
@@ -403,8 +403,8 @@
         </div>
       </div>
       <blockquote class="llm-memo glass">
-        <p><strong>Token</strong> 是「字」；<strong>Embedding</strong> 是「把字變成數學表示」；<strong>Attention</strong> 是「現在該注意哪些字」；<strong>Transformer</strong> 是「處理這些關係的神經網路」；<strong>機率分布</strong> 是「下一個 Token 各有多大可能」。</p>
-        <p>接回 RAG：Embedding＋向量搜尋＝去外部知識庫找資料；Transformer＋Attention＝把找到的資料和問題一起理解；Token＋機率＝一個字一個字長出答案。</p>
+        <p><strong>Token</strong> 是「文字切分單位」（≠一定等於一個字）；<strong>Embedding</strong> 是「把 Token／段落變成向量」；<strong>Attention</strong> 是「現在該注意哪些 Token」；<strong>Transformer</strong> 是「處理這些關係的神經網路」；<strong>機率分布（Softmax）</strong> 是「下一個 Token 各有多大可能」。</p>
+        <p>接回 RAG：Embedding＋向量索引檢索＝從外部知識庫找回段落；Transformer＋Attention＝把找回的段落和問題一起理解；Token＋機率＝一個 Token 一個 Token 長出答案。</p>
       </blockquote>
       <div class="llm-footer-links">
         <a class="btn btn-primary" href="index.html#params">回主課 · 參數調校</a>
@@ -419,6 +419,6 @@
     </footer>
   </main>
 
-  <script src="js/llm.js?v=narrate-1"></script>
+  <script src="js/llm.js?v=terms-1"></script>
 </body>
 </html>

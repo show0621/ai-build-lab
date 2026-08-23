@@ -655,24 +655,24 @@ function afterMs(ms, fn) {
 
 function narrateJourneyBeats() {
   afterMs(Math.round(JOURNEY.word * 1000 + 150), () =>
-    setPipeStatus("文字星雲展開 · Embedding 向量空間")
+    setPipeStatus("Embedding 向量空間展開…")
   );
   afterMs(Math.round(JOURNEY.prob * 1000), () =>
-    setPipeStatus("搜尋可能關鍵 Token · 同步標示條件機率…")
+    setPipeStatus("標示相關 Token · 同步顯示條件機率…")
   );
   afterMs(Math.round(JOURNEY.dash * 1000), () =>
-    setPipeStatus("神經虛線連結 · Attention 候選路徑成形…")
+    setPipeStatus("Attention 虛線連結 · 候選路徑成形…")
   );
   afterMs(Math.round(JOURNEY.hot * 1000), () =>
-    setPipeStatus("Transformer 加權演算 · 高機率路徑強化…")
+    setPipeStatus("Transformer／Attention 加權 · 高機率路徑強化…")
   );
   afterMs(Math.round(JOURNEY.next * 1000), () =>
-    setPipeStatus("推演下一個可能 Token · Softmax 選字…")
+    setPipeStatus("Softmax 推演下一個 Token…")
   );
 }
 
 function runAttnSearchAnimation(focusIdx, onDone) {
-  setPipeStatus("進入向量資料庫…");
+  setPipeStatus("進入向量空間（Embedding）…");
   drawAttnSvg(focusIdx, "journey");
   narrateJourneyBeats();
   const ms = Number($("#attnSvg")?.dataset.journeyMs) || Math.round(JOURNEY.done * 1000);
@@ -709,7 +709,7 @@ function runPipeline(fromStep = 0) {
       schedule(() => runStep(1), 1200);
     },
     () => {
-      setPipeStatus("語意搜尋開始…");
+      setPipeStatus("計算下一 Token 機率（Softmax）…");
       highlightChain(2);
       runAttnSearchAnimation(4, () => {
         if (pipePaused) return;
@@ -844,7 +844,7 @@ function typeCineQuery(onDone) {
 
 function diveToBrain(onDone) {
   const { stage, ui, brain } = cineEls();
-  setPipeStatus("進入向量資料庫…");
+  setPipeStatus("進入向量空間（Embedding）…");
   if (stage) stage.dataset.act = "dive";
   cineFlashBurst();
   if (ui) ui.classList.add("cine-warp-out");
