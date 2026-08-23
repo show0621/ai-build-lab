@@ -358,34 +358,118 @@ function setPipeStatus(t) {
   if (el) el.textContent = t;
 }
 
-function drawAttnSvg(focusIdx) {
+function drawAttnSvg(focusIdx, mode = "highlight") {
   const svg = $("#attnSvg");
   if (!svg) return;
   const tokens = PIPE_TOKENS;
   const W = 640;
-  const positions = tokens.map((_, i) => 50 + (i * (W - 100)) / Math.max(tokens.length - 1, 1));
-  const focus = Math.min(focusIdx, tokens.length - 1);
-  const weights = tokens.map((_, i) => {
-    if (i === focus) return 0;
+  const H = 280;
+  const n = tokens.length;
+  const focus = Math.min(Math.max(focusIdx, 0), n - 1);
+
+  // Layer Y positions
+  const yIn = 42;
+  const yHid = 130;
+  const yOut = 230;
+  const xIn = tokens.map((_, i) => 56 + (i * (W - 112)) / Math.max(n - 1, 1));
+  const hidN = 7;
+  const xHid = Array.from({ length: hidN }, (_, i) => 70 + (i * (W - 140)) / Math.max(hidN - 1, 1));
+  const xOut = W / 2;
+
+  // Softmax-ish attention from focus → each token (self gets residual)
+  const raw = tokens.map((_, i) => {
+    if (i === focus) return 0.55;
     const dist = Math.abs(i - focus);
-    return Math.max(0.15, 1 - dist * 0.28);
+    return Math.exp(-dist * 0.85) * (i < focus ? 1.15 : 0.9);
+  });
+  const sum = raw.reduce((a, b) => a + b, 0);
+  const probs = raw.map((v) => v / sum);
+
+  // Dense web: every input → every hidden (dim)
+  let web = "";
+  xIn.forEach((x0) => {
+    xHid.forEach((x1) => {
+      web += `<path class="attn-web" d="M${x0} ${yIn + 14} L${x1} ${yHid - 8}" />`;
+    });
+  });
+  xHid.forEach((x0) => {
+    web += `<path class="attn-web" d="M${x0} ${yHid + 8} L${xOut} ${yOut - 16}" />`;
   });
 
-  let html = "";
+  // Strong paths: focus token fans through hidden to output, weighted by probs to other tokens
+  let hot = "";
+  let pulses = "";
+  let labels = "";
+
+  // Rank links for labeling (top connections from focus perspective)
+  const ranked = probs
+    .map((p, i) => ({ i, p, t: tokens[i] }))
+    .sort((a, b) => b.p - a.p);
+
+  if (mode === "web") {
+    // only dense web + idle neurons
+  } else {
+    // Highlight: from each token (esp. high prob) through nearest hidden to output
+    ranked.forEach((r, rank) => {
+      const p = r.p;
+      const x0 = xIn[r.i];
+      const hidIdx = Math.min(hidN - 1, Math.round((r.i / Math.max(n - 1, 1)) * (hidN - 1)));
+      const x1 = xHid[hidIdx];
+      const w = 0.8 + p * 5.5;
+      const op = mode === "highlight" ? 0.25 + p * 0.75 : 0.12;
+      const midY = (yIn + yHid) / 2;
+      hot += `<path class="attn-link hot" d="M${x0} ${yIn + 14} Q${(x0 + x1) / 2} ${midY} ${x1} ${yHid - 8}" stroke-width="${w}" opacity="${op}" />`;
+      hot += `<path class="attn-link hot" d="M${x1} ${yHid + 8} Q${(x1 + xOut) / 2} ${(yHid + yOut) / 2} ${xOut} ${yOut - 16}" stroke-width="${Math.max(0.7, w * 0.85)}" opacity="${op * 0.9}" />`;
+      if (rank < 4 && p > 0.08) {
+        pulses += `<path class="attn-pulse" d="M${x0} ${yIn + 14} Q${(x0 + x1) / 2} ${midY} ${x1} ${yHid - 8}" stroke-width="${1.2 + p * 2}" opacity="${0.5 + p * 0.4}" />`;
+        const lx = (x0 + x1) / 2;
+        const ly = midY - 6;
+        labels += `<rect x="${lx - 18}" y="${ly - 10}" width="36" height="14" rx="4" fill="rgba(255,255,255,0.92)" stroke="#99f6e4"/>`;
+        labels += `<text class="attn-prob" x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle">${Math.round(p * 100)}%</text>`;
+      }
+    });
+  }
+
+  // Nodes
+  let nodes = "";
   tokens.forEach((t, i) => {
-    if (i === focus) return;
-    const w = weights[i];
-    html += `<path class="attn-line show" d="M${positions[focus]} 55 Q${(positions[focus] + positions[i]) / 2} 110 ${positions[i]} 155" stroke="#0d9f93" stroke-width="${1 + w * 5}" opacity="${0.2 + w * 0.7}" />`;
-  });
-  tokens.forEach((t, i) => {
-    const on = i === focus;
-    html += `<g>
-      <rect x="${positions[i] - 28}" y="28" width="56" height="30" rx="8" fill="${on ? "#ecfdf5" : "#fff"}" stroke="${on ? "#0d9f93" : "#e2e8f0"}"/>
-      <text x="${positions[i]}" y="48" text-anchor="middle" font-size="12" font-family="JetBrains Mono,monospace" fill="#0f172a">${t}</text>
-      <circle cx="${positions[i]}" cy="155" r="${on ? 0 : 5 + weights[i] * 4}" fill="#0284c7" opacity="${on ? 0 : 0.3 + weights[i] * 0.6}"/>
+    const on = i === focus && mode !== "web";
+    const glow = on ? `filter="url(#attnGlow)"` : "";
+    nodes += `<g ${glow}>
+      <rect x="${xIn[i] - 30}" y="${yIn - 16}" width="60" height="28" rx="9" fill="${on ? "#ecfdf5" : "#fff"}" stroke="${on ? "#0d9f93" : "#cbd5e1"}" stroke-width="${on ? 2 : 1}"/>
+      <text x="${xIn[i]}" y="${yIn}" text-anchor="middle" dominant-baseline="middle" font-size="12" font-family="JetBrains Mono,monospace" fill="#0f172a">${t}</text>
     </g>`;
   });
-  svg.innerHTML = html;
+
+  xHid.forEach((x, i) => {
+    const active = mode !== "web";
+    nodes += `<circle cx="${x}" cy="${yHid}" r="${active ? 7 : 5.5}" fill="${active ? "#14b8a6" : "#94a3b8"}" opacity="${active ? 0.85 : 0.45}" />`;
+    nodes += `<circle cx="${x}" cy="${yHid}" r="2.2" fill="#fff" opacity="0.9"/>`;
+  });
+
+  nodes += `<g>
+    <circle cx="${xOut}" cy="${yOut}" r="18" fill="#ecfdf5" stroke="#0d9f93" stroke-width="2"/>
+    <circle cx="${xOut}" cy="${yOut}" r="8" fill="#0d9f93" opacity="0.85"/>
+    <text x="${xOut}" y="${yOut + 34}" text-anchor="middle" class="attn-layer-label">注意力加權向量</text>
+  </g>`;
+
+  const layerLabels = `
+    <text class="attn-layer-label" x="16" y="${yIn}">Token</text>
+    <text class="attn-layer-label" x="16" y="${yHid}">隱藏層</text>
+    <text class="attn-layer-label" x="16" y="${yOut}">輸出</text>
+  `;
+
+  const defs = `
+    <defs>
+      <filter id="attnGlow" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="2.2" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+  `;
+
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML = defs + layerLabels + web + hot + pulses + nodes + labels;
 }
 
 function renderPipeTokens(active = -1) {
@@ -430,19 +514,19 @@ function runPipeline(fromStep = 0) {
       schedule(() => runStep(1), 1200);
     },
     () => {
-      setPipeStatus("2/6 Embedding → Transformer");
+      setPipeStatus("2/6 Embedding → 神經網先鋪滿連線");
       highlightChain(2);
-      drawAttnSvg(4);
-      schedule(() => runStep(2), 900);
+      drawAttnSvg(4, "web");
+      schedule(() => runStep(2), 1000);
     },
     () => {
-      setPipeStatus("3/6 Attention 加亮相關 Token");
+      setPipeStatus("3/6 Attention：加亮連結並標示機率");
       highlightChain(3);
-      drawAttnSvg(4);
+      drawAttnSvg(4, "highlight");
       $$("#pipeTokens .llm-tok").forEach((el, i) => {
         el.classList.toggle("on", i === 0 || i === 1 || i === 4);
       });
-      schedule(() => runStep(3), 1100);
+      schedule(() => runStep(3), 1400);
     },
     () => {
       setPipeStatus("4/6 計算下一個 Token 機率");
