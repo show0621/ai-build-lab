@@ -481,10 +481,22 @@
   filter: drop-shadow(0 0 10px rgba(13, 148, 136, 0.35));
 }
 
-.llm-attn-svg .attn-cloud-word.is-gray-rest {
-  opacity: 0.38;
-  filter: none;
-  fill: #b0b0b0 !important;
+.llm-attn-svg .attn-phase-vec {
+  opacity: 0;
+  animation: attnPhaseIn 0.45s ease forwards;
+  animation-delay: var(--delay, 1s);
+}
+
+@keyframes attnPhaseIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.llm-attn-svg .attn-nebula-dot {
+  opacity: 0;
+  animation: attnWordAwaken 0.6s ease forwards;
+  animation-delay: var(--delay, 0s);
 }
 
 .llm-attn-svg .attn-cloud-word.is-linked {
@@ -1549,15 +1561,42 @@
 }
 
 /* SVG film enhancements */
+@keyframes attnWordAwaken {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.92);
+  }
+  to {
+    opacity: 0.92;
+    transform: none;
+  }
+}
+
 .llm-attn-svg .attn-cloud-word.is-awaken {
   opacity: 0;
   animation: attnWordAwaken 0.7s ease forwards;
   animation-delay: var(--awaken, 0s);
 }
 
-@keyframes attnWordAwaken {
-  from { opacity: 0; transform: translateY(8px) scale(0.92); }
-  to { opacity: 0.9; transform: none; }
+.llm-attn-svg .attn-cloud-word.is-awaken.is-gray-rest {
+  animation:
+    attnWordAwaken 0.7s ease forwards,
+    attnGrayRest 0.85s ease forwards;
+  animation-delay: var(--awaken, 0s), var(--gray, 2s);
+}
+
+.llm-attn-svg .attn-cloud-word.is-gray-rest {
+  filter: none;
+}
+
+@keyframes attnGrayRest {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 0.32;
+    fill: #b0b0b0;
+  }
 }
 
 .llm-attn-svg .attn-prob-count {

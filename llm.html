@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="stylesheet" href="css/llm.css?v=cine-film-1" />
+  <link rel="stylesheet" href="css/llm.css?v=cine-clean-1" />
 </head>
 <body class="llm-page">
   <div class="bg-layer" aria-hidden="true">
@@ -112,8 +112,8 @@
       <div class="section-head">
         <span class="section-num">B</span>
         <div>
-          <h2>電影級：從螢幕到 AI 大腦</h2>
-          <p>螢幕甦醒 → 真實打字／選字 → 潛入文字雲知識庫 → 向量搜尋 → 機率 → 神經連結 → 下一步可能。</p>
+          <h2>從輸入進入向量資料庫</h2>
+          <p>文字輸入後進入文字星雲，進行神經突觸連結與機率推演。</p>
         </div>
       </div>
       <div class="llm-demo glass llm-cinematic">
@@ -124,58 +124,19 @@
           <span class="llm-demo-status" id="pipeStatus">就緒</span>
         </div>
 
-        <div class="cine-stage" id="cineStage" data-act="idle">
+        <div class="cine-stage" id="cineStage" data-act="ui">
           <div class="cine-fx" aria-hidden="true">
             <div class="cine-vignette"></div>
             <div class="cine-grain"></div>
             <div class="cine-flash" id="cineFlash"></div>
-            <div class="cine-letterbox cine-letterbox-t"></div>
-            <div class="cine-letterbox cine-letterbox-b"></div>
           </div>
 
-          <!-- Act 0: AI looking out from the screen -->
-          <div class="cine-act cine-emerge" id="cineEmerge">
-            <div class="cine-monitor">
-              <div class="cine-bezel">
-                <div class="cine-glass">
-                  <svg class="cine-presence" id="cinePresence" viewBox="0 0 420 280" aria-hidden="true">
-                    <defs>
-                      <radialGradient id="irisGrad" cx="50%" cy="45%" r="55%">
-                        <stop offset="0%" stop-color="#ecfeff"/>
-                        <stop offset="45%" stop-color="#5eead4"/>
-                        <stop offset="100%" stop-color="#0f766e"/>
-                      </radialGradient>
-                      <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
-                        <feGaussianBlur stdDeviation="4" result="b"/>
-                        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                      </filter>
-                    </defs>
-                    <!-- anthropomorphic brain / iris looking outward -->
-                    <ellipse class="cine-presence-head" cx="210" cy="148" rx="118" ry="98" fill="rgba(15,23,42,0.06)" stroke="rgba(15,118,110,0.35)" stroke-width="1.5"/>
-                    <path class="cine-presence-folds" d="M120 140 C150 90,180 100,210 95 C240 100,270 90,300 140 C280 185,240 200,210 205 C180 200,140 185,120 140Z" fill="none" stroke="rgba(13,148,136,0.45)" stroke-width="1.2"/>
-                    <circle class="cine-presence-iris" cx="210" cy="145" r="38" fill="url(#irisGrad)" filter="url(#softGlow)"/>
-                    <circle class="cine-presence-pupil" cx="210" cy="145" r="14" fill="#0f172a"/>
-                    <circle cx="216" cy="139" r="4" fill="#fff" opacity="0.85"/>
-                    <g class="cine-presence-syn" stroke="rgba(13,148,136,0.5)" stroke-width="1" fill="none">
-                      <path d="M95 90 L140 120"/><path d="M320 88 L280 118"/><path d="M88 200 L135 175"/><path d="M330 205 L285 175"/>
-                      <circle cx="95" cy="90" r="3" fill="#0d9488"/><circle cx="320" cy="88" r="3" fill="#0d9488"/>
-                      <circle cx="88" cy="200" r="3" fill="#0d9488"/><circle cx="330" cy="205" r="3" fill="#0d9488"/>
-                    </g>
-                  </svg>
-                  <p class="cine-emerge-line" id="cineEmergeLine">AI 從螢幕另一側望向你…</p>
-                </div>
-              </div>
-            </div>
-            <p class="cine-act-label">開場 · 螢幕甦醒</p>
-          </div>
-
-          <!-- Act 1: human input with IME -->
-          <div class="cine-act cine-ui" id="cineUi" hidden>
+          <!-- Act 1: text input only -->
+          <div class="cine-act cine-ui" id="cineUi">
             <div class="cine-ui-panel" id="cineUiPanel">
               <div class="cine-ui-bar">
                 <span class="cine-dot"></span><span class="cine-dot"></span><span class="cine-dot"></span>
                 <span class="cine-ui-title">專業知識庫工作台</span>
-                <span class="cine-live-pill">LIVE</span>
               </div>
               <div class="cine-chat">
                 <div class="cine-bubble cine-ai">你好，我可以依知識庫回答移轉訂價相關問題。</div>
@@ -183,19 +144,10 @@
                   <span id="cineTypeText"></span><span class="cine-caret blink" id="cineCaret" aria-hidden="true"></span>
                 </div>
               </div>
-              <div class="cine-ime" id="cineIme" hidden>
-                <div class="cine-ime-row">
-                  <span class="cine-ime-comp" id="cineImeComp"></span>
-                  <span class="cine-ime-hint">選字</span>
-                </div>
-                <div class="cine-ime-cands" id="cineImeCands"></div>
-              </div>
-              <div class="cine-input-hint" id="cineHint">等待人類輸入…</div>
             </div>
-            <p class="cine-act-label">畫面① 真實輸入 · 打字／選字</p>
           </div>
 
-          <!-- Act 2+: anthropomorphic brain knowledge cosmos -->
+          <!-- Act 2: vector DB word nebula -->
           <div class="cine-act cine-brain" id="cineBrain" hidden>
             <div class="cine-brain-frame">
               <svg class="cine-brain-sil" viewBox="0 0 860 480" aria-hidden="true">
@@ -206,16 +158,11 @@
                   </radialGradient>
                 </defs>
                 <ellipse cx="430" cy="250" rx="320" ry="200" fill="url(#brainAtm)"/>
-                <path d="M220 250 C230 140,340 95,430 100 C520 95,630 140,640 250 C630 340,540 390,430 395 C320 390,230 340,220 250Z"
-                  fill="none" stroke="rgba(15,118,110,0.18)" stroke-width="2" stroke-dasharray="6 8"/>
               </svg>
-              <svg class="llm-attn-svg llm-attn-literary attn-spread attn-white" id="attnSvg" viewBox="0 0 860 480" role="img" aria-label="擬人化大腦文字雲知識庫"></svg>
+              <svg class="llm-attn-svg llm-attn-literary attn-spread attn-white" id="attnSvg" viewBox="0 0 860 480" role="img" aria-label="向量資料庫文字星雲"></svg>
             </div>
-            <p class="cine-act-label" id="cineBrainLabel">畫面② 大腦知識庫 · 文字雲宇宙</p>
           </div>
         </div>
-
-        <p class="llm-caption">電影級敘事：螢幕甦醒 → 真實打字／選字＋游標閃爍 → 潛入大腦文字雲 → 向量搜尋 → 機率運算 → 高機率神經連結 → 下一步可能性。</p>
 
         <div class="llm-prob-panel">
           <h3>同步解說：下一步 Token 機率</h3>
@@ -472,6 +419,6 @@
     </footer>
   </main>
 
-  <script src="js/llm.js?v=cine-film-1"></script>
+  <script src="js/llm.js?v=cine-clean-1"></script>
 </body>
 </html>

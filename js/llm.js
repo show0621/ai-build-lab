@@ -425,16 +425,18 @@ function buildCloudData(focusTok) {
   return cloud;
 }
 
-function drawAttnSvg(focusIdx, mode = "predict") {
+function drawAttnSvg(focusIdx, mode = "journey") {
   const svg = $("#attnSvg");
   if (!svg) return;
-  // mode: awaken | cloud | vector | prob | link | predict
+  // mode: journey = one continuous nebula→synapse→prob play (CSS delays)
+  //        predict = final still (also used after journey)
   const tokens = PIPE_TOKENS;
   const W = 860;
   const H = 480;
   const focus = Math.min(Math.max(focusIdx, 0), tokens.length - 1);
   const focusTok = tokens[focus];
   const cloud = buildCloudData(focusTok);
+  const isJourney = mode === "journey" || mode === "awaken" || mode === "cloud" || mode === "vector" || mode === "prob" || mode === "link";
 
   const nextSpots = [
     { t: "功能", p: 0.35, c: "#0369a1" },
@@ -444,30 +446,16 @@ function drawAttnSvg(focusIdx, mode = "predict") {
     { t: "一方", p: 0.08, c: "#b45309" },
   ];
 
-  const showAwaken = mode === "awaken";
-  const showVector = mode === "vector" || mode === "prob" || mode === "link" || mode === "predict";
-  const showProb = mode === "prob" || mode === "link" || mode === "predict";
-  const showLinks = mode === "link" || mode === "predict";
-  const showPredict = mode === "predict";
-  const grayRest = showLinks;
-
   const related = [...cloud].filter((w) => w.rel >= 0.35).sort((a, b) => b.rel - a.rel);
   const focusNode = cloud.find((w) => w.isFocus) || related[0];
   const fx = focusNode.x * W;
   const fy = focusNode.y * H;
 
-  const phaseHint =
-    mode === "awaken"
-      ? "① 大腦知識庫甦醒 · 詞彙自深層浮現"
-      : mode === "cloud"
-        ? "② Embedding 空間 · 文字雲層次（大小＝權重）"
-        : mode === "vector"
-          ? "③ 向量相似度搜尋 · 查詢向外比對"
-          : mode === "prob"
-            ? "④ Softmax 機率運算 · 高分節點升溫"
-            : mode === "link"
-              ? "⑤ 高機率路徑 · 神經突觸連結"
-              : "⑥ 下一步 Token · 多色可能性";
+  // Timeline (one shot): words 0–1.2s · vectors 1.0–2.2s · synapses+prob 2.0–4.0s · next 3.6–4.8s
+  const T_WORD = 0;
+  const T_VEC = 1.05;
+  const T_LINK = 2.05;
+  const T_NEXT = 3.55;
 
   const defs = `<defs>
     <radialGradient id="queryHalo" cx="50%" cy="50%" r="50%">
@@ -480,77 +468,61 @@ function drawAttnSvg(focusIdx, mode = "predict") {
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
-  <rect width="${W}" height="${H}" fill="#ffffff" rx="0"/>`;
+  <rect width="${W}" height="${H}" fill="#ffffff"/>`;
 
-  const title = `<text x="${W / 2}" y="28" text-anchor="middle" font-family="Outfit,sans-serif" font-size="14" fill="#0f172a" font-weight="600">擬人化大腦 · 文字雲知識庫</text>
-  <text x="${W / 2}" y="48" text-anchor="middle" font-family="Outfit,sans-serif" font-size="12" fill="#0d9488">${phaseHint}</text>`;
-
-  // Ambient depth particles
   let ambient = "";
-  for (let i = 0; i < 18; i++) {
+  for (let i = 0; i < 22; i++) {
     const ax = 40 + ((i * 97) % (W - 80));
-    const ay = 70 + ((i * 53) % (H - 100));
-    ambient += `<circle class="attn-float" cx="${ax}" cy="${ay}" r="${1 + (i % 3)}" fill="rgba(13,148,136,${0.08 + (i % 4) * 0.03})" style="--d:${4 + (i % 5)}s;--delay:${(i % 7) * 0.1}s"/>`;
+    const ay = 50 + ((i * 53) % (H - 80));
+    ambient += `<circle class="attn-float attn-nebula-dot" cx="${ax}" cy="${ay}" r="${1 + (i % 3)}" fill="rgba(13,148,136,${0.1 + (i % 4) * 0.04})" style="--d:${4 + (i % 5)}s;--delay:${T_WORD + (i % 9) * 0.05}s"/>`;
   }
 
-  let vectorFx = "";
-  if (showVector) {
-    vectorFx += `<circle class="attn-vec-ring" cx="${fx}" cy="${fy}" r="34" fill="url(#queryHalo)"/>
-    <circle class="attn-vec-ring r2" cx="${fx}" cy="${fy}" r="62" fill="none" stroke="rgba(13,148,136,0.4)" stroke-width="1.2"/>
-    <circle class="attn-vec-ring r3" cx="${fx}" cy="${fy}" r="102" fill="none" stroke="rgba(13,148,136,0.2)" stroke-width="1"/>
+  // Query halo + similarity rays (appear once after nebula)
+  let vectorFx = `<g class="attn-phase-vec" style="--delay:${T_VEC}s">
+    <circle class="attn-vec-ring" cx="${fx}" cy="${fy}" r="34" fill="url(#queryHalo)"/>
+    <circle class="attn-vec-ring r2" cx="${fx}" cy="${fy}" r="62" fill="none" stroke="rgba(13,148,136,0.35)" stroke-width="1.2"/>
+    <circle class="attn-vec-ring r3" cx="${fx}" cy="${fy}" r="102" fill="none" stroke="rgba(13,148,136,0.18)" stroke-width="1"/>
     <circle cx="${fx}" cy="${fy}" r="5" fill="#0d9488" filter="url(#neuralGlow)"/>`;
-
-    const targets = related.filter((w) => w !== focusNode).slice(0, 10);
-    targets.forEach((b, i) => {
+  related
+    .filter((w) => w !== focusNode)
+    .slice(0, 9)
+    .forEach((b, i) => {
       const x2 = b.x * W;
       const y2 = b.y * H;
-      const delay = `${0.06 + i * 0.09}s`;
-      const op = 0.28 + b.rel * 0.55;
+      const delay = `${T_VEC + 0.08 + i * 0.07}s`;
+      const op = 0.25 + b.rel * 0.55;
       vectorFx += `<line class="attn-vec-ray" x1="${fx}" y1="${fy}" x2="${x2}" y2="${y2}"
         stroke="rgba(13,148,136,${op})" stroke-width="${1 + b.rel * 2}" stroke-dasharray="5 6"
         style="--delay:${delay}"/>`;
-      vectorFx += `<circle class="attn-vec-dot" r="3.5" fill="#0d9488" filter="url(#neuralGlow)">
-        <animateMotion dur="${0.7 + (1 - b.rel) * 0.5}s" begin="${delay}" fill="freeze" path="M${fx} ${fy} L${x2} ${y2}"/>
+      vectorFx += `<circle class="attn-vec-dot" r="3.2" fill="#0d9488" filter="url(#neuralGlow)">
+        <animateMotion dur="0.75s" begin="${delay}" fill="freeze" path="M${fx} ${fy} L${x2} ${y2}"/>
       </circle>`;
-      if (mode === "vector" || mode === "prob") {
-        const mx = (fx + x2) / 2;
-        const my = (fy + y2) / 2;
-        vectorFx += `<text class="attn-sim-label" x="${mx}" y="${my - 7}" text-anchor="middle"
-          font-size="9" font-family="JetBrains Mono,monospace" fill="#0f766e"
-          style="--delay:${0.4 + i * 0.08}s">sim ${(b.rel * 100).toFixed(0)}</text>`;
-      }
     });
-  }
+  vectorFx += `</g>`;
 
+  // Synapses with probability during linking (one continuous draw)
   let links = "";
   let pills = "";
   let pulses = "";
-  if (showLinks || showProb) {
-    const chain = [focusNode, ...related.filter((w) => w !== focusNode)].slice(0, 7);
-    for (let i = 0; i < chain.length - 1; i++) {
-      const a = chain[i];
-      const b = chain[i + 1];
-      const x1 = a.x * W;
-      const y1 = a.y * H;
-      const x2 = b.x * W;
-      const y2 = b.y * H;
-      const mx = (x1 + x2) / 2 + (i % 2 === 0 ? 24 : -24);
-      const my = (y1 + y2) / 2;
-      const p = b.rel;
-      const d = `M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}`;
-      const delay = `${0.1 + i * 0.2}s`;
-      if (showLinks) {
-        links += `<path class="attn-ink attn-draw attn-synapse" d="${d}" stroke-width="${1.8 + p * 3.2}" fill="none" stroke="#0d9488" style="--delay:${delay};--op:${0.6 + p * 0.35}"/>`;
-        pulses += `<path class="attn-ink-pulse" d="${d}" stroke-width="${1.3 + p}" fill="none" style="--delay:${delay}"/>`;
-        pulses += `<circle class="attn-spark" cx="${mx}" cy="${my}" r="3" fill="#5eead4" style="--delay:${0.35 + i * 0.2}s"/>`;
-      }
-      if (showProb || showLinks) {
-        pills += `<g class="attn-prob-reveal" style="--delay:${0.2 + i * 0.16}s">
-          <rect x="${mx - 22}" y="${my - 11}" width="44" height="20" rx="4" fill="#ffffff" stroke="${b.c}" stroke-width="1.5"/>
-          <text class="attn-prob-count" x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-family="JetBrains Mono,monospace" fill="${b.c}" font-weight="700">${Math.round(p * 100)}%</text>
-        </g>`;
-      }
-    }
+  const chain = [focusNode, ...related.filter((w) => w !== focusNode)].slice(0, 7);
+  for (let i = 0; i < chain.length - 1; i++) {
+    const a = chain[i];
+    const b = chain[i + 1];
+    const x1 = a.x * W;
+    const y1 = a.y * H;
+    const x2 = b.x * W;
+    const y2 = b.y * H;
+    const mx = (x1 + x2) / 2 + (i % 2 === 0 ? 24 : -24);
+    const my = (y1 + y2) / 2;
+    const p = b.rel;
+    const d = `M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}`;
+    const delay = `${T_LINK + i * 0.22}s`;
+    links += `<path class="attn-ink attn-draw attn-synapse" d="${d}" stroke-width="${1.8 + p * 3.2}" fill="none" stroke="#0d9488" style="--delay:${delay};--op:${0.6 + p * 0.35}"/>`;
+    pulses += `<path class="attn-ink-pulse" d="${d}" stroke-width="${1.3 + p}" fill="none" style="--delay:${delay}"/>`;
+    pills += `<g class="attn-prob-reveal" style="--delay:${T_LINK + 0.28 + i * 0.22}s">
+      <rect x="${mx - 22}" y="${my - 11}" width="44" height="20" rx="4" fill="#ffffff" stroke="${b.c}" stroke-width="1.5"/>
+      <text class="attn-prob-count" x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-family="JetBrains Mono,monospace" fill="${b.c}" font-weight="700">${Math.round(p * 100)}%</text>
+    </g>`;
   }
 
   let words = "";
@@ -558,95 +530,56 @@ function drawAttnSvg(focusIdx, mode = "predict") {
     const x = w.x * W;
     const y = w.y * H;
     const isRel = w.rel >= 0.35;
-    let cls = "attn-cloud-word attn-float";
-    if (showAwaken) cls += " is-awaken";
-    if (mode === "cloud") cls += " is-cloud";
-    if (mode === "vector" || mode === "prob") cls += isRel ? " is-vec-hit" : " is-vec-miss";
-    if (grayRest) cls += isRel ? " is-related" : " is-gray-rest";
-    if (w.isFocus) cls += " is-focus";
-    if (showLinks && isRel) cls += " is-linked";
     const nextHit = nextSpots.find((n) => n.t === w.t);
-    if (showPredict && nextHit) cls += " is-next";
+    let cls = "attn-cloud-word attn-float is-awaken";
+    if (w.isFocus) cls += " is-focus";
+    if (isRel) cls += " is-related is-linked";
+    else cls += " is-gray-rest";
+    if (nextHit) cls += " is-next";
 
     let fill = w.c;
-    if (grayRest && !isRel && !w.isFocus) fill = "#b0b0b0";
-    if (showPredict && nextHit) fill = nextHit.c;
+    if (nextHit) fill = nextHit.c;
 
-    const awaken = `${(i % 14) * 0.045}s`;
+    const awaken = `${T_WORD + (i % 16) * 0.04}s`;
+    // gray-rest fades later during link phase
+    const grayDelay = `${T_LINK}s`;
     words += `<text class="${cls}" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle"
       font-size="${w.s}" font-family="Georgia,'Noto Serif TC',serif" font-weight="${w.isFocus || isRel ? 700 : 500}"
       fill="${fill}"
-      style="--d:${5.5 + (i % 6) * 0.4}s;--delay:${(i % 9) * 0.07}s;--i:${i};--awaken:${awaken};--hit:${isRel ? (0.08 + (1 - w.rel) * 0.35).toFixed(2) : 0}s">${w.t}</text>`;
+      style="--d:${5.5 + (i % 6) * 0.4}s;--delay:${(i % 9) * 0.07}s;--i:${i};--awaken:${awaken};--gray:${grayDelay}">${w.t}</text>`;
   });
 
-  let predict = "";
-  if (showPredict) {
-    predict = nextSpots
-      .map((s, i) => {
-        const node = cloud.find((w) => w.t === s.t);
-        if (!node) return "";
-        const x = node.x * W;
-        const y = node.y * H - 28;
-        return `<g class="attn-next-tag" style="--delay:${0.12 + i * 0.12}s">
-          <rect x="${x - 34}" y="${y - 11}" width="68" height="20" rx="4" fill="#ffffff" stroke="${s.c}" stroke-width="1.6"/>
-          <text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="${s.c}" font-weight="700">下一字 ${Math.round(s.p * 100)}%</text>
-        </g>`;
-      })
-      .join("");
-    predict += `<text x="${W / 2}" y="${H - 16}" text-anchor="middle" font-size="12" fill="#64748b" font-family="Outfit,sans-serif">無關詞單灰收斂 · 高機率候選以不同顏色推演下一步</text>`;
-  } else {
-    const foot = {
-      awaken: "詞彙自記憶深層浮現…",
-      cloud: "大小層次＝語意權重 · 準備向量比對…",
-      vector: "查詢向量擴散 · 相似度越高射線越強",
-      prob: "條件機率升溫 · 準備建立突觸連結…",
-      link: "高機率路徑點燃 · 神經網路成形…",
-    }[mode] || "";
-    predict = `<text x="${W / 2}" y="${H - 16}" text-anchor="middle" font-size="12" fill="#94a3b8" font-family="Outfit,sans-serif">${foot}</text>`;
-  }
+  let predict = nextSpots
+    .map((s, i) => {
+      const node = cloud.find((w) => w.t === s.t);
+      if (!node) return "";
+      const x = node.x * W;
+      const y = node.y * H - 28;
+      return `<g class="attn-next-tag" style="--delay:${T_NEXT + i * 0.1}s">
+        <rect x="${x - 28}" y="${y - 10}" width="56" height="18" rx="4" fill="#ffffff" stroke="${s.c}" stroke-width="1.5"/>
+        <text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="${s.c}" font-weight="700">${Math.round(s.p * 100)}%</text>
+      </g>`;
+    })
+    .join("");
 
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.classList.remove("llm-attn-tech");
   svg.classList.add("llm-attn-literary", "attn-spread", "attn-white");
-  svg.dataset.phase = mode;
-  svg.innerHTML = defs + title + ambient + vectorFx + links + pulses + words + pills + predict;
+  svg.dataset.phase = isJourney ? "journey" : mode;
+  // Force restart CSS animations
+  svg.innerHTML = "";
+  void svg.offsetWidth;
+  svg.innerHTML = defs + ambient + vectorFx + links + pulses + words + pills + predict;
 }
 
-function runAttnSearchAnimation(focusIdx, onDone, startFrom = 0) {
-  const phases = [
-    { mode: "awaken", status: "大腦知識庫甦醒…", wait: 1400 },
-    { mode: "cloud", status: "文字雲層次展開…", wait: 1200 },
-    { mode: "vector", status: "向量相似度搜尋…", wait: 1700 },
-    { mode: "prob", status: "機率運算升溫…", wait: 1400 },
-    { mode: "link", status: "高機率神經連結…", wait: 1900 },
-    { mode: "predict", status: "推演下一步可能性…", wait: 1600 },
-  ];
-  let i = startFrom;
-  const tick = () => {
+function runAttnSearchAnimation(focusIdx, onDone) {
+  // One continuous journey — no multi-phase redraw loops
+  setPipeStatus("向量資料庫 · 文字星雲連結中…");
+  drawAttnSvg(focusIdx, "journey");
+  schedule(() => {
     if (pipePaused) return;
-    if (i >= phases.length) {
-      if (onDone) onDone();
-      return;
-    }
-    const ph = phases[i];
-    setPipeStatus(`大腦演算 ${i + 1}/${phases.length} · ${ph.status}`);
-    const { label } = cineEls();
-    if (label) {
-      const labels = [
-        "畫面② 大腦甦醒 · 詞彙浮現",
-        "畫面② 文字雲知識庫 · 層次",
-        "畫面③ 向量相似度搜尋",
-        "畫面③ Softmax 機率運算",
-        "畫面④ 高機率神經連結",
-        "畫面⑤ 下一步可能性推演",
-      ];
-      label.textContent = labels[i] || label.textContent;
-    }
-    drawAttnSvg(focusIdx, ph.mode);
-    i += 1;
-    schedule(tick, ph.wait);
-  };
-  tick();
+    if (onDone) onDone();
+  }, 5200);
 }
 
 function renderPipeTokens(active = -1) {
@@ -761,72 +694,19 @@ function highlightChain(step) {
   });
 }
 
-/* ---- Cinematic: film-grade screen → brain journey ---- */
+/* ---- Cinematic: input → vector nebula (one shot) ---- */
 const CINE_QUERY = "受測個體應如何選擇？";
-
-/** Scripted IME: composition → candidate highlight → commit */
-const CINE_IME_STEPS = [
-  {
-    keys: "shouce",
-    cands: ["收測", "受測", "壽策", "手冊"],
-    pick: 1,
-    commit: "受測",
-  },
-  {
-    keys: "geti",
-    cands: ["個體", "各體", "隔堤", "哥提"],
-    pick: 0,
-    commit: "個體",
-  },
-  {
-    keys: "ying",
-    cands: ["應", "英", "影", "硬"],
-    pick: 0,
-    commit: "應",
-  },
-  {
-    keys: "ruhe",
-    cands: ["如何", "入河", "如核", "茹荷"],
-    pick: 0,
-    commit: "如何",
-  },
-  {
-    keys: "xuanze",
-    cands: ["選擇", "懸著", "炫澤", "宣哲"],
-    pick: 0,
-    commit: "選擇",
-  },
-];
 
 function cineEls() {
   return {
     stage: $("#cineStage"),
-    emerge: $("#cineEmerge"),
     ui: $("#cineUi"),
     brain: $("#cineBrain"),
     type: $("#cineTypeText"),
     caret: $("#cineCaret"),
-    label: $("#cineBrainLabel"),
-    hint: $("#cineHint"),
-    ime: $("#cineIme"),
-    imeComp: $("#cineImeComp"),
-    imeCands: $("#cineImeCands"),
     flash: $("#cineFlash"),
     bubble: $("#cineUserBubble"),
-    emergeLine: $("#cineEmergeLine"),
   };
-}
-
-function setCineActs({ emerge, ui, brain }) {
-  const els = cineEls();
-  if (els.emerge) els.emerge.hidden = !emerge;
-  if (els.ui) els.ui.hidden = !ui;
-  if (els.brain) els.brain.hidden = !brain;
-}
-
-function cineLetterbox(on) {
-  const { stage } = cineEls();
-  if (stage) stage.classList.toggle("is-cinema", !!on);
 }
 
 function cineFlashBurst() {
@@ -837,67 +717,15 @@ function cineFlashBurst() {
   flash.classList.add("on");
 }
 
-function hideIme() {
-  const { ime, imeComp, imeCands } = cineEls();
-  if (ime) ime.hidden = true;
-  if (imeComp) imeComp.textContent = "";
-  if (imeCands) imeCands.innerHTML = "";
-}
-
-function renderImeCands(cands, active) {
-  const { imeCands } = cineEls();
-  if (!imeCands) return;
-  imeCands.innerHTML = cands
-    .map(
-      (t, i) =>
-        `<span class="cine-ime-cand${i === active ? " on" : ""}"><span class="n">${i + 1}.</span>${t}</span>`
-    )
-    .join("");
-}
-
-function typeComposition(keys, onDone) {
-  const { ime, imeComp } = cineEls();
-  if (ime) ime.hidden = false;
-  let i = 0;
-  const tick = () => {
-    if (pipePaused) return;
-    if (i <= keys.length) {
-      if (imeComp) imeComp.textContent = keys.slice(0, i);
-      i += 1;
-      schedule(tick, 55 + Math.floor(Math.random() * 40));
-      return;
-    }
-    if (onDone) onDone();
-  };
-  tick();
-}
-
-function selectImeCand(cands, pick, onDone) {
-  let cur = 0;
-  const step = () => {
-    if (pipePaused) return;
-    renderImeCands(cands, cur);
-    if (cur < pick) {
-      cur += 1;
-      schedule(step, 220);
-      return;
-    }
-    // hold on selection then commit
-    schedule(() => {
-      if (onDone) onDone();
-    }, 320);
-  };
-  step();
-}
-
-function runImeTyping(onDone) {
-  const { type, caret, hint, bubble, stage } = cineEls();
+function typeCineQuery(onDone) {
+  const { type, caret, bubble, stage, ui, brain } = cineEls();
   if (!type) {
     if (onDone) onDone();
     return;
   }
   if (stage) stage.dataset.act = "ui";
-  setCineActs({ emerge: false, ui: true, brain: false });
+  if (ui) ui.hidden = false;
+  if (brain) brain.hidden = true;
   type.textContent = "";
   if (caret) caret.classList.add("blink");
   if (bubble) {
@@ -905,62 +733,33 @@ function runImeTyping(onDone) {
     void bubble.offsetWidth;
     bubble.classList.add("is-focus");
   }
-  if (hint) hint.textContent = "模擬真實輸入：拼音組字 → 選字 → 上屏";
-  setPipeStatus("人類輸入中 · IME 選字…");
-  hideIme();
-
-  let built = "";
-  let step = 0;
-
-  const runStep = () => {
+  setPipeStatus("輸入中…");
+  let i = 0;
+  const tick = () => {
     if (pipePaused) return;
-    if (step >= CINE_IME_STEPS.length) {
-      // final punctuation typed directly
-      type.textContent = built + "？";
-      hideIme();
-      if (hint) hint.textContent = "輸入完成 · 游標閃爍等待…";
-      setPipeStatus("等待中 · 游標閃爍");
-      if (caret) caret.classList.add("blink");
-      schedule(() => {
-        if (pipePaused) return;
-        if (onDone) onDone();
-      }, 2000);
+    if (i < CINE_QUERY.length) {
+      type.textContent = CINE_QUERY.slice(0, i + 1);
+      const ch = CINE_QUERY[i];
+      i += 1;
+      let delay = 85 + Math.floor(Math.random() * 50);
+      if (ch === "？") delay = 220;
+      else if ("測體應何".includes(ch)) delay += 35;
+      schedule(tick, delay);
       return;
     }
-    const s = CINE_IME_STEPS[step];
-    typeComposition(s.keys, () => {
-      selectImeCand(s.cands, s.pick, () => {
-        built += s.commit;
-        type.textContent = built;
-        hideIme();
-        step += 1;
-        schedule(runStep, 280);
-      });
-    });
-  };
-  runStep();
-}
-
-function runScreenEmerge(onDone) {
-  const { stage, emergeLine } = cineEls();
-  cineLetterbox(true);
-  if (stage) stage.dataset.act = "emerge";
-  setCineActs({ emerge: true, ui: false, brain: false });
-  if (emergeLine) emergeLine.textContent = "AI 從螢幕另一側望向你…";
-  setPipeStatus("開場 · 螢幕甦醒");
-  schedule(() => {
-    if (pipePaused) return;
-    if (emergeLine) emergeLine.textContent = "準備接收人類輸入…";
+    setPipeStatus("等待…");
+    if (caret) caret.classList.add("blink");
     schedule(() => {
       if (pipePaused) return;
       if (onDone) onDone();
-    }, 900);
-  }, 2200);
+    }, 1500);
+  };
+  tick();
 }
 
 function diveToBrain(onDone) {
-  const { stage, ui, brain, label } = cineEls();
-  setPipeStatus("潛入螢幕 · 進入 AI 大腦…");
+  const { stage, ui, brain } = cineEls();
+  setPipeStatus("進入向量資料庫…");
   if (stage) stage.dataset.act = "dive";
   cineFlashBurst();
   if (ui) ui.classList.add("cine-warp-out");
@@ -975,33 +774,31 @@ function diveToBrain(onDone) {
       brain.classList.add("cine-warp-in");
     }
     if (stage) stage.dataset.act = "brain";
-    if (label) label.textContent = "畫面② 大腦甦醒 · 詞彙浮現";
-    drawAttnSvg(4, "awaken");
+    drawAttnSvg(4, "journey");
     schedule(() => {
       if (brain) brain.classList.remove("cine-warp-in");
       if (onDone) onDone();
-    }, 1100);
-  }, 950);
+    }, 5200);
+  }, 900);
 }
 
 function runCinematicJourney() {
   pipePaused = false;
   const out = $("#pipeOut");
   const bars = $("#probBars");
-  const { stage, ui, brain, type, caret, emerge } = cineEls();
+  const { stage, ui, brain, type, caret } = cineEls();
 
-  hideIme();
   if (type) type.textContent = "";
   if (caret) caret.classList.add("blink");
-  if (ui) ui.classList.remove("cine-fade-out", "cine-warp-out");
-  if (brain) brain.classList.remove("cine-fade-in", "cine-warp-in");
-  if (emerge) emerge.hidden = false;
-  if (ui) ui.hidden = true;
-  if (brain) brain.hidden = true;
-  if (stage) {
-    stage.dataset.act = "idle";
-    stage.classList.add("is-cinema");
+  if (ui) {
+    ui.hidden = false;
+    ui.classList.remove("cine-fade-out", "cine-warp-out");
   }
+  if (brain) {
+    brain.hidden = true;
+    brain.classList.remove("cine-fade-in", "cine-warp-in");
+  }
+  if (stage) stage.dataset.act = "ui";
   if (out) out.textContent = "（尚未開始）";
   renderPipeTokens(-1);
   renderBars(
@@ -1009,62 +806,50 @@ function runCinematicJourney() {
     BASE_PROBS.map((x) => ({ ...x, p: 0.02 }))
   );
 
-  runScreenEmerge(() => {
-    runImeTyping(() => {
-      PIPE_TOKENS.forEach((_, i) => {
-        setTimeout(() => {
-          if (!pipePaused) renderPipeTokens(i);
-        }, 100 * (i + 1));
-      });
-      diveToBrain(() => {
-        const { label } = cineEls();
-        // awaken already shown — continue from cloud
-        runAttnSearchAnimation(
-          4,
-          () => {
-            if (pipePaused) return;
-            if (label) label.textContent = "完成 · 神經連結與下一步可能性已標註";
-            highlightChain(4);
-            renderBars(bars, BASE_PROBS, { pick: "功能" });
-            if (out) out.textContent = "受測個體應如何選擇？功能";
-            schedule(() => {
-              if (pipePaused) return;
-              setPipeStatus("生成下一 Token…");
-              let built = "受測個體應如何選擇？功能";
-              let i = 0;
-              const tick = () => {
-                if (pipePaused) return;
-                if (i >= PIPE_GEN.length) {
-                  setPipeStatus("完成 · 可再按播放");
-                  if (out) out.textContent = built + "…（示意）";
-                  renderBars(bars, NEXT_PROBS, { pick: "單純" });
-                  highlightChain(6);
-                  cineLetterbox(false);
-                  return;
-                }
-                built += PIPE_GEN[i];
-                if (out) out.textContent = built;
-                renderBars(
-                  bars,
-                  i === PIPE_GEN.length - 1
-                    ? NEXT_PROBS
-                    : [
-                        { t: PIPE_GEN[i], p: 0.51 },
-                        { t: "及", p: 0.17 },
-                        { t: "與", p: 0.12 },
-                        { t: "其他", p: 0.2 },
-                      ],
-                  { pick: PIPE_GEN[i], dimOthers: true }
-                );
-                i += 1;
-                schedule(tick, 750);
-              };
-              tick();
-            }, 900);
-          },
-          1
-        );
-      });
+  typeCineQuery(() => {
+    PIPE_TOKENS.forEach((_, i) => {
+      setTimeout(() => {
+        if (!pipePaused) renderPipeTokens(i);
+      }, 90 * (i + 1));
+    });
+    diveToBrain(() => {
+      if (pipePaused) return;
+      highlightChain(4);
+      renderBars(bars, BASE_PROBS, { pick: "功能" });
+      if (out) out.textContent = "受測個體應如何選擇？功能";
+      schedule(() => {
+        if (pipePaused) return;
+        setPipeStatus("生成下一 Token…");
+        let built = "受測個體應如何選擇？功能";
+        let i = 0;
+        const tick = () => {
+          if (pipePaused) return;
+          if (i >= PIPE_GEN.length) {
+            setPipeStatus("完成");
+            if (out) out.textContent = built + "…（示意）";
+            renderBars(bars, NEXT_PROBS, { pick: "單純" });
+            highlightChain(6);
+            return;
+          }
+          built += PIPE_GEN[i];
+          if (out) out.textContent = built;
+          renderBars(
+            bars,
+            i === PIPE_GEN.length - 1
+              ? NEXT_PROBS
+              : [
+                  { t: PIPE_GEN[i], p: 0.51 },
+                  { t: "及", p: 0.17 },
+                  { t: "與", p: 0.12 },
+                  { t: "其他", p: 0.2 },
+                ],
+            { pick: PIPE_GEN[i], dimOthers: true }
+          );
+          i += 1;
+          schedule(tick, 750);
+        };
+        tick();
+      }, 500);
     });
   });
 }
@@ -1091,18 +876,19 @@ $("#pipeReset")?.addEventListener("click", () => {
   if ($("#pipeOut")) $("#pipeOut").textContent = "（尚未開始）";
   setPipeStatus("就緒");
   $$("#llmChain .llm-chain-step").forEach((el) => el.classList.remove("active"));
-  hideIme();
-  cineLetterbox(false);
-  const { stage, emerge, ui, brain, type, caret, hint, flash } = cineEls();
+  const { stage, ui, brain, type, caret, flash } = cineEls();
   if (type) type.textContent = "";
   if (caret) caret.classList.add("blink");
-  if (hint) hint.textContent = "等待人類輸入…";
   if (flash) flash.classList.remove("on");
-  if (ui) ui.classList.remove("cine-fade-out", "cine-warp-out");
-  if (brain) brain.classList.remove("cine-fade-in", "cine-warp-in");
-  setCineActs({ emerge: true, ui: false, brain: false });
-  if (stage) stage.dataset.act = "idle";
-  if (emerge) emerge.hidden = false;
+  if (ui) {
+    ui.hidden = false;
+    ui.classList.remove("cine-fade-out", "cine-warp-out");
+  }
+  if (brain) {
+    brain.hidden = true;
+    brain.classList.remove("cine-fade-in", "cine-warp-in");
+  }
+  if (stage) stage.dataset.act = "ui";
 });
 
 $("#llmPlayAll")?.addEventListener("click", () => {
