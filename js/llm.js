@@ -362,169 +362,158 @@ function drawAttnSvg(focusIdx, mode = "highlight") {
   const svg = $("#attnSvg");
   if (!svg) return;
   const tokens = PIPE_TOKENS;
-  const W = 720;
-  const H = 360;
-  const padX = 78;
-  const n = tokens.length;
-  const focus = Math.min(Math.max(focusIdx, 0), n - 1);
+  const W = 760;
+  const H = 420;
+  const focus = Math.min(Math.max(focusIdx, 0), tokens.length - 1);
+  const query = tokens.join("");
+  const focusTok = tokens[focus];
 
-  const yIn = 88;
-  const yHid = 185;
-  const yOut = 300;
-  const xIn = tokens.map((_, i) => padX + (i * (W - padX * 2)) / Math.max(n - 1, 1));
-  const hidN = 8;
-  const xHid = Array.from(
-    { length: hidN },
-    (_, i) => padX + 20 + (i * (W - padX * 2 - 40)) / Math.max(hidN - 1, 1)
-  );
-  const xOut = W / 2;
-
-  const raw = tokens.map((_, i) => {
-    if (i === focus) return 1.25;
-    const dist = Math.abs(i - focus);
-    return Math.exp(-dist * 0.72) * (i <= focus ? 1.1 : 0.95);
-  });
-  const sumRaw = raw.reduce((a, b) => a + b, 0);
-  const probs = raw.map((v) => v / sumRaw);
-
-  const floatWords = [
-    { t: "功能", x: 110, y: 34, d: 5.2, delay: 0 },
-    { t: "風險", x: 230, y: 26, d: 6.1, delay: 0.4 },
-    { t: "TNMM", x: 360, y: 22, d: 4.8, delay: 0.8 },
-    { t: "可比公司", x: 500, y: 30, d: 5.5, delay: 0.2 },
-    { t: "利潤率", x: 620, y: 36, d: 6.4, delay: 1.1 },
-    { t: "OECD", x: 140, y: 330, d: 5.0, delay: 0.6 },
-    { t: "受測個體", x: 560, y: 334, d: 5.8, delay: 0.3 },
-    { t: "單純", x: 400, y: 342, d: 4.5, delay: 0.9 },
+  // Word cloud: related (to TP / query) + unrelated distractors
+  const cloud = [
+    { t: "受測個體", rel: 0.92, x: 0.52, y: 0.42, s: 22 },
+    { t: "功能", rel: 0.88, x: 0.38, y: 0.36, s: 20 },
+    { t: "風險", rel: 0.78, x: 0.64, y: 0.34, s: 18 },
+    { t: "單純", rel: 0.74, x: 0.44, y: 0.52, s: 17 },
+    { t: "TNMM", rel: 0.62, x: 0.7, y: 0.48, s: 16 },
+    { t: "可比公司", rel: 0.58, x: 0.3, y: 0.48, s: 15 },
+    { t: "利潤率", rel: 0.5, x: 0.58, y: 0.58, s: 14 },
+    { t: "OECD", rel: 0.48, x: 0.24, y: 0.32, s: 14 },
+    { t: "移轉訂價", rel: 0.7, x: 0.48, y: 0.28, s: 16 },
+    { t: "查核準則", rel: 0.42, x: 0.72, y: 0.3, s: 13 },
+    { t: "一方", rel: 0.55, x: 0.34, y: 0.6, s: 13 },
+    { t: "資產", rel: 0.4, x: 0.66, y: 0.62, s: 12 },
+    // unrelated distractors
+    { t: "疫苗", rel: 0.04, x: 0.14, y: 0.18, s: 13 },
+    { t: "ETF", rel: 0.05, x: 0.86, y: 0.2, s: 14 },
+    { t: "台積電", rel: 0.06, x: 0.12, y: 0.72, s: 15 },
+    { t: "永續", rel: 0.07, x: 0.88, y: 0.7, s: 14 },
+    { t: "高股息", rel: 0.03, x: 0.18, y: 0.55, s: 12 },
+    { t: "貼文", rel: 0.02, x: 0.82, y: 0.55, s: 12 },
+    { t: "零碳", rel: 0.05, x: 0.08, y: 0.4, s: 12 },
+    { t: "公司治理", rel: 0.08, x: 0.9, y: 0.42, s: 11 },
+    { t: "美食", rel: 0.01, x: 0.22, y: 0.82, s: 12 },
+    { t: "旅遊", rel: 0.02, x: 0.78, y: 0.82, s: 12 },
+    { t: "天氣", rel: 0.01, x: 0.5, y: 0.86, s: 11 },
+    { t: "籃球", rel: 0.01, x: 0.36, y: 0.78, s: 11 },
+    { t: "指數", rel: 0.06, x: 0.62, y: 0.78, s: 12 },
+    { t: "函釋", rel: 0.35, x: 0.28, y: 0.22, s: 12 },
+    { t: "BAPA", rel: 0.38, x: 0.76, y: 0.4, s: 13 },
   ];
-  const focusSemantic = {
-    0: ["受測個體", "功能", "風險"],
-    1: ["受測個體", "功能", "單純"],
-    2: ["功能", "風險"],
-    3: ["功能", "單純", "可比公司"],
-    4: ["功能", "單純", "風險", "受測個體"],
-  };
-  const closeSet = new Set(focusSemantic[focus] || ["功能", "風險"]);
-  const semProbs = {
-    功能: 0.28,
-    風險: 0.16,
-    單純: 0.22,
-    受測個體: 0.18,
-    可比公司: 0.1,
-    TNMM: 0.08,
-    OECD: 0.07,
-    利潤率: 0.09,
-  };
 
-  let floatHtml = "";
-  floatWords.forEach((f) => {
-    const close = mode === "highlight" && closeSet.has(f.t);
-    const bw = f.t.length > 3 ? 68 : 56;
-    floatHtml += `<g class="attn-float${close ? " close" : ""}" style="--d:${f.d}s;--delay:${f.delay}s">
-      <rect x="${f.x - bw / 2}" y="${f.y - 11}" width="${bw}" height="22" rx="11"
-        fill="${close ? "rgba(13,159,147,0.22)" : "rgba(255,255,255,0.07)"}"
-        stroke="${close ? "rgba(45,212,191,0.9)" : "rgba(148,163,184,0.35)"}" stroke-width="1"/>
-      <text x="${f.x}" y="${f.y + 1}" text-anchor="middle" dominant-baseline="middle"
-        font-size="11" font-family="Outfit,sans-serif"
-        fill="${close ? "#ccfbf1" : "rgba(226,232,240,0.5)"}">${f.t}</text>
-    </g>`;
+  // Boost words that literally match query tokens
+  cloud.forEach((w) => {
+    if (query.includes(w.t) || w.t.includes(focusTok)) w.rel = Math.min(0.98, w.rel + 0.15);
   });
 
-  let web = "";
-  xIn.forEach((x0) => {
-    xHid.forEach((x1) => {
-      web += `<path class="attn-web" d="M${x0} ${yIn + 16} C${x0} ${yIn + 55},${x1} ${yHid - 55},${x1} ${yHid - 10}" />`;
-    });
-  });
-  xHid.forEach((x0) => {
-    web += `<path class="attn-web" d="M${x0} ${yHid + 10} C${x0} ${yHid + 50},${xOut} ${yOut - 60},${xOut} ${yOut - 22}" />`;
-  });
+  const related = [...cloud].filter((w) => w.rel >= 0.35).sort((a, b) => b.rel - a.rel);
+  const threshold = mode === "web" ? 1.1 : 0.35; // web mode: no strong links yet
 
-  let hot = "";
-  let pulses = "";
-  let labels = "";
-  let semantic = "";
-  const ranked = probs
-    .map((p, i) => ({ i, p, t: tokens[i] }))
-    .sort((a, b) => b.p - a.p);
+  const cx = W * 0.5;
+  const cy = H * 0.48;
 
-  if (mode !== "web") {
-    ranked.forEach((r, rank) => {
-      const p = r.p;
-      const x0 = xIn[r.i];
-      const hidIdx = Math.min(hidN - 1, Math.round((r.i / Math.max(n - 1, 1)) * (hidN - 1)));
-      const x1 = xHid[hidIdx];
-      const w = 1 + p * 6;
-      const op = 0.22 + p * 0.78;
-      const c1 = `M${x0} ${yIn + 16} C${x0} ${yIn + 58},${x1} ${yHid - 58},${x1} ${yHid - 10}`;
-      const c2 = `M${x1} ${yHid + 10} C${x1} ${yHid + 52},${xOut} ${yOut - 62},${xOut} ${yOut - 22}`;
-      hot += `<path class="attn-link hot" d="${c1}" stroke-width="${w}" opacity="${op}" />`;
-      hot += `<path class="attn-link hot" d="${c2}" stroke-width="${Math.max(0.85, w * 0.8)}" opacity="${op * 0.85}" />`;
-      if (rank < 4) {
-        pulses += `<path class="attn-pulse" d="${c1}" stroke-width="${1.4 + p * 2.2}" opacity="${0.55 + p * 0.4}" />`;
-        const lx = x0 * 0.42 + x1 * 0.58;
-        const ly = (yIn + yHid) / 2 - 2;
-        labels += `<g class="attn-prob-pill"><rect x="${lx - 20}" y="${ly - 9}" width="40" height="18" rx="9" fill="rgba(15,23,42,0.78)" stroke="rgba(45,212,191,0.7)"/><text class="attn-prob" x="${lx}" y="${ly + 1}" text-anchor="middle" dominant-baseline="middle">${Math.round(p * 100)}%</text></g>`;
+  const defs = `<defs>
+    <radialGradient id="cloudGlow" cx="50%" cy="48%" r="55%">
+      <stop offset="0%" stop-color="rgba(13,159,147,0.22)"/>
+      <stop offset="55%" stop-color="rgba(2,132,199,0.08)"/>
+      <stop offset="100%" stop-color="rgba(11,18,32,0)"/>
+    </radialGradient>
+    <filter id="attnGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="attnGrid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M28 0H0V28" fill="none" stroke="rgba(148,163,184,0.1)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="${W}" height="${H}" fill="#0b1220" rx="16"/>
+  <rect width="${W}" height="${H}" fill="url(#attnGrid)" rx="16"/>
+  <rect width="${W}" height="${H}" fill="url(#cloudGlow)" rx="16"/>`;
+
+  // Center query capsule
+  const qLabel = `焦點：「${focusTok}」`;
+  const center = `<g filter="url(#attnGlow)">
+    <rect x="${cx - 118}" y="${cy - 28}" width="236" height="56" rx="16"
+      fill="rgba(13,159,147,0.2)" stroke="#2dd4bf" stroke-width="2"/>
+    <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="12" fill="rgba(226,232,240,0.7)" font-family="Outfit,sans-serif">輸入語境（示意）</text>
+    <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="16" font-weight="600" fill="#ecfdf5" font-family="JetBrains Mono,monospace">${qLabel}</text>
+  </g>
+  <text x="${cx}" y="28" text-anchor="middle" font-size="13" fill="rgba(226,232,240,0.75)" font-family="Outfit,sans-serif">語意文字雲 · 相關加亮／不相關淡化 · 神經連線標機率</text>`;
+
+  // Soft web among nearby related words (brain mesh), only in highlight
+  let mesh = "";
+  if (mode === "highlight") {
+    const top = related.slice(0, 7);
+    for (let i = 0; i < top.length; i++) {
+      for (let j = i + 1; j < top.length; j++) {
+        if ((i * 7 + j) % 3 !== 0) continue;
+        const a = top[i];
+        const b = top[j];
+        mesh += `<path class="attn-web" d="M${a.x * W} ${a.y * H} L${b.x * W} ${b.y * H}" opacity="0.25"/>`;
       }
-    });
+    }
+  }
 
-    floatWords.forEach((f) => {
-      if (!closeSet.has(f.t)) return;
-      const sp = semProbs[f.t] ?? 0.1;
-      const lx = (xIn[focus] + f.x) / 2;
-      const ly = (yIn - 20 + f.y + 11) / 2;
-      semantic += `<path class="attn-semantic" d="M${xIn[focus]} ${yIn - 18} Q${lx} ${ly - 16} ${f.x} ${f.y + 11}" stroke-width="${1.2 + sp * 7}" opacity="${0.4 + sp}" />`;
-      labels += `<g class="attn-prob-pill"><rect x="${lx - 18}" y="${ly - 20}" width="36" height="16" rx="8" fill="rgba(15,23,42,0.8)" stroke="rgba(56,189,248,0.6)"/><text class="attn-prob sky" x="${lx}" y="${ly - 11}" text-anchor="middle" dominant-baseline="middle">${Math.round(sp * 100)}%</text></g>`;
+  // Links from center → related words with probability
+  let links = "";
+  let pulses = "";
+  let pills = "";
+  if (mode === "highlight") {
+    related.slice(0, 8).forEach((w, idx) => {
+      const x = w.x * W;
+      const y = w.y * H;
+      const p = w.rel;
+      const midX = (cx + x) / 2 + (idx % 2 === 0 ? -18 : 18);
+      const midY = (cy + y) / 2;
+      const d = `M${cx} ${cy - 28} Q${midX} ${midY} ${x} ${y}`;
+      links += `<path class="attn-link hot" d="${d}" stroke-width="${1.2 + p * 5}" opacity="${0.35 + p * 0.55}"/>`;
+      pulses += `<path class="attn-pulse" d="${d}" stroke-width="${1 + p * 2}" opacity="${0.5 + p * 0.4}"/>`;
+      const lx = midX;
+      const ly = midY;
+      pills += `<g class="attn-prob-pill">
+        <rect x="${lx - 22}" y="${ly - 10}" width="44" height="18" rx="9" fill="rgba(15,23,42,0.82)" stroke="rgba(45,212,191,0.7)"/>
+        <text class="attn-prob" x="${lx}" y="${ly + 1}" text-anchor="middle" dominant-baseline="middle">${Math.round(p * 100)}%</text>
+      </g>`;
+    });
+  } else {
+    // web mode: faint spokes to everything (searching)
+    cloud.forEach((w, idx) => {
+      if (idx % 2 === 1) return;
+      const x = w.x * W;
+      const y = w.y * H;
+      links += `<path class="attn-web" d="M${cx} ${cy} L${x} ${y}" opacity="0.2"/>`;
     });
   }
 
-  let nodes = "";
-  tokens.forEach((t, i) => {
-    const on = i === focus && mode !== "web";
-    nodes += `<g ${on ? 'filter="url(#attnGlow)"' : ""}>
-      <rect x="${xIn[i] - 32}" y="${yIn - 15}" width="64" height="30" rx="10"
-        fill="${on ? "rgba(13,159,147,0.28)" : "rgba(255,255,255,0.1)"}"
-        stroke="${on ? "#2dd4bf" : "rgba(148,163,184,0.45)"}" stroke-width="${on ? 2 : 1}"/>
-      <text x="${xIn[i]}" y="${yIn + 1}" text-anchor="middle" dominant-baseline="middle"
-        font-size="13" font-family="JetBrains Mono,monospace" fill="${on ? "#ecfdf5" : "#e2e8f0"}">${t}</text>
+  // Word cloud nodes
+  let words = "";
+  cloud.forEach((w, i) => {
+    const x = w.x * W;
+    const y = w.y * H;
+    const on = mode === "highlight" && w.rel >= threshold;
+    const dim = mode === "highlight" && w.rel < threshold;
+    const fill = on ? "#ccfbf1" : dim ? "rgba(148,163,184,0.28)" : "rgba(226,232,240,0.55)";
+    const stroke = on ? "rgba(45,212,191,0.85)" : "rgba(148,163,184,0.2)";
+    const bg = on ? "rgba(13,159,147,0.22)" : "rgba(255,255,255,0.04)";
+    const bw = Math.max(40, w.t.length * (w.s * 0.7));
+    const bh = w.s + 10;
+    words += `<g class="attn-float${on ? " close" : ""}" style="--d:${4.5 + (i % 5) * 0.45}s;--delay:${(i % 7) * 0.18}s">
+      <rect x="${x - bw / 2}" y="${y - bh / 2}" width="${bw}" height="${bh}" rx="${bh / 2}"
+        fill="${bg}" stroke="${stroke}" stroke-width="${on ? 1.4 : 0.8}" opacity="${dim ? 0.55 : 1}"/>
+      <text x="${x}" y="${y + 1}" text-anchor="middle" dominant-baseline="middle"
+        font-size="${w.s}" font-family="Outfit,sans-serif" font-weight="${on ? 650 : 500}" fill="${fill}">${w.t}</text>
     </g>`;
   });
-  xHid.forEach((x) => {
-    const active = mode !== "web";
-    nodes += `<g><circle cx="${x}" cy="${yHid}" r="${active ? 9 : 6}" fill="url(#nodeGrad)" opacity="${active ? 1 : 0.4}"/><circle cx="${x}" cy="${yHid}" r="2.5" fill="#fff" opacity="0.95"/></g>`;
-  });
-  nodes += `<g filter="url(#attnGlow)"><circle cx="${xOut}" cy="${yOut}" r="22" fill="rgba(13,159,147,0.22)" stroke="#2dd4bf" stroke-width="2"/><circle cx="${xOut}" cy="${yOut}" r="10" fill="url(#nodeGrad)"/><text x="${xOut}" y="${yOut + 40}" text-anchor="middle" class="attn-out-label">注意力加權向量</text></g>`;
 
-  const badges = `<g class="attn-badges">
-    <rect x="78" y="52" width="58" height="20" rx="6" fill="rgba(56,189,248,0.14)" stroke="rgba(56,189,248,0.45)"/>
-    <text x="107" y="63" text-anchor="middle" class="attn-badge-t">Token 層</text>
-    <rect x="310" y="158" width="58" height="18" rx="6" fill="rgba(45,212,191,0.12)" stroke="rgba(45,212,191,0.4)"/>
-    <text x="339" y="168" text-anchor="middle" class="attn-badge-t">隱藏層</text>
-    <rect x="328" y="252" width="44" height="18" rx="6" fill="rgba(45,212,191,0.12)" stroke="rgba(45,212,191,0.4)"/>
-    <text x="350" y="262" text-anchor="middle" class="attn-badge-t">輸出</text>
+  const legend = `<g>
+    <rect x="24" y="${H - 46}" width="12" height="12" rx="3" fill="rgba(13,159,147,0.35)" stroke="#2dd4bf"/>
+    <text x="42" y="${H - 36}" font-size="11" fill="rgba(226,232,240,0.7)" font-family="Outfit,sans-serif">相關（加亮＋連線＋機率）</text>
+    <rect x="210" y="${H - 46}" width="12" height="12" rx="3" fill="rgba(255,255,255,0.04)" stroke="rgba(148,163,184,0.35)"/>
+    <text x="228" y="${H - 36}" font-size="11" fill="rgba(226,232,240,0.55)" font-family="Outfit,sans-serif">不相關（淡化、不連線）</text>
   </g>`;
-
-  const defs = `<defs>
-    <linearGradient id="nodeGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#5eead4"/><stop offset="100%" stop-color="#0284c7"/>
-    </linearGradient>
-    <radialGradient id="attnBgGlow" cx="50%" cy="40%" r="65%">
-      <stop offset="0%" stop-color="rgba(13,159,147,0.2)"/><stop offset="100%" stop-color="rgba(15,23,42,0)"/>
-    </radialGradient>
-    <filter id="attnGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="2.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <pattern id="attnGrid" width="24" height="24" patternUnits="userSpaceOnUse">
-      <path d="M24 0H0V24" fill="none" stroke="rgba(148,163,184,0.12)" stroke-width="1"/>
-    </pattern>
-  </defs>
-  <rect width="${W}" height="${H}" fill="#0b1220" rx="14"/>
-  <rect width="${W}" height="${H}" fill="url(#attnGrid)" rx="14"/>
-  <rect width="${W}" height="${H}" fill="url(#attnBgGlow)" rx="14"/>`;
 
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.classList.add("llm-attn-tech");
-  svg.innerHTML = defs + floatHtml + web + semantic + hot + pulses + nodes + labels + badges;
+  svg.innerHTML = defs + mesh + links + pulses + words + center + pills + legend;
 }
 
 function renderPipeTokens(active = -1) {
@@ -569,19 +558,19 @@ function runPipeline(fromStep = 0) {
       schedule(() => runStep(1), 1200);
     },
     () => {
-      setPipeStatus("2/6 Embedding → 神經網先鋪滿連線");
+      setPipeStatus("2/6 文字雲展開：相關＋不相關詞圍繞");
       highlightChain(2);
       drawAttnSvg(4, "web");
-      schedule(() => runStep(2), 1000);
+      schedule(() => runStep(2), 1100);
     },
     () => {
-      setPipeStatus("3/6 Attention：加亮連結並標示機率");
+      setPipeStatus("3/6 依輸入加亮相關詞，連線並標機率");
       highlightChain(3);
       drawAttnSvg(4, "highlight");
       $$("#pipeTokens .llm-tok").forEach((el, i) => {
         el.classList.toggle("on", i === 0 || i === 1 || i === 4);
       });
-      schedule(() => runStep(3), 1400);
+      schedule(() => runStep(3), 1600);
     },
     () => {
       setPipeStatus("4/6 計算下一個 Token 機率");
