@@ -454,12 +454,13 @@ function drawAttnSvg(focusIdx, mode = "journey") {
   const fx = focusNode.x * W;
   const fy = focusNode.y * H;
 
-  // Timeline (readable): nebula → slow vector search → synapses+prob → next
+  // Correct order: nebula → label probs → dashed links → high-P thicken green → next
   const T_WORD = 0;
-  const T_VEC = 2.4;
-  const T_LINK = 5.9;
-  const T_NEXT = 9.3;
-  const JOURNEY_MS = 11000;
+  const T_PROB = 2.3;
+  const T_DASH = 5.2;
+  const T_HOT = 8.0;
+  const T_NEXT = 10.2;
+  const JOURNEY_MS = 12200;
 
   const defs = `<defs>
     <radialGradient id="queryHalo" cx="50%" cy="50%" r="50%">
@@ -495,39 +496,29 @@ function drawAttnSvg(focusIdx, mode = "journey") {
     ambient += `<circle class="attn-float attn-nebula-dot" cx="${ax}" cy="${ay}" r="${r}" fill="rgba(71,85,105,${op})" style="--d:${5 + (i % 6)}s;--delay:${T_WORD + (i % 14) * 0.07}s"/>`;
   }
 
-  // Expanding rings: charcoal / black-gray (not teal)
-  let vectorFx = `<g class="attn-phase-vec" style="--delay:${T_VEC}s">
+  // Soft search rings only (charcoal) — no early thick connections
+  let vectorFx = `<g class="attn-phase-vec" style="--delay:${T_PROB}s">
     <circle class="attn-vec-ring" cx="${fx}" cy="${fy}" r="34" fill="url(#queryHalo)"/>
     <circle class="attn-vec-ring r2" cx="${fx}" cy="${fy}" r="62" fill="none" stroke="rgba(30,41,59,0.45)" stroke-width="1.3"/>
     <circle class="attn-vec-ring r3" cx="${fx}" cy="${fy}" r="102" fill="none" stroke="rgba(71,85,105,0.28)" stroke-width="1.1"/>
     <circle class="attn-vec-ring r4" cx="${fx}" cy="${fy}" r="140" fill="none" stroke="rgba(100,116,139,0.16)" stroke-width="0.9"/>
-    <circle cx="${fx}" cy="${fy}" r="4.5" fill="#1e293b" filter="url(#neuralGlow)"/>`;
-  related
-    .filter((w) => w !== focusNode)
-    .slice(0, 9)
-    .forEach((b, i) => {
-      const x2 = b.x * W;
-      const y2 = b.y * H;
-      const delay = `${T_VEC + 0.25 + i * 0.28}s`;
-      const travel = 1.15 + (1 - b.rel) * 0.45;
-      const op = 0.22 + b.rel * 0.5;
-      const mx = (fx + x2) / 2;
-      const my = (fy + y2) / 2;
-      vectorFx += `<line class="attn-vec-ray" x1="${fx}" y1="${fy}" x2="${x2}" y2="${y2}"
-        stroke="rgba(51,65,85,${op})" stroke-width="${1 + b.rel * 2}" stroke-dasharray="5 6"
-        style="--delay:${delay}"/>`;
-      vectorFx += `<circle class="attn-vec-dot" r="3.2" fill="#334155" filter="url(#neuralGlow)">
-        <animateMotion dur="${travel}s" begin="${delay}" fill="freeze" path="M${fx} ${fy} L${x2} ${y2}"/>
-      </circle>`;
-      vectorFx += `<text class="attn-sim-label" x="${mx}" y="${my - 8}" text-anchor="middle"
-        font-size="10" font-family="JetBrains Mono,monospace" fill="#334155" font-weight="600"
-        style="--delay:${T_VEC + 0.55 + i * 0.28}s">${Math.round(b.rel * 100)}%</text>`;
-    });
-  vectorFx += `</g>`;
+    <circle cx="${fx}" cy="${fy}" r="4.5" fill="#1e293b" filter="url(#neuralGlow)"/>
+  </g>`;
 
-  // Synapses with probability during linking (one continuous draw)
-  let links = "";
+  // ① Probabilities first — label on related nodes
+  const probTargets = related.filter((w) => w !== focusNode).slice(0, 8);
   let pills = "";
+  probTargets.forEach((b, i) => {
+    const px = b.x * W;
+    const py = b.y * H - 22;
+    pills += `<g class="attn-prob-reveal" style="--delay:${T_PROB + 0.35 + i * 0.28}s">
+      <rect x="${px - 22}" y="${py - 10}" width="44" height="18" rx="4" fill="#ffffff" stroke="${b.c}" stroke-width="1.4"/>
+      <text class="attn-prob-count" x="${px}" y="${py}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-family="JetBrains Mono,monospace" fill="${b.c}" font-weight="700">${Math.round(b.rel * 100)}%</text>
+    </g>`;
+  });
+
+  // ② Dashed links among related · ③ high-P dashed → thick green
+  let links = "";
   let pulses = "";
   const chain = [focusNode, ...related.filter((w) => w !== focusNode)].slice(0, 7);
   for (let i = 0; i < chain.length - 1; i++) {
@@ -537,17 +528,18 @@ function drawAttnSvg(focusIdx, mode = "journey") {
     const y1 = a.y * H;
     const x2 = b.x * W;
     const y2 = b.y * H;
-    const mx = (x1 + x2) / 2 + (i % 2 === 0 ? 24 : -24);
+    const mx = (x1 + x2) / 2 + (i % 2 === 0 ? 22 : -22);
     const my = (y1 + y2) / 2;
     const p = b.rel;
     const d = `M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}`;
-    const delay = `${T_LINK + i * 0.48}s`;
-    links += `<path class="attn-ink attn-draw attn-synapse" d="${d}" stroke-width="${1.8 + p * 3.2}" fill="none" stroke="#334155" style="--delay:${delay};--op:${0.55 + p * 0.35}"/>`;
-    pulses += `<path class="attn-ink-pulse" d="${d}" stroke-width="${1.3 + p}" fill="none" style="--delay:${delay}"/>`;
-    pills += `<g class="attn-prob-reveal" style="--delay:${T_LINK + 0.55 + i * 0.48}s">
-      <rect x="${mx - 22}" y="${my - 11}" width="44" height="20" rx="4" fill="#ffffff" stroke="${b.c}" stroke-width="1.5"/>
-      <text class="attn-prob-count" x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-family="JetBrains Mono,monospace" fill="${b.c}" font-weight="700">${Math.round(p * 100)}%</text>
-    </g>`;
+    const dashDelay = `${T_DASH + i * 0.38}s`;
+    links += `<path class="attn-dash" d="${d}" fill="none" style="--delay:${dashDelay};--op:0.65"/>`;
+    // High probability: thicken + turn green after all dashes are in
+    if (p >= 0.55) {
+      const hotDelay = `${T_HOT + i * 0.32}s`;
+      links += `<path class="attn-dash-hot" d="${d}" fill="none" style="--delay:${hotDelay};--w:${2.2 + p * 3.2}"/>`;
+      pulses += `<path class="attn-ink-pulse attn-hot-pulse" d="${d}" fill="none" style="--delay:${hotDelay}"/>`;
+    }
   }
 
   // Draw far → near for 3D stacking
@@ -557,7 +549,7 @@ function drawAttnSvg(focusIdx, mode = "journey") {
     const x = w.x * W;
     const y = w.y * H;
     const z = w.z ?? 0.5;
-    const depthScale = 0.55 + (1 - z) * 0.7; // near bigger
+    const depthScale = 0.55 + (1 - z) * 0.7;
     const fontSize = Math.max(7, Math.round(w.s * depthScale));
     const depthOp = (0.28 + (1 - z) * 0.72).toFixed(2);
     const isRel = w.rel >= 0.35;
@@ -573,7 +565,7 @@ function drawAttnSvg(focusIdx, mode = "journey") {
     if (nextHit) fill = nextHit.c;
 
     const awaken = `${T_WORD + (i % 20) * 0.09}s`;
-    const grayDelay = `${T_LINK}s`;
+    const grayDelay = `${T_HOT}s`;
     const floatDur = `${4.5 + z * 3.5}s`;
     const filterAttr = z > 0.7 ? ' filter="url(#farSoft)"' : "";
     words += `<text class="${cls}" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle"
@@ -609,7 +601,7 @@ function drawAttnSvg(focusIdx, mode = "journey") {
 function runAttnSearchAnimation(focusIdx, onDone) {
   setPipeStatus("向量資料庫 · 文字星雲連結中…");
   drawAttnSvg(focusIdx, "journey");
-  const ms = Number($("#attnSvg")?.dataset.journeyMs) || 11000;
+  const ms = Number($("#attnSvg")?.dataset.journeyMs) || 12200;
   schedule(() => {
     if (pipePaused) return;
     if (onDone) onDone();
@@ -809,7 +801,7 @@ function diveToBrain(onDone) {
     }
     if (stage) stage.dataset.act = "brain";
     drawAttnSvg(4, "journey");
-    const ms = Number($("#attnSvg")?.dataset.journeyMs) || 11000;
+    const ms = Number($("#attnSvg")?.dataset.journeyMs) || 12200;
     schedule(() => {
       if (brain) brain.classList.remove("cine-warp-in");
       if (onDone) onDone();
