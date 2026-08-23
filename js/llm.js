@@ -359,68 +359,67 @@ function setPipeStatus(t) {
 }
 
 function buildCloudData(focusTok) {
-  // Size hierarchy from the start: related large, noise varies small→mid
+  // Related + unrelated interleaved across the nebula (not clustered by type)
   const cloud = [
-    { t: "受測個體", rel: 0.94, x: 0.22, y: 0.3, s: 34, c: "#0f766e" },
-    { t: "功能", rel: 0.9, x: 0.62, y: 0.24, s: 30, c: "#0369a1" },
-    { t: "風險", rel: 0.84, x: 0.78, y: 0.4, s: 26, c: "#c2410c" },
-    { t: "移轉訂價", rel: 0.88, x: 0.38, y: 0.18, s: 28, c: "#15803d" },
-    { t: "單純", rel: 0.78, x: 0.48, y: 0.56, s: 24, c: "#a16207" },
-    { t: "選擇", rel: 0.86, x: 0.55, y: 0.36, s: 28, c: "#1e3a5f" },
-    { t: "TNMM", rel: 0.66, x: 0.18, y: 0.54, s: 20, c: "#0284c7" },
-    { t: "可比公司", rel: 0.62, x: 0.82, y: 0.22, s: 18, c: "#be123c" },
-    { t: "利潤率", rel: 0.55, x: 0.7, y: 0.58, s: 18, c: "#0d9488" },
-    { t: "OECD", rel: 0.5, x: 0.12, y: 0.22, s: 16, c: "#1d4ed8" },
-    { t: "一方", rel: 0.58, x: 0.32, y: 0.64, s: 17, c: "#b45309" },
-    { t: "資產", rel: 0.45, x: 0.88, y: 0.5, s: 15, c: "#475569" },
-    { t: "查核準則", rel: 0.42, x: 0.58, y: 0.14, s: 15, c: "#0e7490" },
-    { t: "函釋", rel: 0.4, x: 0.28, y: 0.44, s: 15, c: "#7c3aed" },
-    { t: "BAPA", rel: 0.38, x: 0.42, y: 0.74, s: 14, c: "#0369a1" },
-    { t: "個體", rel: 0.72, x: 0.5, y: 0.28, s: 20, c: "#0f766e" },
-    { t: "交易", rel: 0.44, x: 0.68, y: 0.44, s: 15, c: "#57534e" },
-    { t: "利潤", rel: 0.4, x: 0.24, y: 0.74, s: 14, c: "#15803d" },
-    { t: "較", rel: 0.22, x: 0.52, y: 0.68, s: 18, c: "#0d9488", isNext: true },
-    // distractors — varied sizes for depth (not flat gray yet)
-    { t: "台積電", rel: 0.04, x: 0.08, y: 0.12, s: 18, c: "#78716c" },
-    { t: "鴻海", rel: 0.04, x: 0.92, y: 0.12, s: 16, c: "#78716c" },
-    { t: "永續", rel: 0.05, x: 0.14, y: 0.38, s: 14, c: "#78716c" },
-    { t: "ETF", rel: 0.04, x: 0.9, y: 0.68, s: 20, c: "#78716c" },
-    { t: "疫苗", rel: 0.03, x: 0.08, y: 0.68, s: 12, c: "#78716c" },
-    { t: "高股息", rel: 0.04, x: 0.74, y: 0.12, s: 13, c: "#78716c" },
-    { t: "美食", rel: 0.02, x: 0.94, y: 0.42, s: 11, c: "#78716c" },
-    { t: "旅遊", rel: 0.02, x: 0.06, y: 0.48, s: 15, c: "#78716c" },
-    { t: "籃球", rel: 0.02, x: 0.86, y: 0.78, s: 10, c: "#78716c" },
-    { t: "天氣", rel: 0.01, x: 0.48, y: 0.88, s: 9, c: "#78716c" },
-    { t: "零碳", rel: 0.05, x: 0.16, y: 0.82, s: 13, c: "#78716c" },
-    { t: "貼文", rel: 0.02, x: 0.36, y: 0.08, s: 10, c: "#78716c" },
-    { t: "指數", rel: 0.05, x: 0.64, y: 0.8, s: 16, c: "#78716c" },
-    { t: "國泰", rel: 0.03, x: 0.78, y: 0.7, s: 12, c: "#78716c" },
-    { t: "富邦", rel: 0.03, x: 0.2, y: 0.08, s: 14, c: "#78716c" },
-    { t: "公司治理", rel: 0.06, x: 0.88, y: 0.3, s: 11, c: "#78716c" },
-    { t: "半導體", rel: 0.04, x: 0.1, y: 0.3, s: 17, c: "#78716c" },
-    { t: "定期定額", rel: 0.03, x: 0.34, y: 0.9, s: 10, c: "#78716c" },
-    { t: "Podcast", rel: 0.02, x: 0.56, y: 0.08, s: 12, c: "#78716c" },
-    { t: "設計", rel: 0.03, x: 0.72, y: 0.86, s: 14, c: "#78716c" },
-    { t: "Usability", rel: 0.02, x: 0.42, y: 0.48, s: 9, c: "#78716c" },
-    { t: "Participation", rel: 0.02, x: 0.6, y: 0.7, s: 8, c: "#78716c" },
-    { t: "RSS", rel: 0.02, x: 0.26, y: 0.56, s: 10, c: "#78716c" },
-    { t: "AJAX", rel: 0.02, x: 0.84, y: 0.58, s: 11, c: "#78716c" },
-    { t: "簡報", rel: 0.02, x: 0.14, y: 0.6, s: 13, c: "#78716c" },
-    { t: "咖啡", rel: 0.01, x: 0.96, y: 0.55, s: 10, c: "#78716c" },
-    { t: "股市", rel: 0.03, x: 0.44, y: 0.82, s: 15, c: "#78716c" },
-    { t: "房價", rel: 0.02, x: 0.76, y: 0.48, s: 12, c: "#78716c" },
+    { t: "受測個體", rel: 0.94, x: 0.18, y: 0.32, s: 32, c: "#0f766e" },
+    { t: "台積電", rel: 0.04, x: 0.34, y: 0.22, s: 15, c: "#78716c" },
+    { t: "功能", rel: 0.9, x: 0.72, y: 0.28, s: 28, c: "#0369a1" },
+    { t: "ETF", rel: 0.04, x: 0.52, y: 0.18, s: 16, c: "#78716c" },
+    { t: "風險", rel: 0.84, x: 0.86, y: 0.48, s: 24, c: "#c2410c" },
+    { t: "鴻海", rel: 0.04, x: 0.12, y: 0.16, s: 14, c: "#78716c" },
+    { t: "移轉訂價", rel: 0.88, x: 0.42, y: 0.38, s: 26, c: "#15803d" },
+    { t: "美食", rel: 0.02, x: 0.28, y: 0.58, s: 12, c: "#78716c" },
+    { t: "單純", rel: 0.78, x: 0.58, y: 0.62, s: 22, c: "#a16207" },
+    { t: "旅遊", rel: 0.02, x: 0.78, y: 0.16, s: 13, c: "#78716c" },
+    { t: "選擇", rel: 0.86, x: 0.64, y: 0.42, s: 26, c: "#1e3a5f" },
+    { t: "疫苗", rel: 0.03, x: 0.22, y: 0.78, s: 12, c: "#78716c" },
+    { t: "TNMM", rel: 0.66, x: 0.14, y: 0.55, s: 18, c: "#0284c7" },
+    { t: "高股息", rel: 0.04, x: 0.48, y: 0.78, s: 13, c: "#78716c" },
+    { t: "可比公司", rel: 0.62, x: 0.88, y: 0.24, s: 16, c: "#be123c" },
+    { t: "永續", rel: 0.05, x: 0.36, y: 0.48, s: 14, c: "#78716c" },
+    { t: "利潤率", rel: 0.55, x: 0.76, y: 0.68, s: 17, c: "#0d9488" },
+    { t: "籃球", rel: 0.02, x: 0.08, y: 0.72, s: 11, c: "#78716c" },
+    { t: "OECD", rel: 0.5, x: 0.3, y: 0.14, s: 15, c: "#1d4ed8" },
+    { t: "天氣", rel: 0.01, x: 0.92, y: 0.72, s: 10, c: "#78716c" },
+    { t: "一方", rel: 0.58, x: 0.2, y: 0.68, s: 16, c: "#b45309" },
+    { t: "指數", rel: 0.05, x: 0.56, y: 0.32, s: 14, c: "#78716c" },
+    { t: "資產", rel: 0.45, x: 0.9, y: 0.56, s: 14, c: "#475569" },
+    { t: "咖啡", rel: 0.01, x: 0.44, y: 0.66, s: 11, c: "#78716c" },
+    { t: "查核準則", rel: 0.42, x: 0.5, y: 0.1, s: 14, c: "#0e7490" },
+    { t: "半導體", rel: 0.04, x: 0.68, y: 0.78, s: 15, c: "#78716c" },
+    { t: "函釋", rel: 0.4, x: 0.38, y: 0.7, s: 14, c: "#7c3aed" },
+    { t: "Podcast", rel: 0.02, x: 0.82, y: 0.38, s: 11, c: "#78716c" },
+    { t: "BAPA", rel: 0.38, x: 0.46, y: 0.86, s: 13, c: "#0369a1" },
+    { t: "國泰", rel: 0.03, x: 0.1, y: 0.42, s: 12, c: "#78716c" },
+    { t: "個體", rel: 0.72, x: 0.54, y: 0.5, s: 18, c: "#0f766e" },
+    { t: "設計", rel: 0.03, x: 0.7, y: 0.54, s: 13, c: "#78716c" },
+    { t: "交易", rel: 0.44, x: 0.26, y: 0.4, s: 14, c: "#57534e" },
+    { t: "富邦", rel: 0.03, x: 0.6, y: 0.86, s: 12, c: "#78716c" },
+    { t: "利潤", rel: 0.4, x: 0.16, y: 0.86, s: 13, c: "#15803d" },
+    { t: "較", rel: 0.22, x: 0.66, y: 0.2, s: 16, c: "#0d9488", isNext: true },
+    { t: "零碳", rel: 0.05, x: 0.84, y: 0.84, s: 12, c: "#78716c" },
+    { t: "貼文", rel: 0.02, x: 0.4, y: 0.28, s: 10, c: "#78716c" },
+    { t: "公司治理", rel: 0.06, x: 0.94, y: 0.36, s: 11, c: "#78716c" },
+    { t: "定期定額", rel: 0.03, x: 0.32, y: 0.88, s: 10, c: "#78716c" },
+    { t: "Usability", rel: 0.02, x: 0.74, y: 0.46, s: 9, c: "#78716c" },
+    { t: "RSS", rel: 0.02, x: 0.48, y: 0.42, s: 10, c: "#78716c" },
+    { t: "AJAX", rel: 0.02, x: 0.08, y: 0.28, s: 10, c: "#78716c" },
+    { t: "簡報", rel: 0.02, x: 0.58, y: 0.74, s: 12, c: "#78716c" },
+    { t: "股市", rel: 0.03, x: 0.8, y: 0.58, s: 14, c: "#78716c" },
+    { t: "房價", rel: 0.02, x: 0.24, y: 0.24, s: 12, c: "#78716c" },
+    { t: "Participation", rel: 0.02, x: 0.92, y: 0.64, s: 8, c: "#78716c" },
   ];
 
   cloud.forEach((w) => {
     if (w.t === focusTok || w.t.includes(focusTok)) {
       w.rel = Math.max(w.rel, 0.95);
       w.isFocus = true;
-      w.s = Math.max(w.s, 32);
+      w.s = Math.max(w.s, 30);
       w.c = "#0f172a";
     }
   });
   if (!cloud.some((w) => w.isFocus)) {
-    cloud.push({ t: focusTok, rel: 0.98, x: 0.48, y: 0.4, s: 32, c: "#0f172a", isFocus: true });
+    cloud.push({ t: focusTok, rel: 0.98, x: 0.5, y: 0.45, s: 30, c: "#0f172a", isFocus: true });
   }
   return cloud;
 }
@@ -451,11 +450,12 @@ function drawAttnSvg(focusIdx, mode = "journey") {
   const fx = focusNode.x * W;
   const fy = focusNode.y * H;
 
-  // Timeline (one shot): words 0–1.2s · vectors 1.0–2.2s · synapses+prob 2.0–4.0s · next 3.6–4.8s
+  // Timeline (readable): nebula → slow vector search → synapses+prob → next
   const T_WORD = 0;
-  const T_VEC = 1.05;
-  const T_LINK = 2.05;
-  const T_NEXT = 3.55;
+  const T_VEC = 2.4;
+  const T_LINK = 5.9;
+  const T_NEXT = 9.3;
+  const JOURNEY_MS = 11000;
 
   const defs = `<defs>
     <radialGradient id="queryHalo" cx="50%" cy="50%" r="50%">
@@ -474,7 +474,7 @@ function drawAttnSvg(focusIdx, mode = "journey") {
   for (let i = 0; i < 22; i++) {
     const ax = 40 + ((i * 97) % (W - 80));
     const ay = 50 + ((i * 53) % (H - 80));
-    ambient += `<circle class="attn-float attn-nebula-dot" cx="${ax}" cy="${ay}" r="${1 + (i % 3)}" fill="rgba(13,148,136,${0.1 + (i % 4) * 0.04})" style="--d:${4 + (i % 5)}s;--delay:${T_WORD + (i % 9) * 0.05}s"/>`;
+    ambient += `<circle class="attn-float attn-nebula-dot" cx="${ax}" cy="${ay}" r="${1 + (i % 3)}" fill="rgba(13,148,136,${0.1 + (i % 4) * 0.04})" style="--d:${4 + (i % 5)}s;--delay:${T_WORD + (i % 12) * 0.08}s"/>`;
   }
 
   // Query halo + similarity rays (appear once after nebula)
@@ -489,14 +489,20 @@ function drawAttnSvg(focusIdx, mode = "journey") {
     .forEach((b, i) => {
       const x2 = b.x * W;
       const y2 = b.y * H;
-      const delay = `${T_VEC + 0.08 + i * 0.07}s`;
+      const delay = `${T_VEC + 0.25 + i * 0.28}s`;
+      const travel = 1.15 + (1 - b.rel) * 0.45;
       const op = 0.25 + b.rel * 0.55;
+      const mx = (fx + x2) / 2;
+      const my = (fy + y2) / 2;
       vectorFx += `<line class="attn-vec-ray" x1="${fx}" y1="${fy}" x2="${x2}" y2="${y2}"
         stroke="rgba(13,148,136,${op})" stroke-width="${1 + b.rel * 2}" stroke-dasharray="5 6"
         style="--delay:${delay}"/>`;
       vectorFx += `<circle class="attn-vec-dot" r="3.2" fill="#0d9488" filter="url(#neuralGlow)">
-        <animateMotion dur="0.75s" begin="${delay}" fill="freeze" path="M${fx} ${fy} L${x2} ${y2}"/>
+        <animateMotion dur="${travel}s" begin="${delay}" fill="freeze" path="M${fx} ${fy} L${x2} ${y2}"/>
       </circle>`;
+      vectorFx += `<text class="attn-sim-label" x="${mx}" y="${my - 8}" text-anchor="middle"
+        font-size="10" font-family="JetBrains Mono,monospace" fill="#0f766e" font-weight="600"
+        style="--delay:${T_VEC + 0.55 + i * 0.28}s">${Math.round(b.rel * 100)}%</text>`;
     });
   vectorFx += `</g>`;
 
@@ -516,10 +522,10 @@ function drawAttnSvg(focusIdx, mode = "journey") {
     const my = (y1 + y2) / 2;
     const p = b.rel;
     const d = `M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}`;
-    const delay = `${T_LINK + i * 0.22}s`;
+    const delay = `${T_LINK + i * 0.48}s`;
     links += `<path class="attn-ink attn-draw attn-synapse" d="${d}" stroke-width="${1.8 + p * 3.2}" fill="none" stroke="#0d9488" style="--delay:${delay};--op:${0.6 + p * 0.35}"/>`;
     pulses += `<path class="attn-ink-pulse" d="${d}" stroke-width="${1.3 + p}" fill="none" style="--delay:${delay}"/>`;
-    pills += `<g class="attn-prob-reveal" style="--delay:${T_LINK + 0.28 + i * 0.22}s">
+    pills += `<g class="attn-prob-reveal" style="--delay:${T_LINK + 0.55 + i * 0.48}s">
       <rect x="${mx - 22}" y="${my - 11}" width="44" height="20" rx="4" fill="#ffffff" stroke="${b.c}" stroke-width="1.5"/>
       <text class="attn-prob-count" x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-family="JetBrains Mono,monospace" fill="${b.c}" font-weight="700">${Math.round(p * 100)}%</text>
     </g>`;
@@ -540,7 +546,7 @@ function drawAttnSvg(focusIdx, mode = "journey") {
     let fill = w.c;
     if (nextHit) fill = nextHit.c;
 
-    const awaken = `${T_WORD + (i % 16) * 0.04}s`;
+    const awaken = `${T_WORD + (i % 20) * 0.09}s`;
     // gray-rest fades later during link phase
     const grayDelay = `${T_LINK}s`;
     words += `<text class="${cls}" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle"
@@ -555,7 +561,7 @@ function drawAttnSvg(focusIdx, mode = "journey") {
       if (!node) return "";
       const x = node.x * W;
       const y = node.y * H - 28;
-      return `<g class="attn-next-tag" style="--delay:${T_NEXT + i * 0.1}s">
+      return `<g class="attn-next-tag" style="--delay:${T_NEXT + i * 0.18}s">
         <rect x="${x - 28}" y="${y - 10}" width="56" height="18" rx="4" fill="#ffffff" stroke="${s.c}" stroke-width="1.5"/>
         <text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="${s.c}" font-weight="700">${Math.round(s.p * 100)}%</text>
       </g>`;
@@ -566,6 +572,7 @@ function drawAttnSvg(focusIdx, mode = "journey") {
   svg.classList.remove("llm-attn-tech");
   svg.classList.add("llm-attn-literary", "attn-spread", "attn-white");
   svg.dataset.phase = isJourney ? "journey" : mode;
+  svg.dataset.journeyMs = String(JOURNEY_MS);
   // Force restart CSS animations
   svg.innerHTML = "";
   void svg.offsetWidth;
@@ -573,13 +580,13 @@ function drawAttnSvg(focusIdx, mode = "journey") {
 }
 
 function runAttnSearchAnimation(focusIdx, onDone) {
-  // One continuous journey — no multi-phase redraw loops
   setPipeStatus("向量資料庫 · 文字星雲連結中…");
   drawAttnSvg(focusIdx, "journey");
+  const ms = Number($("#attnSvg")?.dataset.journeyMs) || 11000;
   schedule(() => {
     if (pipePaused) return;
     if (onDone) onDone();
-  }, 5200);
+  }, ms);
 }
 
 function renderPipeTokens(active = -1) {
@@ -775,10 +782,11 @@ function diveToBrain(onDone) {
     }
     if (stage) stage.dataset.act = "brain";
     drawAttnSvg(4, "journey");
+    const ms = Number($("#attnSvg")?.dataset.journeyMs) || 11000;
     schedule(() => {
       if (brain) brain.classList.remove("cine-warp-in");
       if (onDone) onDone();
-    }, 5200);
+    }, ms);
   }, 900);
 }
 

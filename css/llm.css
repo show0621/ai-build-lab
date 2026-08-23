@@ -536,14 +536,14 @@
 .llm-attn-svg .attn-vec-ray {
   stroke-linecap: round;
   opacity: 0;
-  animation: attnRayIn 0.55s ease forwards;
+  animation: attnRayIn 0.9s ease forwards;
   animation-delay: var(--delay, 0s);
 }
 
 @keyframes attnRayIn {
   from {
     opacity: 0;
-    stroke-dashoffset: 40;
+    stroke-dashoffset: 60;
   }
   to {
     opacity: 1;
@@ -568,19 +568,19 @@
 }
 
 .llm-attn-svg .attn-draw {
-  stroke-dasharray: 420;
-  stroke-dashoffset: 420;
+  stroke-dasharray: 520;
+  stroke-dashoffset: 520;
   opacity: 0;
-  animation: attnDrawLine 0.85s ease forwards;
+  animation: attnDrawLine 1.45s ease forwards;
   animation-delay: var(--delay, 0s);
 }
 
 @keyframes attnDrawLine {
   0% {
-    stroke-dashoffset: 420;
+    stroke-dashoffset: 520;
     opacity: 0;
   }
-  20% {
+  15% {
     opacity: var(--op, 0.7);
   }
   100% {
@@ -614,7 +614,7 @@
 
 .llm-attn-svg .attn-prob-reveal {
   opacity: 0;
-  animation: attnProbIn 0.45s ease forwards;
+  animation: attnProbIn 0.55s ease forwards;
   animation-delay: var(--delay, 0.3s);
 }
 
