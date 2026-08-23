@@ -51,20 +51,16 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  /* 清透：幾乎無填色、無毛玻璃模糊 */
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.18) 0%,
-    rgba(255, 255, 255, 0.02) 50%,
-    rgba(255, 255, 255, 0.08) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 0 0 1px rgba(15, 23, 42, 0.08),
-    0 8px 22px rgba(15, 23, 42, 0.1);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 0 0 1px rgba(71, 85, 105, 0.28),
+    0 8px 20px rgba(15, 23, 42, 0.08);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
 }
 
 .llm-assist-orb-dot {
@@ -123,29 +119,34 @@
   position: relative;
   padding: 0.7rem 0.65rem 0.75rem;
   border-radius: 18px;
-  /* 高度透明＝看得到背後網格；玻璃感＝邊緣／高光，不是 blur 毛面 */
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.72);
+  /* 清透玻璃：底板全透，背後文字／網格應清晰可見 */
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
   box-shadow:
-    0 1.5px 0 rgba(255, 255, 255, 0.95) inset,
-    0 -0.5px 0 rgba(15, 23, 42, 0.06) inset,
-    0 0 0 1px rgba(15, 23, 42, 0.08),
-    0 16px 40px rgba(15, 23, 42, 0.08);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+    /* 內緣亮邊 */
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4),
+    /* 外緣深描邊＝玻璃輪廓 */
+    0 0 0 1px rgba(71, 85, 105, 0.32),
+    0 10px 28px rgba(15, 23, 42, 0.07);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
   font-size: 0.78rem;
-  overflow: hidden;
+  overflow: visible;
+  isolation: isolate;
 }
 
-/* 頂緣一條亮線＝玻璃邊 */
+/* 只留頂緣細亮線，不要整面白霧 */
 .llm-assist-panel-inner::before {
   content: "";
   position: absolute;
-  left: 8%;
-  right: 8%;
+  left: 12%;
+  right: 12%;
   top: 0;
   height: 1px;
   background: linear-gradient(
@@ -158,20 +159,9 @@
   z-index: 2;
 }
 
-/* 左上斜向高光（清透反光，不糊底） */
 .llm-assist-panel-inner::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    125deg,
-    rgba(255, 255, 255, 0.28) 0%,
-    rgba(255, 255, 255, 0.06) 18%,
-    transparent 42%
-  );
-  pointer-events: none;
-  z-index: 0;
+  display: none !important;
+  content: none !important;
 }
 
 .llm-assist-head {
@@ -201,8 +191,8 @@
   width: 22px;
   height: 22px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  background: transparent;
   color: var(--llm-soft);
   font-size: 1rem;
   line-height: 1;
@@ -210,8 +200,11 @@
   display: grid;
   place-items: center;
   padding: 0;
-  backdrop-filter: none;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 0 0 1px rgba(71, 85, 105, 0.25);
 }
 
 .llm-assist-collapse:hover {
@@ -228,20 +221,26 @@
 }
 
 .llm-assist-links a {
-  color: rgba(15, 23, 42, 0.82);
+  color: #0f172a;
   text-decoration: none;
   padding: 0.32rem 0.45rem;
   border-radius: 9px;
   border-left: 2px solid transparent;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  /* 文字可讀，但不鋪整塊霧面 */
+  text-shadow:
+    0 0 6px rgba(255, 255, 255, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.8);
+  background: transparent;
 }
 
 .llm-assist-links a:hover,
 .llm-assist-links a.active {
-  color: var(--llm-ink);
-  background: rgba(13, 159, 147, 0.12);
+  color: #0f172a;
+  background: rgba(13, 159, 147, 0.16);
   border-left-color: var(--llm-teal);
-  backdrop-filter: none;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .visually-hidden {
