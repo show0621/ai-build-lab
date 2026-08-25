@@ -1,4 +1,4 @@
-/* SPEC / PROMPT Workshop — generate Claude-ready specs
+/* SPEC / PROMPT Workshop — generate Codex-ready specs
  * Demo: 4 primary function tabs (one view at a time) + workbench layout. */
 
 const DEMO_BLOCKS = [

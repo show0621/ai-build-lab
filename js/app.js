@@ -112,7 +112,7 @@ Content-Type: application/json</pre>`,
         <dt>UI 必做</dt><dd>貼上框、顯示／隱藏、儲存、清除、連線測試；頂欄顯示「AI：就緒／未設定 Key／驗證失敗」</dd>
         <dt>安全</dt><dd>日誌與錯誤訊息不可印出完整 Key；匯出設定檔預設不含 Key</dd>
       </dl>
-      <pre class="code-block">// Demo 流程（寫進 PROMPT 給 Claude）
+      <pre class="code-block">// Demo 流程（寫進 PROMPT 給 Codex）
 1. 設定頁輸入 API Key
 2. localStorage.setItem("app_api_key", key)  // 僅示範
 3. fetch(base + "/chat/completions", {
@@ -131,7 +131,7 @@ Content-Type: application/json</pre>`,
         <dt>你送什麼</dt><dd><code>{"query":"年假怎麼算？","top_k":20,"rerank":true}</code>＝問題文字＋要抓幾筆＋要不要重排</dd>
         <dt>成功時</dt><dd>回答案、引用出處、信心高低、用量（方便對帳）</dd>
         <dt>失敗例子</dt><dd>422：問題空白或太長；429：問太快被限流；401：Key／登入無效</dd>
-        <dt>教學重點</dt><dd>寫進 SPEC 時要附「範例請求／範例成功回覆／常見錯誤」，Claude 才知道畫面要接什麼欄位、失敗要顯示什麼。</dd>
+        <dt>教學重點</dt><dd>寫進 SPEC 時要附「範例請求／範例成功回覆／常見錯誤」，Codex 才知道畫面要接什麼欄位、失敗要顯示什麼。</dd>
       </dl>
       <pre class="code-block">{
   "answer": "到職滿一年特休 7 天…",
@@ -348,7 +348,7 @@ const TERM_GLOSSARY = {
   skill: {
     title: "Skill（技能／工作手冊）",
     metaphor: "比喻：把「這次怎麼做出來的」寫成單位共用 SOP，下次直接照做",
-    body: "Skill 不是再接一條 MCP，而是把<strong>怎麼做這類任務</strong>寫成可重用說明（步驟、規則、該看哪些檔、輸出格式）。之後對話可自動套用，減少每次重講 PROMPT。<br /><br /><strong>建議怎麼做：</strong><br />1. 先用黃金案例跑通一次，記下成功步驟與踩坑。<br />2. 濃縮成短手冊：何時用、必做／禁止、輸出格式長怎樣。<br />3. 放進專案（例如 Claude Skill／規則），讓同事同一條路徑可重複。<br />4. 真正接工具、門禁、分工，仍搭配 Hook／MCP／Subagent——Skill 管「怎麼做」，它們管「怎麼接、怎麼攔、怎麼拆」。",
+    body: "Skill 不是再接一條 MCP，而是把<strong>怎麼做這類任務</strong>寫成可重用說明（步驟、規則、該看哪些檔、輸出格式）。之後對話可自動套用，減少每次重講 PROMPT。<br /><br /><strong>建議怎麼做：</strong><br />1. 先用黃金案例跑通一次，記下成功步驟與踩坑。<br />2. 濃縮成短手冊：何時用、必做／禁止、輸出格式長怎樣。<br />3. 放進專案（例如 Codex Skill／規則），讓同事同一條路徑可重複。<br />4. 真正接工具、門禁、分工，仍搭配 Hook／MCP／Subagent——Skill 管「怎麼做」，它們管「怎麼接、怎麼攔、怎麼拆」。",
   },
   "collab-tools": {
     title: "上述工具（Hook／MCP／Subagent）",

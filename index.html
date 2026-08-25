@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=claude-skill-1" />
+  <link rel="stylesheet" href="css/styles.css?v=codex-1" />
 </head>
 <body>
   <div class="bg-layer" aria-hidden="true">
@@ -366,7 +366,7 @@
           <li><strong>API</strong>＝服務生（傳話窗口）</li>
           <li><strong>後端／AI／知識庫</strong>＝廚房（真正做事）</li>
         </ul>
-        <p>所以 API 細節＝寫清楚：客人要點什麼、廚房會端什麼、點錯或廚房忙時怎麼回覆。寫給人看，也寫給 Claude 實作時照著做。</p>
+        <p>所以 API 細節＝寫清楚：客人要點什麼、廚房會端什麼、點錯或廚房忙時怎麼回覆。寫給人看，也寫給 Codex 實作時照著做。</p>
         <p class="api-teach-goal"><strong>教學目的：</strong>學會在 SPEC／PROMPT 裡附上「接口地圖」＋「模型對接設定」（網址、模型名、驗證、Key 存放），避免 AI 只做出漂亮畫面卻接不上模型，或 Key 亂存造成外洩。</p>
       </div>
 
@@ -374,11 +374,11 @@
         <h3>對接 AI 模型時，規格一定要寫的四件事</h3>
         <ol class="api-connect-steps">
           <li><strong>Base URL／端點網址</strong> — 例如 OpenAI 相容 <code>https://api.openai.com/v1</code>，或單位內部閘道。前端／後端打哪裡要寫死欄位，不要口頭講「接一下 API」。</li>
-          <li><strong>模型名稱</strong> — 例如 <code>gpt-4o</code>、<code>claude-sonnet-4-…</code>、或內部部署模型 id。頂欄「模型下拉」的選項要從設定來，可改。</li>
+          <li><strong>模型名稱</strong> — 例如 <code>gpt-4o</code>、<code>codex-…</code>、或內部部署模型 id。頂欄「模型下拉」的選項要從設定來，可改。</li>
           <li><strong>驗證機制</strong> — 常見：HTTP Header <code>Authorization: Bearer &lt;API_KEY&gt;</code>；有的用 <code>x-api-key</code>。寫清「放哪個 header、有沒有額外 org／專案 id」。</li>
           <li><strong>API Key 載入與存放</strong> — 誰輸入、存在哪、誰看得到、能不能進 Git。教學示範可用「設定頁貼上 → 本機 localStorage」；正式環境 Key 只放伺服器環境變數（<code>.env</code>），瀏覽器不要長期明文存正式金鑰。</li>
         </ol>
-        <p class="api-teach-note">對接邏輯口訣：<strong>畫面按下提問 → 組請求（URL＋模型＋Header＋body）→ 呼叫 → 解析回覆／錯誤 → 更新 UI 狀態</strong>。這整段要寫進 SPEC，Claude 才知道設定頁與問答區怎麼串。</p>
+        <p class="api-teach-note">對接邏輯口訣：<strong>畫面按下提問 → 組請求（URL＋模型＋Header＋body）→ 呼叫 → 解析回覆／錯誤 → 更新 UI 狀態</strong>。這整段要寫進 SPEC，Codex 才知道設定頁與問答區怎麼串。</p>
       </div>
 
       <p class="section-note">先點下面四張「模型對接」卡片，再點三張「業務窗口」卡片。</p>
@@ -1258,13 +1258,13 @@ owner: HR
         <span class="section-num">12</span>
         <div>
           <h2>SPEC／PROMPT 工坊</h2>
-          <p>把需求寫成人話給 Claude：產出完整 SPEC＋可直接貼上的 PROMPT（含整套系統，不只網頁 UI）。</p>
+          <p>把需求寫成人話給 Codex：產出完整 SPEC＋可直接貼上的 PROMPT（含整套系統，不只網頁 UI）。</p>
         </div>
         <span class="min-badge">實作區</span>
       </div>
 
       <div class="workshop-banner glass">
-        <p>示範會要求 Claude 做出<strong>四個一級功能 Tab</strong>（一次只顯示一個畫面），並寫入<strong>API 對接</strong>（Base URL、模型、驗證、API Key 存放與測試連線）。請按「載入示範」→「產生」→複製 PROMPT。</p>
+        <p>示範會要求 Codex 做出<strong>四個一級功能 Tab</strong>（一次只顯示一個畫面），並寫入<strong>API 對接</strong>（Base URL、模型、驗證、API Key 存放與測試連線）。請按「載入示範」→「產生」→複製 PROMPT。</p>
       </div>
 
       <div class="workshop-layout">
@@ -1316,14 +1316,14 @@ owner: HR
           <div id="wsBlocks" class="ws-blocks"></div>
 
           <div class="ws-generate-row">
-            <button type="button" class="btn btn-primary" id="wsGenerate">產生給 Claude 的 SPEC＋PROMPT</button>
+            <button type="button" class="btn btn-primary" id="wsGenerate">產生給 Codex 的 SPEC＋PROMPT</button>
           </div>
         </div>
 
         <div class="workshop-out glass" id="workshopOut" data-ready="false">
           <div class="ws-out-tabs" role="tablist">
             <button type="button" class="active" data-ws-tab="spec" role="tab" aria-selected="true">SPEC</button>
-            <button type="button" data-ws-tab="prompt" role="tab" aria-selected="false">PROMPT（貼給 Claude）</button>
+            <button type="button" data-ws-tab="prompt" role="tab" aria-selected="false">PROMPT（貼給 Codex）</button>
             <button type="button" data-ws-tab="system" role="tab" aria-selected="false">整套系統清單</button>
           </div>
           <div class="ws-out-toolbar">
@@ -1333,7 +1333,7 @@ owner: HR
           </div>
           <div class="ws-empty" id="wsEmpty">
             <p class="ws-empty-title">右側尚未產生內容</p>
-            <p>先編輯左側（或按「載入示範」），再按<br /><strong>產生給 Claude 的 SPEC＋PROMPT</strong><br />結果會出現在這裡。</p>
+            <p>先編輯左側（或按「載入示範」），再按<br /><strong>產生給 Codex 的 SPEC＋PROMPT</strong><br />結果會出現在這裡。</p>
           </div>
           <pre class="code-block ws-output" id="wsOutput" hidden></pre>
         </div>
@@ -1468,7 +1468,7 @@ owner: HR
     </div>
   </div>
 
-  <script src="js/app.js?v=skill-name-2"></script>
-  <script src="js/spec-workshop.js?v=ws-reveal-1"></script>
+  <script src="js/app.js?v=codex-1"></script>
+  <script src="js/spec-workshop.js?v=codex-1"></script>
 </body>
 </html>
