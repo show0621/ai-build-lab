@@ -1,6 +1,6 @@
 /* AI Build Lab — interactions */
 
-const SECTIONS = ["hero", "plan", "flow", "spec", "prompt", "api", "kb", "params", "case", "summary", "collab", "loop", "workshop"];
+const SECTIONS = ["hero", "plan", "flow", "spec", "prompt", "api", "kb", "params", "case", "ainote", "summary", "collab", "loop", "workshop"];
 
 const SECTION_TITLES = {
   plan: "構想",
@@ -11,6 +11,7 @@ const SECTION_TITLES = {
   kb: "知識庫",
   params: "參數",
   case: "案例",
+  ainote: "NOTE架構",
   collab: "協作",
   summary: "總結",
   loop: "回饋",
@@ -354,6 +355,76 @@ const TERM_GLOSSARY = {
     title: "上述工具（Hook／MCP／Subagent）",
     metaphor: "比喻：劇本寫好了，還要有門禁、接線、分工才能上場",
     body: "這裡的「上述工具」指同一頁前面三張卡：<strong>Hook</strong>（事件門禁）、<strong>MCP</strong>（接外部系統）、<strong>Subagent</strong>（專責小助理）。Workflow／Skill 負責可重複的做法；這三者負責執行時的檢查、接線與分工。",
+  },
+  orchestrator: {
+    title: "Orchestrator（編排引擎）",
+    metaphor: "比喻：餐廳外場經理——不炒菜，但決定先上什麼、誰做哪一步",
+    body: "問答不是「一個函式叫 LLM」就結束。編排引擎負責：收到問題 → 叫檢索模組 → 看分數夠不夠 → 夠就組 Context 再生成，不夠就澄清。各模組可替換，流程邏輯集中在一處。",
+  },
+  "chatgpt-like": {
+    title: "ChatGPT 式對話體驗",
+    metaphor: "比喻：像跟一位會翻資料、會說「我不確定」的顧問聊天",
+    body: "不是指長得跟 ChatGPT 一樣，而是：多輪對話、語氣自然、有依據、會追問、不會無故硬答。我們用 RAG + 結構化輸出 + 後處理，在「單位專屬知識」上逼近這種體驗。",
+  },
+  "frontend-stack": {
+    title: "前端技術棧",
+    metaphor: "比喻：餐廳大廳——客人看得到的菜單、點餐、上菜",
+    body: "TP NOTE01 常見組合：React + Vite 做聊天與設定；心智圖元件做法規節點導覽；Tab 切換知識問答／筆記／匯出。前端只負責呈現與送 API，不直接握正式 API Key（正式版走後端代理）。",
+  },
+  "backend-api": {
+    title: "後端 API",
+    metaphor: "比喻：廚房出菜口——前端點餐，後端真的去檢索、生成",
+    body: "REST 接口如 POST /chat/query（問答）、PUT /kb/documents（入庫）、GET /health（健康檢查）。後端持有編排引擎，串檢索、LLM、後處理，前端不必知道向量索引細節。",
+  },
+  "embedding-model": {
+    title: "Embedding 模型",
+    metaphor: "比喻：把每段文字變成地圖座標的「測量儀」",
+    body: "入庫與查詢時都要用同一套 Embedding 模型，段落與問題才在同一座標系。換模型通常要重建索引。常見：OpenAI text-embedding-3、BGE、E5 等。",
+  },
+  "vector-db": {
+    title: "向量索引／Vector DB",
+    metaphor: "比喻：依「意思遠近」排好的卡片櫃",
+    body: "存每個 chunk 的向量與 metadata（來源檔、章節、版本）。查詢時算距離取 Top-K。可本機 Chroma、SQLite+向量擴充，或 pgvector、Milvus 等。TP NOTE01 偏本機、單位內網部署。",
+  },
+  "llm-api": {
+    title: "LLM API（語言模型接口）",
+    metaphor: "比喻：主廚——看食譜（Prompt）與食材（chunks）下菜",
+    body: "OpenAI 相容 chat/completions 最常見；亦可 Azure OpenAI、Anthropic、或單位 LLM 閘道。參數：model、temperature、max_tokens。查核場景 temperature 宜低（約 0.15）。",
+  },
+  "markdown-kb": {
+    title: "Markdown 知識庫",
+    metaphor: "比喻：切好、貼好標籤的食材庫",
+    body: "法規與教材以 Markdown 維護：標題＝主題、metadata＝版本／章節。比 PDF 裸貼更好切塊與引用。入庫前先做知識庫地圖（OECD、台灣準則、BAPA…分檔）。",
+  },
+  ingest: {
+    title: "Ingest（入庫管線）",
+    metaphor: "比喻：進貨驗收——切塊、貼標、上架",
+    body: "文件 → 依 Chunk Size／Overlap 切塊 → Embedding → 寫入向量索引。SPEC 要寫清：更新是覆蓋還是版本並存，避免幽靈舊規定。",
+  },
+  "hybrid-search": {
+    title: "Hybrid Search（混合檢索）",
+    metaphor: "比喻：既看「意思像不像」，也搜「關鍵字有沒有命中」",
+    body: "純向量有時漏掉精確條號（如「第 14 點」）。混合檢索 = 向量 + BM25／關鍵字，再合併去重。法規查核常需要這層保險。",
+  },
+  "context-assembler": {
+    title: "Context 組裝",
+    metaphor: "比喻：把要帶進考場的紙條排好，而且不能超過紙張上限",
+    body: "把 Rerank 後的 6 段 + 系統 Prompt + 對話摘要，塞進 Context 長度預算（Token budget）。太長就截斷或摘要，避免爆 context、拉高成本。",
+  },
+  "post-process": {
+    title: "Post-process（後處理）",
+    metaphor: "比喻：出菜前的品管——對照食譜、貼來源標籤",
+    body: "解析模型輸出：對照 chunk_id、產生 citations、算 confidence、格式不符則重試或降級。低信心觸發澄清 UI，而不是直接顯示看似完整的錯答案。",
+  },
+  "golden-questions": {
+    title: "黃金題（Golden Questions）",
+    metaphor: "比喻：期末考考古題——用固定題目驗收有沒有真的學會",
+    body: "TP NOTE01 例：避風港、BAPA 申請、可比較利潤法。每題預期要引用的段落。調 Chunk、Prompt、Top-K 後用同一套黃金題回歸，才客觀知道有沒有變好。",
+  },
+  streaming: {
+    title: "Streaming（串流輸出）",
+    metaphor: "比喻：邊炒邊上菜——不用等整桌做完才端出來",
+    body: "LLM 逐 token 回傳，UI 逐字顯示，體感更像 ChatGPT。編排引擎仍可在串流結束後跑後處理（引用、信心）。",
   },
 };
 
@@ -1228,6 +1299,217 @@ const LOOP_FILL = {
   "bar-4": "第 4 輪：約 1%。目標不是一次滿分，而是可追蹤的下降機制。",
 };
 
+const ARCH_FLOW = {
+  q: {
+    title: "① 問題＋心智圖上下文",
+    body: "使用者輸入自然語言；若從心智圖點選節點（如 OECD 第 VI 章），編排引擎把節點標題／路徑當 extra context，縮小檢索範圍。",
+    tip: "query + optional mindmap_node_id",
+  },
+  retrieve: {
+    title: "② 檢索 · 向量 + Hybrid",
+    body: "Embedding 問題 → 向量索引 Top-K 20；必要時加 BM25 補條號／專有名詞。不是把整本 MD 塞給模型。",
+    tip: "vector_top_k=20\nhybrid: optional",
+  },
+  rerank: {
+    title: "③ 重排 · 20 → 6",
+    body: "Reranker 用交叉編碼重新打分，留下最能回答「這一題」的約 6 段。向量相似≠最相關。",
+    tip: "rerank_top_k=6",
+  },
+  gate: {
+    title: "④ 門檻判斷 · 足夠嗎？",
+    body: "看 Rerank 最高分與分數分布。低於校準門檻 → 不走生成，改澄清（請改寫、補關鍵字）或拒答（知識庫無依據）。",
+    tip: "if max_score < threshold → fallback",
+  },
+  fallback: {
+    title: "澄清／拒答",
+    body: "查核場景寧可說「資料不足請補充」，也不要捏造法條。這步是信任設計，不是功能缺失。",
+    tip: "response_mode: clarify | refuse",
+  },
+  assemble: {
+    title: "組裝 Context",
+    body: "把 6 段 retrieved_chunks + 系統 Prompt 模板 + 對話摘要（若有）排進 Token 預算。超長則截斷或摘要舊輪。",
+    tip: "context_budget ≈ 32K",
+  },
+  generate: {
+    title: "⑤ 生成 · LLM + Prompt",
+    body: "呼叫 chat/completions；Temperature 0.15；輸出格式在 Prompt 寫死：推論思考、正式回答、查核實務、參考依據。可開 Streaming 改善體感。",
+    tip: "temperature=0.15\nmax_output=3K~9K",
+  },
+  post: {
+    title: "⑥ 後處理 · 引用＋信心",
+    body: "解析 [知識庫 N] 對照 chunk_id；算 confidence；格式錯可重試一次。結果送 UI 並可存筆記／匯出。",
+    tip: "cite_sources: required",
+  },
+};
+
+const ARCH_LAYER_HINT = {
+  "layer-ui": "<strong>介面層</strong>：聊天窗、心智圖、筆記本、匯出 Word/PDF。只負責「展示」與「送 API」，不自己做檢索。",
+  "layer-orchestrator": "<strong>編排引擎</strong>：問答總指揮。決定何時檢索、何時拒答、何時叫 LLM。改流程改這層，不用動 UI。",
+  "layer-retrieval": "<strong>檢索＋重排</strong>：Embedding、向量索引、Hybrid、Reranker。品質問題多半調這層參數（Top-K、Chunk）。",
+  "layer-generation": "<strong>生成＋後處理</strong>：LLM 呼叫、串流、引用解析、信心評估。Prompt 模板也掛在這層附近。",
+  "layer-knowledge": "<strong>知識層</strong>：Markdown 原文、切塊、metadata、向量索引。一切答案的「食材來源」。",
+};
+
+const ARCH_POP = {
+  "layer-ui": {
+    eyebrow: "系統架構 · 第⑤層",
+    title: "介面層 UI",
+    html: `<p class="modal-lead">使用者只看得到這一層，但這層<strong>不該</strong>自己跑 RAG。</p>
+      <ul class="check-list"><li>聊天：送 query、顯示串流答案與引用</li><li>心智圖：點節點帶入上下文</li><li>筆記：存問答、匯出、可回寫知識庫</li><li>設定：模型、API（示範版本機 Key）</li></ul>
+      <p class="modal-note">設計原則：UI 薄、邏輯在後端編排。</p>`,
+  },
+  "layer-orchestrator": {
+    eyebrow: "系統架構 · 第④層",
+    title: "編排引擎 Orchestrator",
+    html: `<p class="modal-lead">這是「引擎」的核心——<strong>不是 Prompt 字串</strong>，而是可測試的流程程式。</p>
+      <div class="vflow"><span>收到 query</span><span class="arrow">↓</span><span>呼叫檢索模組</span><span class="arrow">↓</span><span>評分門檻</span><span class="arrow">↓</span><span>組 Context → 生成 → 後處理</span><span class="arrow">↓</span><span>回傳 JSON</span></div>
+      <p class="modal-note">換 Reranker 或 LLM 時，編排接口不變，這就是模組化的好處。</p>`,
+  },
+  "layer-retrieval": {
+    eyebrow: "系統架構 · 第③層",
+    title: "檢索＋重排引擎",
+    html: `<p class="modal-lead">決定「模型這次看到哪幾段法規」——比 Prompt 寫得漂亮更重要。</p>
+      <ol class="sample-steps"><li>Query Embedding</li><li>Vector Top-K 20</li><li>（可選）Hybrid 關鍵字</li><li>Rerank → 6 段</li></ol>
+      <p class="modal-note">教室參數區的 Chunk、Top-K、Rerank 都調這層。</p>`,
+  },
+  "layer-generation": {
+    eyebrow: "系統架構 · 第②層",
+    title: "生成＋後處理",
+    html: `<p class="modal-lead">LLM 只負責「依規則寫答案」；引用對不對、信心高不高由後處理管。</p>
+      <ul class="check-list"><li>Prompt 模板：角色、格式、禁則</li><li>LLM API：temperature、max_tokens</li><li>Post-process：citations、confidence</li></ul>`,
+  },
+  "layer-knowledge": {
+    eyebrow: "系統架構 · 第①層",
+    title: "知識層 Knowledge",
+    html: `<p class="modal-lead">沒有這層，上面全部空轉。Markdown 不是拿來「貼進對話框」，而是<strong>切塊入庫</strong>。</p>
+      <ul class="check-list"><li>OECD TPG、台灣查核準則、BAPA…分檔</li><li>Chunk + metadata（章節、版本）</li><li>Ingest API 更新索引</li></ul>`,
+  },
+  "mod-ingest": {
+    eyebrow: "模組 · 入庫",
+    title: "Ingest 入庫模組",
+    html: `<p class="modal-lead">開發時先做這條管線，再做問答。</p>
+      <div class="vflow"><span>Markdown/PDF</span><span class="arrow">↓</span><span>切塊 Chunk+Overlap</span><span class="arrow">↓</span><span>Embedding</span><span class="arrow">↓</span><span>寫入向量索引</span></div>
+      <p class="modal-note">驗收：入庫後用固定 query 能撈到預期段落。</p>`,
+  },
+  "mod-retrieval": {
+    eyebrow: "模組 · 檢索",
+    title: "Retrieval 檢索引擎",
+    html: `<p class="modal-lead">依<strong>意思</strong>找段落；法規場景建議加 Hybrid 防漏條號。</p>
+      <p class="modal-note">調參重點：Top-K 先寬（20），靠 Rerank 精選。</p>`,
+  },
+  "mod-rerank": {
+    eyebrow: "模組 · 重排",
+    title: "Rerank 重排引擎",
+    html: `<p class="modal-lead">品質開關。關掉 Rerank 常見現象：撈到的段落「像有關」但答非所問。</p>
+      <p class="modal-note">建議留下 5～8 段（TP NOTE01 用 6）。</p>`,
+  },
+  "mod-context": {
+    eyebrow: "模組 · 組裝",
+    title: "Context 組裝",
+    html: `<p class="modal-lead">把檢索結果排進 Prompt 的 {{retrieved_chunks}}，並控制總 Token 不超過 Context 上限。</p>
+      <p class="modal-note">心智圖節點、對話摘要也會佔額度，要一起算。</p>`,
+  },
+  "mod-prompt": {
+    eyebrow: "模組 · Prompt",
+    title: "Prompt 模板",
+    html: `<p class="modal-lead">Prompt 是模組之一，不是全部。TP NOTE01 固定四段輸出＋禁則（避風港勿混淆等）。</p>
+      <p class="modal-note">模板放檔案或資料庫，版本可追蹤，比寫死在程式裡好維護。</p>`,
+  },
+  "mod-generate": {
+    eyebrow: "模組 · 生成",
+    title: "Generation 生成引擎",
+    html: `<p class="modal-lead">呼叫 LLM API；可 Streaming。查核用低 temperature。</p>
+      <p class="modal-note">生成引擎不決定「撈哪些段」——那是檢索的事。</p>`,
+  },
+  "mod-post": {
+    eyebrow: "模組 · 後處理",
+    title: "Post-process 後處理",
+    html: `<p class="modal-lead">讓答案<strong>可核對</strong>：引用 chunk、信心、follow-up。</p>
+      <p class="modal-note">低信心不要當 high 顯示給查核員。</p>`,
+  },
+  "mod-notes": {
+    eyebrow: "模組 · 筆記",
+    title: "筆記／匯出模組",
+    html: `<p class="modal-lead">問答結果變成可查核員工資產：存筆記、匯出 Word/PDF、可選回寫知識庫。</p>
+      <p class="modal-note">這是 V1 功能，MVP 可先做「複製＋下載」。</p>`,
+  },
+  "chatgpt-compare": {
+    eyebrow: "體驗對照",
+    title: "只有 Prompt vs 引擎管線",
+    html: `<table class="mini-table"><tr><th></th><th>只 Prompt+MD</th><th>引擎+模組</th></tr>
+      <tr><td>知識從哪來</td><td>貼全文／靠模型記</td><td>檢索 chunks</td></tr>
+      <tr><td>答錯時</td><td>改整份 Prompt</td><td>調檢索／Rerank／門檻</td></tr>
+      <tr><td>引用</td><td>常造假或沒有</td><td>後處理對 chunk_id</td></tr>
+      <tr><td>多輪</td><td>容易越聊越偏</td><td>每輪重新檢索</td></tr>
+      <tr><td>像 ChatGPT</td><td>偶爾像、不可控</td><td>串流+結構+拒答，可驗收</td></tr></table>`,
+  },
+  "dev-1": {
+    eyebrow: "開發流程 · Step 1",
+    title: "構想＋SPEC",
+    html: `<p class="modal-lead">交付物：一句話目的、MVP 邊界、輸入輸出、驗收黃金題清單。</p>
+      <p class="modal-note">對照本站 01 構想、03 SPEC。</p>`,
+  },
+  "dev-2": {
+    eyebrow: "開發流程 · Step 2",
+    title: "知識庫地圖",
+    html: `<p class="modal-lead">OECD、台灣準則、三層文據、BAPA…分檔；每檔標 metadata。</p>
+      <p class="modal-note">對照案例 TP NOTE01 知識庫地圖 Tab。</p>`,
+  },
+  "dev-3": {
+    eyebrow: "開發流程 · Step 3",
+    title: "入庫管線",
+    html: `<p class="modal-lead">Chunk、Overlap、Embedding、索引。先跑通 ingest API。</p>`,
+  },
+  "dev-4": {
+    eyebrow: "開發流程 · Step 4",
+    title: "檢索＋重排",
+    html: `<p class="modal-lead">接 vector search + reranker；用黃金題看撈到的段對不對。</p>`,
+  },
+  "dev-5": {
+    eyebrow: "開發流程 · Step 5",
+    title: "Prompt 模板",
+    html: `<p class="modal-lead">角色、四段格式、禁則。Prompt 是模組，接在 Context 組裝之後。</p>`,
+  },
+  "dev-6": {
+    eyebrow: "開發流程 · Step 6",
+    title: "API 串接",
+    html: `<p class="modal-lead">POST /chat/query、PUT /kb/documents、GET /health。前端只打自家後端。</p>
+      <p class="modal-note">對照本站 05 API 區。</p>`,
+  },
+  "dev-7": {
+    eyebrow: "開發流程 · Step 7",
+    title: "UI 模組",
+    html: `<p class="modal-lead">聊天、心智圖、筆記、設定。MVP 可先做聊天+引用。</p>`,
+  },
+  "dev-8": {
+    eyebrow: "開發流程 · Step 8",
+    title: "黃金題驗收",
+    html: `<p class="modal-lead">避風港、BAPA、可比法…每題檢查引用是否正確、有無混淆概念。</p>
+      <p class="modal-note">調參後必跑同一套題，才算客觀改善。</p>`,
+  },
+  "dev-9": {
+    eyebrow: "開發流程 · Step 9",
+    title: "部署＋回饋",
+    html: `<p class="modal-lead">本機／內網部署；錯誤問答回寫成案例，接 12 回饋迴路思維。</p>`,
+  },
+  "dev-full": {
+    eyebrow: "完整流程圖",
+    title: "TP NOTE01 開發路徑",
+    html: `<div class="vflow">
+      <span>SPEC</span><span class="arrow">↓</span>
+      <span>知識庫地圖</span><span class="arrow">↓</span>
+      <span>Ingest 入庫</span><span class="arrow">↓</span>
+      <span>Retrieval + Rerank</span><span class="arrow">↓</span>
+      <span>Prompt 模板</span><span class="arrow">↓</span>
+      <span>編排引擎串 API</span><span class="arrow">↓</span>
+      <span>UI（聊天/心智圖/筆記）</span><span class="arrow">↓</span>
+      <span>黃金題驗收</span><span class="arrow">↓</span>
+      <span>部署 → 回饋改善 ↺</span>
+    </div>
+    <p class="modal-note">與「只叫 AI 寫一個聊天網頁」差別：中間每步都有可驗收的交付物。</p>`,
+  },
+};
+
 const LOOP_POP = {
   "tesla-flow": {
     eyebrow: "案例一 · 只借方法",
@@ -1360,7 +1642,7 @@ function closeLoopModal() {
 }
 
 function openLoopModal(key) {
-  const data = LOOP_POP[key];
+  const data = ARCH_POP[key] || LOOP_POP[key];
   if (!data || !loopModal) return;
   const eye = $("#loopModalEyebrow");
   const title = $("#loopModalTitle");
@@ -1448,6 +1730,57 @@ $("#loopDeck")?.addEventListener("click", (e) => {
   if (fillBtn) showLoopFill(fillBtn.dataset.loopFill, fillBtn);
 });
 
+/* ---------- AI NOTE architecture section ---------- */
+function setAinoteLayerDetail(key) {
+  const box = $("#ainoteLayerDetail");
+  if (!box) return;
+  const html = ARCH_LAYER_HINT[key];
+  box.innerHTML = html ? `<p>${html}</p><p class="ainote-hint">點同層卡片可開完整流程說明。</p>` : "<p>點上方任一層，看白話說明。</p>";
+}
+
+function setAinoteFlowDetail(key) {
+  const box = $("#ainoteFlowDetail");
+  if (!box || !ARCH_FLOW[key]) return;
+  const d = ARCH_FLOW[key];
+  box.innerHTML = `<h4>${d.title}</h4><p>${d.body}</p><pre class="code-inline">${d.tip}</pre>`;
+}
+
+function initAinoteTabs() {
+  const root = $("#ainoteTabs");
+  if (!root) return;
+  const tabs = $all(".tab-list button", root);
+  const panels = $all(".tab-panel", root);
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const id = tab.dataset.tab;
+      tabs.forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
+      panels.forEach((p) => p.classList.toggle("active", p.dataset.panel === id));
+    });
+  });
+}
+
+initAinoteTabs();
+setAinoteLayerDetail(null);
+
+$("#ainote")?.addEventListener("click", (e) => {
+  const pop = e.target.closest("[data-arch-pop]");
+  if (pop) {
+    openLoopModal(pop.dataset.archPop);
+    return;
+  }
+  const layer = e.target.closest(".ainote-layer");
+  if (layer?.dataset.archPop) {
+    $all(".ainote-layer").forEach((el) => el.classList.toggle("active", el === layer));
+    setAinoteLayerDetail(layer.dataset.archPop);
+    return;
+  }
+  const flow = e.target.closest("[data-arch-flow]");
+  if (flow) {
+    $all("#ainoteFlowBoard .flow-node").forEach((el) => el.classList.toggle("active", el === flow));
+    setAinoteFlowDetail(flow.dataset.archFlow);
+  }
+});
+
 $("#loopModalClose")?.addEventListener("click", closeLoopModal);
 loopModal?.addEventListener("click", (e) => {
   if (e.target === loopModal) closeLoopModal();
@@ -1467,7 +1800,7 @@ const io = new IntersectionObserver(
   { threshold: 0.12 }
 );
 
-$all(".section .glass, .section .panel, .kb-step, .api-card, .path-node, .tool-card, .loop-deck").forEach((el, i) => {
+$all(".section .glass, .section .panel, .kb-step, .api-card, .path-node, .tool-card, .loop-deck, .ainote-layer, .ainote-module, .ainote-tech").forEach((el, i) => {
   if (el.closest(".hero")) return;
   el.style.opacity = "0";
   el.style.transform = "translateY(14px)";

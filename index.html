@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=codex-1" />
+  <link rel="stylesheet" href="css/styles.css?v=codex-2" />
 </head>
 <body>
   <div class="bg-layer" aria-hidden="true">
@@ -35,6 +35,7 @@
       <li><a href="#kb">知識庫</a></li>
       <li><a href="#params">參數</a></li>
       <li><a href="#case">案例</a></li>
+      <li><a href="#ainote">NOTE架構</a></li>
       <li><a href="#summary">總結</a></li>
       <li><a href="#collab">協作</a></li>
       <li><a href="#loop">回饋</a></li>
@@ -68,7 +69,7 @@
           <button class="btn btn-ghost" id="demoPulse" type="button">體驗互動</button>
           <button class="btn btn-ghost" id="heroDeck" type="button">投影片全螢幕</button>
         </div>
-        <p class="hero-case-hint reveal">實戰案例：<a href="#case">TP NOTE01</a> · <a href="#case" data-case-jump="comparable">北區國稅局 TP 可比篩選器</a> · <a href="#workshop">SPEC／PROMPT 工坊</a> · <a href="llm.html">LLM 進階說明</a></p>
+        <p class="hero-case-hint reveal">實戰案例：<a href="#case">TP NOTE01</a> · <a href="#ainote">AI NOTE 架構解說</a> · <a href="#case" data-case-jump="comparable">北區國稅局 TP 可比篩選器</a> · <a href="#workshop">SPEC／PROMPT 工坊</a> · <a href="llm.html">LLM 進階說明</a></p>
         <div class="path-strip reveal" id="pathStrip">
           <button class="path-node active" data-target="plan"><span>01</span>構想</button>
           <button class="path-node" data-target="flow"><span>02</span>流程</button>
@@ -78,10 +79,11 @@
           <button class="path-node" data-target="kb"><span>06</span>知識庫</button>
           <button class="path-node" data-target="params"><span>07</span>參數</button>
           <button class="path-node" data-target="case"><span>08</span>案例</button>
-          <button class="path-node" data-target="summary"><span>09</span>總結</button>
-          <button class="path-node" data-target="collab"><span>10</span>協作</button>
-          <button class="path-node" data-target="loop"><span>11</span>回饋</button>
-          <button class="path-node" data-target="workshop"><span>12</span>SPEC工坊</button>
+          <button class="path-node" data-target="ainote"><span>09</span>NOTE架構</button>
+          <button class="path-node" data-target="summary"><span>10</span>總結</button>
+          <button class="path-node" data-target="collab"><span>11</span>協作</button>
+          <button class="path-node" data-target="loop"><span>12</span>回饋</button>
+          <button class="path-node" data-target="workshop"><span>13</span>SPEC工坊</button>
           <a class="path-node path-node-link" href="llm.html"><span>＋</span>LLM進階</a>
         </div>
       </div>
@@ -711,6 +713,7 @@ owner: HR
             <span>查核員 Prompt</span>
             <span>筆記匯出</span>
           </div>
+          <p class="case-arch-link"><a href="#ainote">→ 深入閱讀：AI NOTE 架構解說（引擎＋模組）</a></p>
         </div>
 
         <div class="case-tabs" id="caseTabs">
@@ -904,10 +907,208 @@ owner: HR
       </div>
     </section>
 
-    <!-- 09 SUMMARY: AI 工作規則 -->
-    <section class="section" id="summary" data-minutes="5">
+    <!-- 09 AI NOTE ARCHITECTURE -->
+    <section class="section" id="ainote" data-minutes="12">
       <div class="section-head">
         <span class="section-num">09</span>
+        <div>
+          <h2>AI NOTE 架構解說</h2>
+          <p>TP NOTE01 怎麼運作？為什麼用「引擎＋模組」，而不是只寫 Prompt 丟 Markdown？</p>
+        </div>
+        <span class="min-badge">約 12 分</span>
+      </div>
+
+      <p class="section-note ainote-lead glass">
+        這一區是<strong>上課專用深讀</strong>：把案例 TP NOTE01 拆成「誰負責什麼、資料怎麼流、為什麼答起來更像
+        <button type="button" class="term-btn term-inline" data-term="chatgpt-like">ChatGPT 那種對話體驗</button>。
+        藍色名詞都可點開；模組卡片可點看設計理念與開發做法。
+      </p>
+
+      <div class="ainote-compare glass">
+        <h3>兩種做法，差在哪？</h3>
+        <div class="ainote-compare-grid">
+          <article class="ainote-compare-card warn">
+            <h4>❌ 只做 Prompt + Markdown</h4>
+            <ul>
+              <li>把整本規章貼進對話框，或靠模型「記憶」</li>
+              <li>一次改 Prompt 就牽一髮動全身</li>
+              <li>找不到段落時，模型容易<strong>幻覺／亂答</strong></li>
+              <li>無法穩定引用、無法量測「這次答得好不好」</li>
+            </ul>
+          </article>
+          <article class="ainote-compare-card ok">
+            <h4>✅ 引擎 + 模組（TP NOTE01 做法）</h4>
+            <ul>
+              <li>知識先<strong>切塊入庫</strong>，問答時<strong>先檢索再生成</strong>（<button type="button" class="term-btn term-inline" data-term="rag">RAG</button>）</li>
+              <li>檢索、重排、組裝、生成、後處理<strong>分開維護</strong></li>
+              <li>低信心走<strong>澄清／拒答</strong>，不硬掰</li>
+              <li>輸出固定格式：推論、答案、實務重點、<button type="button" class="term-btn term-inline" data-term="citation">引用</button></li>
+            </ul>
+          </article>
+        </div>
+        <p class="ainote-compare-footer">白話：<strong>Prompt 是「廚師守則」</strong>，但還要有<strong>食材庫（知識庫）、點菜系統（編排引擎）、品管（後處理）</strong>，才像一間能穩定出菜的餐廳，而不是每次現場翻冰箱。</p>
+      </div>
+
+      <div class="ainote-tabs" id="ainoteTabs">
+        <div class="tab-list" role="tablist" aria-label="AI NOTE 架構分頁">
+          <button role="tab" aria-selected="true" data-tab="arch-layers">系統架構圖</button>
+          <button role="tab" aria-selected="false" data-tab="arch-modules">模組與引擎</button>
+          <button role="tab" aria-selected="false" data-tab="arch-answer">AI 回答邏輯</button>
+          <button role="tab" aria-selected="false" data-tab="arch-dev">開發流程</button>
+          <button role="tab" aria-selected="false" data-tab="arch-tech">運用技術</button>
+        </div>
+        <div class="tab-panels glass">
+          <!-- 系統架構圖 -->
+          <div class="tab-panel active" data-panel="arch-layers">
+            <p class="panel-intro">由下而上五層。點每一層看「這層負責什麼、為什麼要獨立成一層」。</p>
+            <div class="ainote-stack" id="ainoteStack">
+              <button type="button" class="ainote-layer" data-arch-pop="layer-ui">
+                <span class="ainote-layer-num">⑤</span>
+                <span class="ainote-layer-body"><strong>介面層 UI</strong><small>聊天、心智圖、筆記、匯出</small></span>
+              </button>
+              <button type="button" class="ainote-layer" data-arch-pop="layer-orchestrator">
+                <span class="ainote-layer-num">④</span>
+                <span class="ainote-layer-body"><strong>編排引擎 Orchestrator</strong><small>串模組、走分支、控流程</small></span>
+              </button>
+              <button type="button" class="ainote-layer" data-arch-pop="layer-retrieval">
+                <span class="ainote-layer-num">③</span>
+                <span class="ainote-layer-body"><strong>檢索＋重排引擎</strong><small>向量檢索、Hybrid、Rerank</small></span>
+              </button>
+              <button type="button" class="ainote-layer" data-arch-pop="layer-generation">
+                <span class="ainote-layer-num">②</span>
+                <span class="ainote-layer-body"><strong>生成＋後處理</strong><small>LLM 生成、引用解析、信心評估</small></span>
+              </button>
+              <button type="button" class="ainote-layer primary" data-arch-pop="layer-knowledge">
+                <span class="ainote-layer-num">①</span>
+                <span class="ainote-layer-body"><strong>知識層 Knowledge</strong><small>Markdown 切塊、Embedding、向量索引</small></span>
+              </button>
+            </div>
+            <aside class="ainote-layer-detail" id="ainoteLayerDetail">
+              <p>點上方任一層，右側會顯示白話說明；也可點開完整流程圖。</p>
+            </aside>
+          </div>
+
+          <!-- 模組與引擎 -->
+          <div class="tab-panel" data-panel="arch-modules">
+            <p class="panel-intro">每個模組只做一件事。改一個模組，不必整包 Prompt 重寫。</p>
+            <div class="ainote-module-grid">
+              <button type="button" class="ainote-module" data-arch-pop="mod-ingest">
+                <strong>入庫模組 Ingest</strong>
+                <span>Markdown／PDF → 切塊 → 向量化</span>
+              </button>
+              <button type="button" class="ainote-module" data-arch-pop="mod-retrieval">
+                <strong>檢索引擎 Retrieval</strong>
+                <span>依意思找段落 + 關鍵字補漏</span>
+              </button>
+              <button type="button" class="ainote-module" data-arch-pop="mod-rerank">
+                <strong>重排引擎 Rerank</strong>
+                <span>Top-K 20 → 精選 6 段</span>
+              </button>
+              <button type="button" class="ainote-module" data-arch-pop="mod-context">
+                <strong>Context 組裝</strong>
+                <span>塞進 Prompt、控 Token 預算</span>
+              </button>
+              <button type="button" class="ainote-module" data-arch-pop="mod-prompt">
+                <strong>Prompt 模板</strong>
+                <span>角色、格式、禁則、查核語氣</span>
+              </button>
+              <button type="button" class="ainote-module" data-arch-pop="mod-generate">
+                <strong>生成引擎 Generation</strong>
+                <span>呼叫 LLM、串流輸出</span>
+              </button>
+              <button type="button" class="ainote-module" data-arch-pop="mod-post">
+                <strong>後處理 Post-process</strong>
+                <span>引用對照、信心、拒答</span>
+              </button>
+              <button type="button" class="ainote-module" data-arch-pop="mod-notes">
+                <strong>筆記／匯出模組</strong>
+                <span>存筆記、Word／PDF、回寫</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- AI 回答邏輯 -->
+          <div class="tab-panel" data-panel="arch-answer">
+            <p class="panel-intro">使用者按下送出後，<strong>不是</strong>直接把問題丟給模型。而是走下面這條「引擎管線」。點節點看細節。</p>
+            <div class="ainote-flow-board glass" id="ainoteFlowBoard">
+              <svg class="flow-lines ainote-flow-lines" viewBox="0 0 900 320" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                <path d="M80 160 H170" /><path d="M270 160 H360" /><path d="M460 160 H550" />
+                <path d="M650 160 H740" /><path d="M400 70 V100" /><path d="M400 220 V250" />
+              </svg>
+              <button class="flow-node" data-arch-flow="q" style="--x:6%;--y:44%">① 問題<br /><small>＋心智圖上下文</small></button>
+              <button class="flow-node" data-arch-flow="retrieve" style="--x:22%;--y:44%">② 檢索<br /><small>向量 + Hybrid</small></button>
+              <button class="flow-node" data-arch-flow="rerank" style="--x:38%;--y:44%">③ 重排<br /><small>20 → 6</small></button>
+              <button class="flow-node diamond" data-arch-flow="gate" style="--x:52%;--y:44%"><span class="diamond-label">④ 足夠?</span></button>
+              <button class="flow-node warn" data-arch-flow="fallback" style="--x:52%;--y:78%">澄清／拒答</button>
+              <button class="flow-node" data-arch-flow="assemble" style="--x:52%;--y:10%">組裝 Context</button>
+              <button class="flow-node primary" data-arch-flow="generate" style="--x:68%;--y:44%">⑤ 生成<br /><small>LLM + Prompt</small></button>
+              <button class="flow-node" data-arch-flow="post" style="--x:84%;--y:44%">⑥ 後處理<br /><small>引用＋信心</small></button>
+            </div>
+            <aside class="ainote-flow-detail glass" id="ainoteFlowDetail">
+              <h4>點流程節點</h4>
+              <p>這裡會顯示該步驟的白話說明與 TP NOTE01 實作對照。</p>
+            </aside>
+            <div class="ainote-chatgpt glass">
+              <h4>為什麼這樣更像 ChatGPT？</h4>
+              <ul class="check-list">
+                <li><strong>先找資料再答</strong>：ChatGPT 有龐大訓練；我們用 <button type="button" class="term-btn term-inline" data-term="rag">RAG</button> 補「單位專屬知識」</li>
+                <li><strong>多輪上下文</strong>：編排引擎保留對話歷史，但<strong>每輪仍重新檢索</strong>，避免舊答案污染</li>
+                <li><strong>結構化輸出</strong>：推論→正式回答→實務→引用，比一大段文字更好核對</li>
+                <li><strong>會說不知道</strong>：門檻不足就澄清，這是專業查核系統的必備，不是 bug</li>
+                <li><strong>可調參</strong>：Temperature、Top-K、Chunk 都可依黃金題調，不是賭一次 Prompt</li>
+              </ul>
+              <button type="button" class="btn btn-ghost" data-arch-pop="chatgpt-compare">看「只有 Prompt」vs「引擎管線」對照表 →</button>
+            </div>
+          </div>
+
+          <!-- 開發流程 -->
+          <div class="tab-panel" data-panel="arch-dev">
+            <p class="panel-intro">從零到 TP NOTE01，建議照這條路走。點步驟看「這步要交付什麼、怎麼驗收」。</p>
+            <ol class="ainote-dev-steps" id="ainoteDevSteps">
+              <li><button type="button" data-arch-pop="dev-1"><strong>1 · 構想＋SPEC</strong><span>誰、情境、輸入輸出、不做什麼</span></button></li>
+              <li><button type="button" data-arch-pop="dev-2"><strong>2 · 知識庫地圖</strong><span>OECD、台灣準則、BAPA…分檔切塊</span></button></li>
+              <li><button type="button" data-arch-pop="dev-3"><strong>3 · 入庫管線</strong><span>Chunk、Overlap、Embedding、索引</span></button></li>
+              <li><button type="button" data-arch-pop="dev-4"><strong>4 · 檢索＋重排</strong><span>Top-K、Rerank、相似度門檻</span></button></li>
+              <li><button type="button" data-arch-pop="dev-5"><strong>5 · Prompt 模板</strong><span>角色、格式、禁則、查核語氣</span></button></li>
+              <li><button type="button" data-arch-pop="dev-6"><strong>6 · API 串接</strong><span>chat/query、ingest、health</span></button></li>
+              <li><button type="button" data-arch-pop="dev-7"><strong>7 · UI 模組</strong><span>聊天、心智圖、筆記、匯出</span></button></li>
+              <li><button type="button" data-arch-pop="dev-8"><strong>8 · 黃金題驗收</strong><span>避風港、BAPA、可比法…能引用</span></button></li>
+              <li><button type="button" data-arch-pop="dev-9"><strong>9 · 部署＋回饋</strong><span>本機／內網、錯誤案例回寫</span></button></li>
+            </ol>
+            <button type="button" class="btn btn-primary" data-arch-pop="dev-full">看完整開發流程圖 →</button>
+          </div>
+
+          <!-- 運用技術 -->
+          <div class="tab-panel" data-panel="arch-tech">
+            <p class="panel-intro">技術可以替換，但<strong>分層不變</strong>。點標籤看白話說明。</p>
+            <div class="ainote-tech-grid">
+              <button type="button" class="ainote-tech term-btn" data-term="frontend-stack"><strong>前端</strong><span>React／Vite、心智圖、聊天 UI</span></button>
+              <button type="button" class="ainote-tech term-btn" data-term="backend-api"><strong>後端 API</strong><span>FastAPI／Node、REST 問答窗口</span></button>
+              <button type="button" class="ainote-tech term-btn" data-term="embedding-model"><strong>Embedding 模型</strong><span>文字→向量，檢索的地基</span></button>
+              <button type="button" class="ainote-tech term-btn" data-term="vector-db"><strong>向量索引</strong><span>Chroma／pgvector／本機索引</span></button>
+              <button type="button" class="ainote-tech term-btn" data-term="reranker"><strong>Reranker</strong><span>交叉編碼重排，品質關鍵</span></button>
+              <button type="button" class="ainote-tech term-btn" data-term="llm-api"><strong>LLM API</strong><span>OpenAI 相容／Azure／內部閘道</span></button>
+              <button type="button" class="ainote-tech term-btn" data-term="markdown-kb"><strong>Markdown 知識庫</strong><span>法規原文、metadata、版本</span></button>
+              <button type="button" class="ainote-tech term-btn" data-term="orchestrator"><strong>編排引擎</strong><span>串檢索→生成→後處理</span></button>
+            </div>
+            <table class="mini-table ainote-tech-table">
+              <tr><th>TP NOTE01 實機組態</th><td>本機 RAG · Chunk 3K · Top-K 20 → Rerank 6 · Temp 0.15 · Max 6K</td></tr>
+              <tr><th>教室建議起點</th><td>Chunk 1500 · 一般輸出 3K · 複雜查核 9K（見 <a href="#params">參數區</a>）</td></tr>
+              <tr><th>部署</th><td>前端 Vercel／內網；知識庫與向量索引可本機或單位伺服器</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="ainote-cta glass">
+        <p>看完架構，回去對照 <a href="#case">08 案例 TP NOTE01</a> 的 SPEC／PROMPT／參數，或繼續 <a href="#summary">10 總結 · RAG 流程</a> 把名詞串起來。</p>
+      </div>
+    </section>
+
+    <!-- 10 SUMMARY: AI 工作規則 -->
+    <section class="section" id="summary" data-minutes="5">
+      <div class="section-head">
+        <span class="section-num">10</span>
         <div>
           <h2>總結 · AI 工作規則</h2>
           <p>把前面學的串成一條完整 RAG 問答流程。點藍色名詞可看淺白比喻。</p>
@@ -997,10 +1198,10 @@ owner: HR
       </div>
     </section>
 
-    <!-- 10 COLLAB: Hook / MCP / SUBAGENT / WORKFLOW -->
+    <!-- 11 COLLAB: Hook / MCP / SUBAGENT / WORKFLOW -->
     <section class="section" id="collab" data-minutes="8">
       <div class="section-head">
-        <span class="section-num">10</span>
+        <span class="section-num">11</span>
         <div>
           <h2>Hook · MCP · Subagent · Workflow</h2>
           <p>AI 不只會寫字。把它接上工具、門禁與分工，才叫工作流。</p>
@@ -1082,10 +1283,10 @@ owner: HR
       </div>
     </section>
 
-    <!-- 11 LOOP: AI Feedback Loop -->
+    <!-- 12 LOOP: AI Feedback Loop -->
     <section class="section" id="loop" data-minutes="8">
       <div class="section-head">
-        <span class="section-num">11</span>
+        <span class="section-num">12</span>
         <div>
           <h2>AI 回饋迴路</h2>
           <p>核心問題不是「辨識」，而是「辨識之後，如何知道自己可能錯了？」</p>
@@ -1252,10 +1453,10 @@ owner: HR
       </div>
     </section>
 
-    <!-- 12 SPEC WORKSHOP -->
+    <!-- 13 SPEC WORKSHOP -->
     <section class="section" id="workshop" data-minutes="8">
       <div class="section-head">
-        <span class="section-num">12</span>
+        <span class="section-num">13</span>
         <div>
           <h2>SPEC／PROMPT 工坊</h2>
           <p>把需求寫成人話給 Codex：產出完整 SPEC＋可直接貼上的 PROMPT（含整套系統，不只網頁 UI）。</p>
@@ -1468,7 +1669,7 @@ owner: HR
     </div>
   </div>
 
-  <script src="js/app.js?v=codex-1"></script>
+  <script src="js/app.js?v=codex-2"></script>
   <script src="js/spec-workshop.js?v=codex-1"></script>
 </body>
 </html>
