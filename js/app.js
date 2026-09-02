@@ -426,6 +426,21 @@ const TERM_GLOSSARY = {
     metaphor: "比喻：邊炒邊上菜——不用等整桌做完才端出來",
     body: "LLM 逐 token 回傳，UI 逐字顯示，體感更像 ChatGPT。編排引擎仍可在串流結束後跑後處理（引用、信心）。",
   },
+  "rule-engine": {
+    title: "Rule Engine（規則引擎）",
+    metaphor: "比喻：先查法規電腦系統，再請顧問用白話解釋",
+    body: "像 treaty_rate_ai：稅率、適用要件由結構化 Rule DB 決定，LLM 只負責說明與論述，不能自己「發明」稅率。這是專業查核系統和一般聊天機器人的關鍵差異。",
+  },
+  "tp-lego": {
+    title: "tp_lego（TP 積木子引擎）",
+    metaphor: "比喻：依圖紙只拿出需要的積木，不是把整箱倒出來",
+    body: "FAR 題用 FAR 積木、可比題用可比積木。tp_reasoning orchestrator 依 question_type 呼叫 tp_sub_engines 裡的不同積木，避免一個 Prompt 包所有規則。",
+  },
+  "prompt-block": {
+    title: "prompt_block",
+    metaphor: "比喻：給 LLM 的「已填好欄位的表格」",
+    body: "規則引擎跑完後產生的結構化文字塊（爭點、缺失事實、協定結果、引用），塞進 Prompt 讓 LLM 只負責寫自然語言，不負責「想分析架構」。",
+  },
 };
 
 /* ---------- helpers ---------- */
@@ -1342,6 +1357,127 @@ const ARCH_FLOW = {
   },
 };
 
+const ARCH_SYS = {
+  ui: {
+    title: "UI 四 Tab",
+    body: "AI小助手-NOTE精簡版V1.html：知識問答｜專業翻譯｜去識別化｜筆記本。一次只顯示一個工作區，避免拓撲樹、翻譯表、去識別表擠在同一頁。",
+    path: "主 HTML + TP及BAPA專業助理/*.js",
+  },
+  router: {
+    title: "意圖路由",
+    body: "依 Tab 與關鍵字分流：租稅協定 → treaty_rate_ai；BAPA/CA/FAR → tp_bapa_reasoning；翻譯 Tab → translation_engine；去識別 Tab → deident_engine；其餘 → tp_reasoning + Mentor。",
+    path: "tp_reasoning/mentor/mentor_mode_classifier.js · rag_intent_router.js",
+  },
+  "tp-reasoning": {
+    title: "tp_reasoning",
+    body: "16 步專業推理主引擎：理解→爭點樹→子引擎→攻防→證據→prompt_block。RAG 找段落，引擎決定分析結構。",
+    path: "tp_reasoning/ · api.js · tp_reasoning_orchestrator.js",
+  },
+  "tp-bapa": {
+    title: "tp_bapa_reasoning",
+    body: "BAPA 規則塊：Critical Assumptions、FAR／受測個體。在 LLM 前產生 missing_facts 與 citations。",
+    path: "tp_bapa_reasoning/engines/",
+  },
+  "tp-lego": {
+    title: "tp_lego",
+    body: "積木式子引擎：依題型組裝 FAR、方法選擇、可比、查核攻防、BAPA flow。實作核心在 tp_sub_engines.js。",
+    path: "tp_reasoning/tp_sub_engines.js · tp_lego/",
+  },
+  translation: {
+    title: "translation_engine",
+    body: "獨立翻譯管線：術語庫+TM+分塊+QA+領域模式（treaty/oecd/tp/bapa）。",
+    path: "translation_engine/",
+  },
+  deident: {
+    title: "deident_engine",
+    body: "規則驅動去識別：對照表即時同步、雙欄預覽、匯出。不用 LLM 隨機遮罩。",
+    path: "deident_engine/ · tp_deident.js",
+  },
+  treaty: {
+    title: "treaty_rate_ai",
+    body: "協定 Rule DB + 事實萃取 + 決策引擎。LLM 不解釋稅率數字本身，只說明規則結果。",
+    path: "treaty_rate_ai/",
+  },
+  rag: {
+    title: "RAG 知識層",
+    body: "tp_kb_rag.js 本機向量檢索；rag-java HybridSearch 可後端加強；知識庫/ 存法規 Markdown。",
+    path: "知識庫/ · tp_kb_rag.js · rag-java/",
+  },
+  llm: {
+    title: "LLM + Validator",
+    body: "reasoning_llm_profile 選模型；agent_llm_orchestration 分 main/sub；tp_llm_output_validator 輸出檢查與重試。",
+    path: "tp_reasoning/config/ · engines/tp_llm_output_validator.js",
+  },
+  output: {
+    title: "結構化輸出",
+    body: "prompt_block 進 LLM；回來後 UI Card 顯示推論、正式回答、實務、引用、信心。可存筆記。",
+    path: "mentor_answer_engine.js · tp_evidence_citation.js",
+  },
+};
+
+const ARCH_LOGIC = {
+  start: {
+    title: "使用者提問",
+    body: "自然語言問題；可從心智圖帶入節點路徑作為檢索縮小範圍。",
+    path: "UI 聊天輸入",
+  },
+  tab: {
+    title: "哪個 Tab？",
+    body: "四 Tab 決定主引擎：問答≠翻譯≠去識別。避免所有功能擠在同一個 generate()。",
+    path: "主導覽 Tab 狀態",
+  },
+  intent: {
+    title: "意圖分類",
+    body: "在問答 Tab 內再分：租稅協定、BAPA、一般 TP、是否啟用 Mentor 深度模式。",
+    path: "mentor_mode_classifier · TpReasoningAI",
+  },
+  treaty: {
+    title: "租稅協定分支",
+    body: "treaty_rate_ai.analyze()：萃取事實→所得類型→Rule DB→引用。結果併入 prompt_block，不讓 LLM 自創稅率。",
+    path: "treaty_rate_ai/api.js",
+  },
+  bapa: {
+    title: "BAPA 分支",
+    body: "tp_bapa_reasoning：CA 與 FAR 規則引擎先跑，產生 warnings / missing_facts。",
+    path: "tp_bapa_reasoning/api.js",
+  },
+  reason: {
+    title: "tp_reasoning + tp_lego",
+    body: "主推理 16 步 + 積木子引擎（FAR/方法/可比/查核/BAPA）。",
+    path: "tp_reasoning_orchestrator.js · tp_sub_engines.js",
+  },
+  mentor: {
+    title: "Mentor 深度增強",
+    body: "深度案件：事實矩陣、紅旗、辯論輪、證據請求、利潤移轉等 20+ 模組 enhance。",
+    path: "tp_reasoning/mentor/mentor_orchestrator.js",
+  },
+  rag: {
+    title: "RAG 檢索",
+    body: "TpReasoningAI.boostKbChunks() 對知識庫段落重排；與規則引擎結果並行。",
+    path: "tp_context_retrieval.js · tp_kb_rag.js",
+  },
+  prompt: {
+    title: "組 prompt_block",
+    body: "規則引擎輸出 + retrieved_chunks + 系統禁則 → 完整 Prompt。LLM 只負責自然語言。",
+    path: "tp_reasoning_orchestrator buildPromptBlock",
+  },
+  llm: {
+    title: "LLM 生成",
+    body: "依 profile 呼叫模型；可串流；Main/Sub agent 可分工（KB 檢索 vs 主回答）。",
+    path: "tp_llm_client.mjs · agent_llm_orchestration.json",
+  },
+  valid: {
+    title: "Validator 重試",
+    body: "tp_llm_output_validator 檢查格式與禁則；失敗可重試，避免幻覺條文。",
+    path: "engines/tp_llm_output_validator.js",
+  },
+  end: {
+    title: "UI 呈現",
+    body: "結構化卡片：推論、正式回答、查核實務、引用。可匯出筆記。",
+    path: "UI render + tp_note_actions",
+  },
+};
+
 const ARCH_LAYER_HINT = {
   "layer-ui": "<strong>介面層</strong>：聊天窗、心智圖、筆記本、匯出 Word/PDF。只負責「展示」與「送 API」，不自己做檢索。",
   "layer-orchestrator": "<strong>編排引擎</strong>：問答總指揮。決定何時檢索、何時拒答、何時叫 LLM。改流程改這層，不用動 UI。",
@@ -1507,6 +1643,126 @@ const ARCH_POP = {
       <span>部署 → 回饋改善 ↺</span>
     </div>
     <p class="modal-note">與「只叫 AI 寫一個聊天網頁」差別：中間每步都有可驗收的交付物。</p>`,
+  },
+  "diag-system-arch": {
+    eyebrow: "完整架構圖",
+    title: "AI-NOTE01 系統架構（上課版）",
+    html: `<div class="vflow">
+      <span><strong>UI</strong>：AI小助手-NOTE精簡版V1.html — 四 Tab（知識問答｜專業翻譯｜去識別化｜筆記本）</span>
+      <span class="arrow">↓</span>
+      <span><strong>意圖路由</strong>：mentor_mode_classifier · treaty 關鍵字 · Tab 隔離（翻譯／去識別不進 TP 推理）</span>
+      <span class="arrow">↓</span>
+      <div class="vflow-split">
+        <div><span>tp_reasoning</span><span class="arrow">→</span><span>16 步推理 + Mentor</span></div>
+        <div><span>tp_bapa_reasoning</span><span class="arrow">→</span><span>CA / FAR 規則塊</span></div>
+        <div><span>tp_lego</span><span class="arrow">→</span><span>子引擎積木（FAR/方法/可比…）</span></div>
+        <div><span>translation_engine</span><span class="arrow">→</span><span>術語+TM+QA</span></div>
+        <div><span>deident_engine</span><span class="arrow">→</span><span>去識別規則</span></div>
+        <div><span>treaty_rate_ai</span><span class="arrow">→</span><span>協定 Rule DB</span></div>
+      </div>
+      <span class="arrow">↓</span>
+      <span><strong>RAG</strong>：tp_kb_rag.js · rag-java HybridSearch · 知識庫/ 法規 Markdown</span>
+      <span class="arrow">↓</span>
+      <span><strong>LLM</strong>：reasoning_llm_profile · agent_llm_orchestration · tp_llm_output_validator</span>
+      <span class="arrow">↓</span>
+      <span><strong>輸出</strong>：prompt_block + UI Card + citations + 筆記匯出</span>
+    </div>
+    <p class="modal-note">原則：<strong>一個 Tab／一種任務 = 一條獨立引擎管線</strong>，共用 RAG 與 LLM 設定，但不共用 Prompt 模板。</p>`,
+  },
+  "diag-logic-flow": {
+    eyebrow: "完整邏輯圖",
+    title: "知識問答 · 一題進來怎麼答（邏輯順序）",
+    html: `<ol class="sample-steps">
+      <li><strong>使用者提問</strong>（可帶心智圖節點上下文）</li>
+      <li><strong>Tab 判斷</strong>：若在「翻譯／去識別」Tab → 走對應引擎，<em>不</em>進 tp_reasoning</li>
+      <li><strong>租稅協定？</strong> → treaty_rate_ai.analyze()：事實萃取 → 所得分類 → Rule DB → 引用（LLM 只解釋）</li>
+      <li><strong>BAPA / CA / FAR？</strong> → tp_bapa_reasoning：規則產生 missing_facts、warnings、citations</li>
+      <li><strong>一般 TP</strong> → tp_reasoning.process()：理解 → Issue Tree → tp_lego 子引擎 → 攻防 → 敏感度</li>
+      <li><strong>深度案件</strong> → MentorAI.enhance()：事實矩陣、紅旗、辯論輪、證據請求…</li>
+      <li><strong>RAG</strong>：TpReasoningAI.boostKbChunks() 重排知識庫段落</li>
+      <li><strong>組裝</strong>：規則引擎的 prompt_block + retrieved_chunks → 送 LLM</li>
+      <li><strong>生成</strong>：串流輸出；validator 失敗可重試</li>
+      <li><strong>呈現</strong>：結構化 UI Card、引用、可存筆記</li>
+    </ol>
+    <p class="modal-note">關鍵：<strong>RAG 找證據，Rule Engine 決定怎麼分析，LLM 寫自然語言</strong>——不是一個 Prompt 包到底。</p>`,
+  },
+  "eng-tp-reasoning": {
+    eyebrow: "實機引擎",
+    title: "tp_reasoning／TP 專業推理主引擎",
+    html: `<p class="modal-lead"><strong>為何獨立？</strong>移轉訂價問答不是 FAQ。要先分題型、建爭點樹、跑子引擎、列缺失事實與攻防，再請 LLM 寫人話。全部寫在一個 Prompt 無法維護、無法用黃金題驗收。</p>
+      <div class="modal-block"><h4>核心方法（16 步 pipeline）</h4>
+      <p>Question → Classification → Fact Extraction → Issue Tree → Legal Stack → Sub-Engines → Counterarguments → Missing Facts → Sensitivity → Evidence → Prompt Block → LLM</p></div>
+      <div class="modal-block"><h4>技術</h4>
+      <ul class="check-list"><li>目錄：<code>tp_reasoning/</code> · 入口 <code>api.js</code>（TpReasoningAI）</li><li>編排：<code>tp_reasoning_orchestrator.js</code></li><li>Mentor 層：<code>mentor/</code>（20+ 子模組）</li><li>HTTP：<code>server/</code> POST /v1/chat/query</li><li>LLM 設定：<code>config/reasoning_llm_profile.json</code>、<code>agent_llm_orchestration.json</code></li><li>驗收：<code>tests/golden_cases.jsonl</code>、run_golden_eval.mjs</li></ul></div>
+      <p class="modal-note">SPEC：<code>tp_reasoning/SPEC.md</code>、<code>mentor/MENTOR_AI_SPEC.md</code></p>`,
+  },
+  "eng-tp-bapa": {
+    eyebrow: "實機引擎",
+    title: "tp_bapa_reasoning／BAPA 專用推理",
+    html: `<p class="modal-lead"><strong>為何獨立？</strong>BAPA 有 Critical Assumptions、FAR／受測個體等<strong>規則型</strong>問題，要在呼叫 LLM 前先產生結構化分析塊，並與租稅協定結果（beneficial owner 等）交叉檢查。</p>
+      <div class="modal-block"><h4>方法</h4>
+      <p>偵測 BAPA/CA/FAR 題 → <code>critical_assumptions.js</code> / <code>far_tested_party.js</code> → 合併 missing_facts、warnings、citations → 併入 tp_reasoning 的 prompt_block</p></div>
+      <div class="modal-block"><h4>技術</h4>
+      <ul class="check-list"><li>目錄：<code>tp_bapa_reasoning/</code></li><li>API：<code>api.js</code>（BapaReasoningAI.analyze）</li><li>與 <code>treaty_rate_ai</code> 串接：協定資格不確定時寫入 warnings</li></ul></div>
+      <p class="modal-note">BAPA 爭議深度模擬另見 <code>tp_reasoning/bapa_controversy/</code>（談判、讓步、雙方 CA 等）。</p>`,
+  },
+  "eng-tp-lego": {
+    eyebrow: "實機引擎",
+    title: "tp_lego／TP 積木子引擎",
+    html: `<p class="modal-lead"><strong>為何獨立？</strong>不同問題要裝不同「積木」：FAR 題裝 FAR 積木、可比題裝可比積木。像 LEGO 依題型 snap-in，而不是每次把全部規則塞進 Prompt。</p>
+      <div class="modal-block"><h4>積木清單（tp_sub_engines）</h4>
+      <ul class="check-list"><li>FARReasoningEngine — 功能／資產／風險 → 受測個體</li><li>TPMethodSelectionEngine — 方法選擇</li><li>ComparableReasoningEngine — 可比分析</li><li>TPAuditReasoningEngine — 查核論述</li><li>AuditDebateEngine — 攻防辯論</li><li>BAPAReasoningEngine — BAPA 流程</li></ul></div>
+      <div class="modal-block"><h4>技術</h4>
+      <p>實作：<code>tp_reasoning/tp_sub_engines.js</code>，由 orchestrator 依 question_type 呼叫 <code>TpSubEngines.runSubEngines()</code>。獨立目錄 <code>tp_lego/</code> 為積木化封裝，方便單獨測試與擴充。</p></div>`,
+  },
+  "eng-translation": {
+    eyebrow: "實機引擎",
+    title: "translation_engine／專業翻譯引擎",
+    html: `<p class="modal-lead"><strong>為何獨立？</strong>翻譯要「翻概念、不翻錯術語」，和問答是不同任務。需術語庫、翻譯記憶、法律結構、回譯 QA——不能和 TP 問答共用一條 Prompt。</p>
+      <div class="modal-block"><h4>管線（Mode C · 法律／稅務專業翻譯）</h4>
+      <p>TranslationContext → 文件分類 → Terminology + TM → TranslationPromptEngine → LLM → Native/Taiwan Editor → TranslationQAEngine（可 back-translation）</p></div>
+      <div class="modal-block"><h4>技術</h4>
+      <ul class="check-list"><li>202+ MOF 術語、<code>terminology_seed.jsonl</code></li><li>領域模式：treaty / oecd / tp / bapa / correspondence</li><li>Golden：<code>data/golden/</code> · eval：run_translation_eval.mjs</li><li>SPEC：<code>TRANSLATION_ENGINE_SPEC.md</code></li></ul></div>`,
+  },
+  "eng-deident": {
+    eyebrow: "實機引擎",
+    title: "deident_engine／去識別化引擎",
+    html: `<p class="modal-lead"><strong>為何獨立？</strong>去識別是<strong>規則＋對照表</strong>任務，不是生成式問答。要即時雙欄預覽、甲乙丙丁→ABCD、可匯出——必須獨立 Tab 與引擎，避免 LLM 隨機改寫當事人代號。</p>
+      <div class="modal-block"><h4>方法</h4>
+      <p>使用者貼文／上傳 → 對照表驅動替換 → 左原文｜右去識別即時同步 → 匯出 Word／PDF</p></div>
+      <div class="modal-block"><h4>技術</h4>
+      <ul class="check-list"><li>UI：<code>TP及BAPA專業助理/tp_deident.js</code></li><li>獨立引擎目錄：<code>deident_engine/</code>（規則與對照邏輯抽離）</li><li>原則：可規則化處理，不硬叫 LLM「幫我遮」</li></ul></div>`,
+  },
+  "eng-treaty-rate": {
+    eyebrow: "實機引擎",
+    title: "treaty_rate_ai／租稅協定稅率 AI",
+    html: `<p class="modal-lead"><strong>為何獨立？</strong>協定稅率、適用要件、MLI 等必須查<strong>結構化 Rule DB</strong>。LLM 不能「決定」稅率，只能依規則引擎結果解釋。這是 Rule Engine + RAG + LLM 的典型分工。</p>
+      <div class="modal-block"><h4>管線</h4>
+      <p>Fact Extraction → Income Classification → Eligibility → Treaty Rule DB → Decision Engine → Citation → Validator →（可選）LLM 論述</p></div>
+      <div class="modal-block"><h4>技術</h4>
+      <ul class="check-list"><li><code>data/treaty_rules_*.jsonl</code>、MLI、國內法對照</li><li>engines：pe_decision、exception、legal_source…</li><li>retrieval/hybrid.js · 100+ golden cases</li><li>與 TP 串接：<code>tp_bapa_chain.js</code></li></ul></div>
+      <p class="modal-note">原則：<code>maximum_rate</code> ≠ <code>fixed_rate</code> ≠ 臆測 applicable rate</p>`,
+  },
+  "eng-treaty-treatment": {
+    eyebrow: "實機引擎 · 舊版",
+    title: "treaty_treatment／協定處理（Legacy）",
+    html: `<p class="modal-lead"><strong>為何曾獨立？</strong>早期租稅協定問答的 rule engine 原型：<code>treaty_decision_engine.js</code>、<code>treaty_kb_retrieval.js</code>。</p>
+      <p class="modal-note">現行開發以 <strong>treaty_rate_ai</strong> 為主（更完整 SPEC、MLI、validator、golden eval）。treaty_treatment 保留作對照與漸進遷移；上課可說明「同一問題的引擎演進」。</p>`,
+  },
+  "eng-training": {
+    eyebrow: "實機引擎",
+    title: "training／訓練資料管線（Phase 12）",
+    html: `<p class="modal-lead"><strong>為何獨立？</strong>Fine-tuning／LoRA 是<strong>離線資料工程</strong>，不該和線上問答引擎混在一起。要有獨立工具把案例庫、golden L3 轉成訓練 JSONL。</p>
+      <div class="modal-block"><h4>方法</h4>
+      <p><code>node tp_reasoning/tools/build_finetune_dataset.mjs</code> → <code>tp_reasoning/data/finetune/mentor_chat_train.jsonl</code>（OpenAI chat 格式）</p></div>
+      <div class="modal-block"><h4>技術</h4>
+      <ul class="check-list"><li>來源：case_scenario_db、golden L3、mentor 教學層</li><li>目錄 <code>training/</code> 彙整訓練腳本與產出</li><li>尚未等於正式上線訓練——需人工審核 skeleton 與 L6 內容</li></ul></div>`,
+  },
+  "eng-node-modules": {
+    eyebrow: "依賴層（非業務引擎）",
+    title: "node_modules／npm 執行環境",
+    html: `<p class="modal-lead"><strong>這不是業務引擎。</strong>是 <code>tp_reasoning/server</code> 等 Node 專案安裝的第三方套件（express、dotenv…），由 <code>npm install</code> 產生。</p>
+      <ul class="check-list"><li>不寫進架構簡報的「八大引擎」</li><li>上課可一句帶過：server 端需要 Node 依賴；瀏覽器端引擎多為純 JS script 載入</li><li>勿 commit 進 Git（已在 .gitignore）</li></ul>`,
   },
 };
 
@@ -1738,6 +1994,17 @@ function setAinoteLayerDetail(key) {
   box.innerHTML = html ? `<p>${html}</p><p class="ainote-hint">點同層卡片可開完整流程說明。</p>` : "<p>點上方任一層，看白話說明。</p>";
 }
 
+function setAinoteDiagramDetail(key, map) {
+  const box = $("#ainoteDiagramDetail");
+  if (!box) return;
+  const d = map[key];
+  if (!d) {
+    box.innerHTML = "<h4>點上方方塊或流程節點</h4><p>這裡會顯示該步驟在 AI-NOTE01 裡對應哪個目錄／檔案，以及為什麼要獨立成引擎。</p>";
+    return;
+  }
+  box.innerHTML = `<h4>${d.title}</h4><p>${d.body}</p><p class="ainote-hint"><strong>對應路徑：</strong><code>${d.path}</code></p>`;
+}
+
 function setAinoteFlowDetail(key) {
   const box = $("#ainoteFlowDetail");
   if (!box || !ARCH_FLOW[key]) return;
@@ -1778,6 +2045,18 @@ $("#ainote")?.addEventListener("click", (e) => {
   if (flow) {
     $all("#ainoteFlowBoard .flow-node").forEach((el) => el.classList.toggle("active", el === flow));
     setAinoteFlowDetail(flow.dataset.archFlow);
+    return;
+  }
+  const sys = e.target.closest("[data-arch-sys]");
+  if (sys) {
+    $all("#ainoteSysBoard .ainote-box").forEach((el) => el.classList.toggle("active", el === sys));
+    setAinoteDiagramDetail(sys.dataset.archSys, ARCH_SYS);
+    return;
+  }
+  const logic = e.target.closest("[data-arch-logic]");
+  if (logic) {
+    $all("#ainoteLogicBoard .flow-node").forEach((el) => el.classList.toggle("active", el === logic));
+    setAinoteDiagramDetail(logic.dataset.archLogic, ARCH_LOGIC);
   }
 });
 
@@ -1800,7 +2079,7 @@ const io = new IntersectionObserver(
   { threshold: 0.12 }
 );
 
-$all(".section .glass, .section .panel, .kb-step, .api-card, .path-node, .tool-card, .loop-deck, .ainote-layer, .ainote-module, .ainote-tech").forEach((el, i) => {
+$all(".section .glass, .section .panel, .kb-step, .api-card, .path-node, .tool-card, .loop-deck, .ainote-layer, .ainote-module, .ainote-tech, .ainote-box, .ainote-engine-card, .ainote-diagram-card").forEach((el, i) => {
   if (el.closest(".hero")) return;
   el.style.opacity = "0";
   el.style.transform = "translateY(14px)";

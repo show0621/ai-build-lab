@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=codex-2" />
+  <link rel="stylesheet" href="css/styles.css?v=codex-3" />
 </head>
 <body>
   <div class="bg-layer" aria-hidden="true">
@@ -915,13 +915,13 @@ owner: HR
           <h2>AI NOTE 架構解說</h2>
           <p>TP NOTE01 怎麼運作？為什麼用「引擎＋模組」，而不是只寫 Prompt 丟 Markdown？</p>
         </div>
-        <span class="min-badge">約 12 分</span>
+        <span class="min-badge">約 18 分</span>
       </div>
 
       <p class="section-note ainote-lead glass">
         這一區是<strong>上課專用深讀</strong>：把案例 TP NOTE01 拆成「誰負責什麼、資料怎麼流、為什麼答起來更像
         <button type="button" class="term-btn term-inline" data-term="chatgpt-like">ChatGPT 那種對話體驗</button>。
-        藍色名詞都可點開；模組卡片可點看設計理念與開發做法。
+        藍色名詞都可點開；<strong>實機引擎目錄</strong>與<strong>架構／邏輯流程圖</strong>對應 AI-NOTE01 專案（<code>show0621/AI-NOTE01</code>）的真實目錄。
       </p>
 
       <div class="ainote-compare glass">
@@ -951,15 +951,124 @@ owner: HR
 
       <div class="ainote-tabs" id="ainoteTabs">
         <div class="tab-list" role="tablist" aria-label="AI NOTE 架構分頁">
-          <button role="tab" aria-selected="true" data-tab="arch-layers">系統架構圖</button>
-          <button role="tab" aria-selected="false" data-tab="arch-modules">模組與引擎</button>
-          <button role="tab" aria-selected="false" data-tab="arch-answer">AI 回答邏輯</button>
+          <button role="tab" aria-selected="true" data-tab="arch-diagrams">架構＋邏輯圖</button>
+          <button role="tab" aria-selected="false" data-tab="arch-engines">實機引擎目錄</button>
+          <button role="tab" aria-selected="false" data-tab="arch-layers">系統分層</button>
+          <button role="tab" aria-selected="false" data-tab="arch-answer">RAG 回答管線</button>
           <button role="tab" aria-selected="false" data-tab="arch-dev">開發流程</button>
           <button role="tab" aria-selected="false" data-tab="arch-tech">運用技術</button>
         </div>
         <div class="tab-panels glass">
-          <!-- 系統架構圖 -->
-          <div class="tab-panel active" data-panel="arch-layers">
+          <!-- 架構＋邏輯流程圖 -->
+          <div class="tab-panel active" data-panel="arch-diagrams">
+            <p class="panel-intro">上課建議<strong>先講這兩張圖</strong>：左＝整體架構（誰呼叫誰）；右＝一題進來後的判斷與路由。點方塊看白話；右下角可開完整大圖。</p>
+            <div class="ainote-diagram-grid">
+              <article class="ainote-diagram-card">
+                <h4>① 系統架構流程圖 <small>System Architecture</small></h4>
+                <p class="diagram-caption">四個 Tab 共用同一套 LLM／RAG，但<strong>各自獨立引擎</strong>，不混在同一個 Prompt。</p>
+                <div class="ainote-sys-board" id="ainoteSysBoard">
+                  <button type="button" class="ainote-box ui" data-arch-sys="ui">UI 四 Tab<br /><small>問答｜翻譯｜去識別｜筆記</small></button>
+                  <span class="ainote-arr">↓</span>
+                  <button type="button" class="ainote-box route" data-arch-sys="router">意圖路由<br /><small>mentor_mode / treaty / translate</small></button>
+                  <span class="ainote-arr">↓</span>
+                  <div class="ainote-engine-row">
+                    <button type="button" class="ainote-box eng" data-arch-sys="tp-reasoning">tp_reasoning<br /><small>16 步推理</small></button>
+                    <button type="button" class="ainote-box eng" data-arch-sys="tp-bapa">tp_bapa_reasoning<br /><small>CA / FAR</small></button>
+                    <button type="button" class="ainote-box eng" data-arch-sys="tp-lego">tp_lego<br /><small>子引擎積木</small></button>
+                    <button type="button" class="ainote-box eng" data-arch-sys="translation">translation_engine</button>
+                    <button type="button" class="ainote-box eng" data-arch-sys="deident">deident_engine</button>
+                    <button type="button" class="ainote-box eng" data-arch-sys="treaty">treaty_rate_ai</button>
+                  </div>
+                  <span class="ainote-arr">↓</span>
+                  <button type="button" class="ainote-box rag" data-arch-sys="rag">RAG 知識層<br /><small>tp_kb_rag · rag-java Hybrid</small></button>
+                  <span class="ainote-arr">↓</span>
+                  <button type="button" class="ainote-box llm" data-arch-sys="llm">LLM ＋ Validator<br /><small>profile / orchestration</small></button>
+                  <span class="ainote-arr">↓</span>
+                  <button type="button" class="ainote-box out" data-arch-sys="output">結構化輸出<br /><small>引用 · 信心 · UI Card</small></button>
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm" data-arch-pop="diag-system-arch">開啟完整架構圖 →</button>
+              </article>
+              <article class="ainote-diagram-card">
+                <h4>② 邏輯流程圖 <small>Answer Logic Flow</small></h4>
+                <p class="diagram-caption">以<strong>知識問答 Tab</strong>為例：規則引擎先跑，LLM 只負責「寫人話」。</p>
+                <div class="ainote-logic-board" id="ainoteLogicBoard">
+                  <button type="button" class="flow-node compact" data-arch-logic="start" style="--x:6%;--y:8%">使用者<br />提問</button>
+                  <button type="button" class="flow-node compact" data-arch-logic="tab" style="--x:22%;--y:8%">哪個<br />Tab？</button>
+                  <button type="button" class="flow-node compact diamond" data-arch-logic="intent" style="--x:38%;--y:8%"><span class="diamond-label">意圖<br />分類</span></button>
+                  <button type="button" class="flow-node compact alt" data-arch-logic="treaty" style="--x:54%;--y:2%">租稅協定？<br /><small>treaty_rate_ai</small></button>
+                  <button type="button" class="flow-node compact alt" data-arch-logic="bapa" style="--x:54%;--y:14%">BAPA？<br /><small>tp_bapa_reasoning</small></button>
+                  <button type="button" class="flow-node compact primary" data-arch-logic="reason" style="--x:70%;--y:8%">tp_reasoning<br /><small>+ tp_lego 積木</small></button>
+                  <button type="button" class="flow-node compact" data-arch-logic="mentor" style="--x:86%;--y:8%">Mentor<br /><small>深度案件</small></button>
+                  <button type="button" class="flow-node compact" data-arch-logic="rag" style="--x:22%;--y:42%">RAG 檢索<br /><small>boostKbChunks</small></button>
+                  <button type="button" class="flow-node compact" data-arch-logic="prompt" style="--x:42%;--y:42%">組 prompt_block<br /><small>規則結果＋chunks</small></button>
+                  <button type="button" class="flow-node compact primary" data-arch-logic="llm" style="--x:62%;--y:42%">LLM 生成<br /><small>串流</small></button>
+                  <button type="button" class="flow-node compact" data-arch-logic="valid" style="--x:82%;--y:42%">Validator<br /><small>重試</small></button>
+                  <button type="button" class="flow-node compact" data-arch-logic="end" style="--x:50%;--y:76%">UI 卡片<br /><small>引用＋筆記</small></button>
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm" data-arch-pop="diag-logic-flow">開啟完整邏輯圖 →</button>
+              </article>
+            </div>
+            <aside class="ainote-diagram-detail glass" id="ainoteDiagramDetail">
+              <h4>點上方方塊或流程節點</h4>
+              <p>這裡會顯示該步驟在 AI-NOTE01 裡對應哪個目錄／檔案，以及為什麼要獨立成引擎。</p>
+            </aside>
+          </div>
+
+          <!-- 實機引擎目錄 -->
+          <div class="tab-panel" data-panel="arch-engines">
+            <p class="panel-intro">以下為<strong>專案根目錄的獨立引擎資料夾</strong>（各自有 api.js、engines、tests）。點卡片看：為何獨立、用什麼技術、怎麼開發。</p>
+            <div class="ainote-engine-catalog">
+              <button type="button" class="ainote-engine-card primary" data-arch-pop="eng-tp-reasoning">
+                <code>tp_reasoning/</code>
+                <strong>TP 專業推理主引擎</strong>
+                <span>16 步 pipeline · Mentor · HTTP server · 黃金題 eval</span>
+              </button>
+              <button type="button" class="ainote-engine-card" data-arch-pop="eng-tp-bapa">
+                <code>tp_bapa_reasoning/</code>
+                <strong>BAPA 專用推理</strong>
+                <span>Critical Assumptions · FAR／受測個體 · 規則先於 LLM</span>
+              </button>
+              <button type="button" class="ainote-engine-card" data-arch-pop="eng-tp-lego">
+                <code>tp_lego/</code>
+                <strong>TP 積木子引擎</strong>
+                <span>FAR · 方法選擇 · 可比 · 查核攻防 · BAPA flow</span>
+              </button>
+              <button type="button" class="ainote-engine-card" data-arch-pop="eng-translation">
+                <code>translation_engine/</code>
+                <strong>專業翻譯引擎</strong>
+                <span>術語庫 · TM · 回譯 QA · treaty/oecd/tp/bapa 模式</span>
+              </button>
+              <button type="button" class="ainote-engine-card" data-arch-pop="eng-deident">
+                <code>deident_engine/</code>
+                <strong>去識別化引擎</strong>
+                <span>甲乙丙丁→ABCD · 雙欄即時預覽 · 匯出</span>
+              </button>
+              <button type="button" class="ainote-engine-card" data-arch-pop="eng-treaty-rate">
+                <code>treaty_rate_ai/</code>
+                <strong>租稅協定稅率 AI</strong>
+                <span>Rule DB · MLI · 事實萃取 · LLM 只解釋不決定</span>
+              </button>
+              <button type="button" class="ainote-engine-card muted" data-arch-pop="eng-treaty-treatment">
+                <code>treaty_treatment/</code>
+                <strong>協定處理（舊版）</strong>
+                <span>rule engine 前身 · 現以 treaty_rate_ai 為主</span>
+              </button>
+              <button type="button" class="ainote-engine-card" data-arch-pop="eng-training">
+                <code>training/</code>
+                <strong>訓練資料管線</strong>
+                <span>finetune JSONL · golden L3 · LoRA 基礎（Phase 12）</span>
+              </button>
+              <button type="button" class="ainote-engine-card dep" data-arch-pop="eng-node-modules">
+                <code>node_modules/</code>
+                <strong>執行環境依賴</strong>
+                <span>npm 套件 · 非業務引擎 · server 用</span>
+              </button>
+            </div>
+            <p class="ainote-repo-note">倉庫：<code>AI-NOTE01</code>（Taiwan TP/BAPA Mentor AI workspace）· 主畫面 <code>AI小助手-NOTE精簡版V1.html</code> 依序載入各引擎 script。</p>
+          </div>
+
+          <!-- 系統分層 -->
+          <div class="tab-panel" data-panel="arch-layers">
             <p class="panel-intro">由下而上五層。點每一層看「這層負責什麼、為什麼要獨立成一層」。</p>
             <div class="ainote-stack" id="ainoteStack">
               <button type="button" class="ainote-layer" data-arch-pop="layer-ui">
@@ -988,46 +1097,7 @@ owner: HR
             </aside>
           </div>
 
-          <!-- 模組與引擎 -->
-          <div class="tab-panel" data-panel="arch-modules">
-            <p class="panel-intro">每個模組只做一件事。改一個模組，不必整包 Prompt 重寫。</p>
-            <div class="ainote-module-grid">
-              <button type="button" class="ainote-module" data-arch-pop="mod-ingest">
-                <strong>入庫模組 Ingest</strong>
-                <span>Markdown／PDF → 切塊 → 向量化</span>
-              </button>
-              <button type="button" class="ainote-module" data-arch-pop="mod-retrieval">
-                <strong>檢索引擎 Retrieval</strong>
-                <span>依意思找段落 + 關鍵字補漏</span>
-              </button>
-              <button type="button" class="ainote-module" data-arch-pop="mod-rerank">
-                <strong>重排引擎 Rerank</strong>
-                <span>Top-K 20 → 精選 6 段</span>
-              </button>
-              <button type="button" class="ainote-module" data-arch-pop="mod-context">
-                <strong>Context 組裝</strong>
-                <span>塞進 Prompt、控 Token 預算</span>
-              </button>
-              <button type="button" class="ainote-module" data-arch-pop="mod-prompt">
-                <strong>Prompt 模板</strong>
-                <span>角色、格式、禁則、查核語氣</span>
-              </button>
-              <button type="button" class="ainote-module" data-arch-pop="mod-generate">
-                <strong>生成引擎 Generation</strong>
-                <span>呼叫 LLM、串流輸出</span>
-              </button>
-              <button type="button" class="ainote-module" data-arch-pop="mod-post">
-                <strong>後處理 Post-process</strong>
-                <span>引用對照、信心、拒答</span>
-              </button>
-              <button type="button" class="ainote-module" data-arch-pop="mod-notes">
-                <strong>筆記／匯出模組</strong>
-                <span>存筆記、Word／PDF、回寫</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- AI 回答邏輯 -->
+          <!-- RAG 回答管線（通用） -->
           <div class="tab-panel" data-panel="arch-answer">
             <p class="panel-intro">使用者按下送出後，<strong>不是</strong>直接把問題丟給模型。而是走下面這條「引擎管線」。點節點看細節。</p>
             <div class="ainote-flow-board glass" id="ainoteFlowBoard">
@@ -1669,7 +1739,7 @@ owner: HR
     </div>
   </div>
 
-  <script src="js/app.js?v=codex-2"></script>
+  <script src="js/app.js?v=codex-3"></script>
   <script src="js/spec-workshop.js?v=codex-1"></script>
 </body>
 </html>
