@@ -7,8 +7,8 @@
   <meta name="description" content="60–70 分鐘互動教學：構想、SPEC、PROMPT、知識庫切塊、Hook／MCP／Subagent、工作流與 AI 回饋迴路" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=codex-3" />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&family=Ma+Shan+Zheng&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=codex-4" />
 </head>
 <body>
   <div class="bg-layer" aria-hidden="true">
@@ -961,56 +961,140 @@ owner: HR
         <div class="tab-panels glass">
           <!-- 架構＋邏輯流程圖 -->
           <div class="tab-panel active" data-panel="arch-diagrams">
-            <p class="panel-intro">上課建議<strong>先講這兩張圖</strong>：左＝整體架構（誰呼叫誰）；右＝一題進來後的判斷與路由。點方塊看白話；右下角可開完整大圖。</p>
-            <div class="ainote-diagram-grid">
-              <article class="ainote-diagram-card">
-                <h4>① 系統架構流程圖 <small>System Architecture</small></h4>
-                <p class="diagram-caption">四個 Tab 共用同一套 LLM／RAG，但<strong>各自獨立引擎</strong>，不混在同一個 Prompt。</p>
-                <div class="ainote-sys-board" id="ainoteSysBoard">
-                  <button type="button" class="ainote-box ui" data-arch-sys="ui">UI 四 Tab<br /><small>問答｜翻譯｜去識別｜筆記</small></button>
-                  <span class="ainote-arr">↓</span>
-                  <button type="button" class="ainote-box route" data-arch-sys="router">意圖路由<br /><small>mentor_mode / treaty / translate</small></button>
-                  <span class="ainote-arr">↓</span>
-                  <div class="ainote-engine-row">
-                    <button type="button" class="ainote-box eng" data-arch-sys="tp-reasoning">tp_reasoning<br /><small>16 步推理</small></button>
-                    <button type="button" class="ainote-box eng" data-arch-sys="tp-bapa">tp_bapa_reasoning<br /><small>CA / FAR</small></button>
-                    <button type="button" class="ainote-box eng" data-arch-sys="tp-lego">tp_lego<br /><small>子引擎積木</small></button>
-                    <button type="button" class="ainote-box eng" data-arch-sys="translation">translation_engine</button>
-                    <button type="button" class="ainote-box eng" data-arch-sys="deident">deident_engine</button>
-                    <button type="button" class="ainote-box eng" data-arch-sys="treaty">treaty_rate_ai</button>
+            <p class="panel-intro">像<strong>工程師在白板前畫的草圖</strong>：管線怎麼接、引擎為何拆開、UI 怎麼分 Tab。黃／粉便條是設計當下的思考；點方框看對應目錄。</p>
+            <div class="ainote-diagram-grid sketch-layout">
+              <!-- ① 系統架構手繪 -->
+              <article class="sketch-sheet">
+                <div class="sketch-sheet-head">
+                  <span class="sketch-tag">白板草圖 ①</span>
+                  <h4>系統架構 · 怎麼切管線？</h4>
+                  <p class="sketch-sub">四 Tab 共用 LLM／RAG，但<strong>引擎各自獨立</strong></p>
+                </div>
+                <div class="sketch-canvas" id="ainoteSysBoard">
+                  <div class="sketch-margin left">
+                    <div class="sketch-sticky yellow">
+                      <strong>UI 怎麼設計？</strong>
+                      <p>四 Tab 各做各的<br />不要拓撲＋翻譯＋去識別擠一頁</p>
+                    </div>
+                    <div class="sketch-sticky blue">
+                      <strong>→ 問答 Tab</strong>
+                      <p>心智圖＋聊天<br />走 tp_reasoning</p>
+                    </div>
+                    <div class="sketch-sticky pink">
+                      <strong>→ 翻譯 Tab</strong>
+                      <p>術語庫管線<br />≠ 問答 Prompt</p>
+                    </div>
                   </div>
-                  <span class="ainote-arr">↓</span>
-                  <button type="button" class="ainote-box rag" data-arch-sys="rag">RAG 知識層<br /><small>tp_kb_rag · rag-java Hybrid</small></button>
-                  <span class="ainote-arr">↓</span>
-                  <button type="button" class="ainote-box llm" data-arch-sys="llm">LLM ＋ Validator<br /><small>profile / orchestration</small></button>
-                  <span class="ainote-arr">↓</span>
-                  <button type="button" class="ainote-box out" data-arch-sys="output">結構化輸出<br /><small>引用 · 信心 · UI Card</small></button>
+                  <div class="sketch-main">
+                    <svg class="sketch-wires" viewBox="0 0 320 520" aria-hidden="true">
+                      <path class="sketch-path" d="M160 58 L160 88" />
+                      <path class="sketch-path" d="M160 128 L160 158" />
+                      <path class="sketch-path branch" d="M160 158 L160 178 L80 198" />
+                      <path class="sketch-path branch" d="M160 178 L240 198" />
+                      <path class="sketch-path branch" d="M160 178 L160 198" />
+                      <path class="sketch-path" d="M160 248 L160 278" />
+                      <path class="sketch-path" d="M160 318 L160 348" />
+                      <path class="sketch-path" d="M160 388 L160 418" />
+                      <path class="sketch-path" d="M160 458 L160 488" />
+                      <path class="sketch-path side" d="M230 210 Q280 260 290 320" />
+                    </svg>
+                    <button type="button" class="sketch-node n-ui" data-arch-sys="ui" style="--sx:50%;--sy:4%">UI · 四 Tab<div>問答｜翻譯｜去識別｜筆記</div></button>
+                    <button type="button" class="sketch-node n-route" data-arch-sys="router" style="--sx:50%;--sy:17%">意圖路由<div>Tab + mentor / treaty 關鍵字</div></button>
+                    <div class="sketch-engine-cluster" style="--sy:34%">
+                      <button type="button" class="sketch-node n-eng" data-arch-sys="tp-reasoning">tp_reasoning<div>16 步</div></button>
+                      <button type="button" class="sketch-node n-eng" data-arch-sys="tp-bapa">tp_bapa<div>CA/FAR</div></button>
+                      <button type="button" class="sketch-node n-eng" data-arch-sys="tp-lego">tp_lego<div>積木</div></button>
+                      <button type="button" class="sketch-node n-eng" data-arch-sys="translation">translation</button>
+                      <button type="button" class="sketch-node n-eng" data-arch-sys="deident">deident</button>
+                      <button type="button" class="sketch-node n-eng" data-arch-sys="treaty">treaty_rate</button>
+                    </div>
+                    <button type="button" class="sketch-node n-rag" data-arch-sys="rag" style="--sx:50%;--sy:58%">RAG 知識層<div>tp_kb_rag · rag-java</div></button>
+                    <button type="button" class="sketch-node n-llm" data-arch-sys="llm" style="--sx:50%;--sy:72%">LLM + Validator<div>profile · main/sub agent</div></button>
+                    <button type="button" class="sketch-node n-out" data-arch-sys="output" style="--sx:50%;--sy:86%">輸出<div>引用 · 信心 · UI Card</div></button>
+                  </div>
+                  <div class="sketch-margin right">
+                    <div class="sketch-sticky green">
+                      <strong>為何拆引擎？</strong>
+                      <p>一個 Prompt<br />維護會爆炸</p>
+                    </div>
+                    <div class="sketch-sticky yellow">
+                      <strong>協定別猜</strong>
+                      <p>Rule DB 決定稅率<br />LLM 只解釋</p>
+                    </div>
+                    <div class="sketch-sticky orange">
+                      <strong>RAG 共用</strong>
+                      <p>知識庫可共用<br />Prompt 模板不共用</p>
+                    </div>
+                    <div class="sketch-scribble">← 先想清這層再寫 code</div>
+                  </div>
                 </div>
-                <button type="button" class="btn btn-ghost btn-sm" data-arch-pop="diag-system-arch">開啟完整架構圖 →</button>
+                <button type="button" class="btn btn-ghost btn-sm sketch-pop-btn" data-arch-pop="diag-system-arch">展開完整架構說明 →</button>
               </article>
-              <article class="ainote-diagram-card">
-                <h4>② 邏輯流程圖 <small>Answer Logic Flow</small></h4>
-                <p class="diagram-caption">以<strong>知識問答 Tab</strong>為例：規則引擎先跑，LLM 只負責「寫人話」。</p>
-                <div class="ainote-logic-board" id="ainoteLogicBoard">
-                  <button type="button" class="flow-node compact" data-arch-logic="start" style="--x:6%;--y:8%">使用者<br />提問</button>
-                  <button type="button" class="flow-node compact" data-arch-logic="tab" style="--x:22%;--y:8%">哪個<br />Tab？</button>
-                  <button type="button" class="flow-node compact diamond" data-arch-logic="intent" style="--x:38%;--y:8%"><span class="diamond-label">意圖<br />分類</span></button>
-                  <button type="button" class="flow-node compact alt" data-arch-logic="treaty" style="--x:54%;--y:2%">租稅協定？<br /><small>treaty_rate_ai</small></button>
-                  <button type="button" class="flow-node compact alt" data-arch-logic="bapa" style="--x:54%;--y:14%">BAPA？<br /><small>tp_bapa_reasoning</small></button>
-                  <button type="button" class="flow-node compact primary" data-arch-logic="reason" style="--x:70%;--y:8%">tp_reasoning<br /><small>+ tp_lego 積木</small></button>
-                  <button type="button" class="flow-node compact" data-arch-logic="mentor" style="--x:86%;--y:8%">Mentor<br /><small>深度案件</small></button>
-                  <button type="button" class="flow-node compact" data-arch-logic="rag" style="--x:22%;--y:42%">RAG 檢索<br /><small>boostKbChunks</small></button>
-                  <button type="button" class="flow-node compact" data-arch-logic="prompt" style="--x:42%;--y:42%">組 prompt_block<br /><small>規則結果＋chunks</small></button>
-                  <button type="button" class="flow-node compact primary" data-arch-logic="llm" style="--x:62%;--y:42%">LLM 生成<br /><small>串流</small></button>
-                  <button type="button" class="flow-node compact" data-arch-logic="valid" style="--x:82%;--y:42%">Validator<br /><small>重試</small></button>
-                  <button type="button" class="flow-node compact" data-arch-logic="end" style="--x:50%;--y:76%">UI 卡片<br /><small>引用＋筆記</small></button>
+
+              <!-- ② 邏輯流程手繪 -->
+              <article class="sketch-sheet">
+                <div class="sketch-sheet-head">
+                  <span class="sketch-tag">白板草圖 ②</span>
+                  <h4>回答邏輯 · 一題怎麼走？</h4>
+                  <p class="sketch-sub">規則引擎<strong>先跑</strong>，LLM <strong>只寫人話</strong></p>
                 </div>
-                <button type="button" class="btn btn-ghost btn-sm" data-arch-pop="diag-logic-flow">開啟完整邏輯圖 →</button>
+                <div class="sketch-canvas logic" id="ainoteLogicBoard">
+                  <div class="sketch-margin left">
+                    <div class="sketch-sticky yellow">
+                      <strong>核心分工</strong>
+                      <p>RAG 找證據<br />Rule 決定分析<br />LLM 寫句子</p>
+                    </div>
+                    <div class="sketch-sticky pink">
+                      <strong>?? 不確定</strong>
+                      <p>→ 澄清／拒答<br />不要硬答法條</p>
+                    </div>
+                  </div>
+                  <div class="sketch-main logic-flow">
+                    <svg class="sketch-wires" viewBox="0 0 400 420" aria-hidden="true">
+                      <path class="sketch-path" d="M36 36 H120" />
+                      <path class="sketch-path" d="M160 36 H240" />
+                      <path class="sketch-path" d="M280 36 H340" />
+                      <path class="sketch-path branch" d="M360 50 L360 80 L300 100" />
+                      <path class="sketch-path branch" d="M360 50 L360 80 L360 100" />
+                      <path class="sketch-path branch" d="M360 50 L360 80 L420 100" />
+                      <path class="sketch-path" d="M360 130 L360 160" />
+                      <path class="sketch-path" d="M80 180 H160" />
+                      <path class="sketch-path" d="M200 180 H280" />
+                      <path class="sketch-path" d="M320 180 H360" />
+                      <path class="sketch-path" d="M200 220 L200 260 L200 300" />
+                      <path class="sketch-path" d="M200 340 L200 380" />
+                    </svg>
+                    <button type="button" class="sketch-node sm" data-arch-logic="start" style="--sx:8%;--sy:6%">使用者<br />提問</button>
+                    <button type="button" class="sketch-node sm" data-arch-logic="tab" style="--sx:28%;--sy:6%">哪個<br />Tab？</button>
+                    <button type="button" class="sketch-node sm diamond-sk" data-arch-logic="intent" style="--sx:48%;--sy:5%">意圖<br />分類</button>
+                    <button type="button" class="sketch-node sm alt-sk" data-arch-logic="treaty" style="--sx:72%;--sy:2%">協定?<br /><span>treaty_rate_ai</span></button>
+                    <button type="button" class="sketch-node sm alt-sk" data-arch-logic="bapa" style="--sx:72%;--sy:14%">BAPA?<br /><span>tp_bapa</span></button>
+                    <button type="button" class="sketch-node sm hi" data-arch-logic="reason" style="--sx:88%;--sy:8%">tp_reasoning<br /><span>+ tp_lego</span></button>
+                    <button type="button" class="sketch-node sm" data-arch-logic="mentor" style="--sx:88%;--sy:22%">Mentor<br /><span>深度</span></button>
+                    <button type="button" class="sketch-node sm" data-arch-logic="rag" style="--sx:12%;--sy:42%">RAG<br /><span>boostKb</span></button>
+                    <button type="button" class="sketch-node sm" data-arch-logic="prompt" style="--sx:38%;--sy:42%">prompt_block<br /><span>規則+chunks</span></button>
+                    <button type="button" class="sketch-node sm hi" data-arch-logic="llm" style="--sx:62%;--sy:42%">LLM<br /><span>串流</span></button>
+                    <button type="button" class="sketch-node sm" data-arch-logic="valid" style="--sx:86%;--sy:42%">Validator</button>
+                    <button type="button" class="sketch-node sm out-sk" data-arch-logic="end" style="--sx:48%;--sy:78%">UI 卡片<br /><span>引用+筆記</span></button>
+                  </div>
+                  <div class="sketch-margin right">
+                    <div class="sketch-sticky green">
+                      <strong>每輪重查</strong>
+                      <p>多輪對話仍<br />re-retrieve</p>
+                    </div>
+                    <div class="sketch-sticky blue">
+                      <strong>training</strong>
+                      <p>離線 JSONL<br />≠ 線上引擎</p>
+                    </div>
+                    <div class="sketch-scribble">validator 掛了才重試 →</div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm sketch-pop-btn" data-arch-pop="diag-logic-flow">展開完整邏輯說明 →</button>
               </article>
             </div>
-            <aside class="ainote-diagram-detail glass" id="ainoteDiagramDetail">
-              <h4>點上方方塊或流程節點</h4>
-              <p>這裡會顯示該步驟在 AI-NOTE01 裡對應哪個目錄／檔案，以及為什麼要獨立成引擎。</p>
+            <aside class="ainote-diagram-detail sketch-detail glass" id="ainoteDiagramDetail">
+              <h4 class="sketch-font">點草圖上的方框</h4>
+              <p>會顯示 AI-NOTE01 對應目錄，以及「為什麼要獨立成引擎」。</p>
             </aside>
           </div>
 
@@ -1739,7 +1823,7 @@ owner: HR
     </div>
   </div>
 
-  <script src="js/app.js?v=codex-3"></script>
+  <script src="js/app.js?v=codex-4"></script>
   <script src="js/spec-workshop.js?v=codex-1"></script>
 </body>
 </html>

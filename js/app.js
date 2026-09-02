@@ -2049,13 +2049,16 @@ $("#ainote")?.addEventListener("click", (e) => {
   }
   const sys = e.target.closest("[data-arch-sys]");
   if (sys) {
-    $all("#ainoteSysBoard .ainote-box").forEach((el) => el.classList.toggle("active", el === sys));
+    const board = sys.closest("#ainoteSysBoard");
+    if (board) {
+      $all("#ainoteSysBoard .sketch-node").forEach((el) => el.classList.toggle("active", el === sys));
+    }
     setAinoteDiagramDetail(sys.dataset.archSys, ARCH_SYS);
     return;
   }
   const logic = e.target.closest("[data-arch-logic]");
   if (logic) {
-    $all("#ainoteLogicBoard .flow-node").forEach((el) => el.classList.toggle("active", el === logic));
+    $all("#ainoteLogicBoard .sketch-node").forEach((el) => el.classList.toggle("active", el === logic));
     setAinoteDiagramDetail(logic.dataset.archLogic, ARCH_LOGIC);
   }
 });
@@ -2079,7 +2082,7 @@ const io = new IntersectionObserver(
   { threshold: 0.12 }
 );
 
-$all(".section .glass, .section .panel, .kb-step, .api-card, .path-node, .tool-card, .loop-deck, .ainote-layer, .ainote-module, .ainote-tech, .ainote-box, .ainote-engine-card, .ainote-diagram-card").forEach((el, i) => {
+$all(".section .glass, .section .panel, .kb-step, .api-card, .path-node, .tool-card, .loop-deck, .ainote-layer, .ainote-module, .ainote-tech, .sketch-sheet, .ainote-engine-card").forEach((el, i) => {
   if (el.closest(".hero")) return;
   el.style.opacity = "0";
   el.style.transform = "translateY(14px)";
