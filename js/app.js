@@ -673,6 +673,12 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
+  if (e.key === "Escape" && frameworkDraftModal && !frameworkDraftModal.hidden) {
+    e.preventDefault();
+    closeFrameworkDraftModal();
+    return;
+  }
+
   if (e.key === "Escape" && loopModal && !loopModal.hidden) {
     e.preventDefault();
     closeLoopModal();
@@ -830,9 +836,10 @@ flowDetail?.querySelector(".close-detail")?.addEventListener("click", () => {
 const aiFlowModal = $("#aiFlowModal");
 const termModal = $("#termModal");
 const loopModal = $("#loopModal");
+const frameworkDraftModal = $("#frameworkDraftModal");
 
 function anyModalOpen() {
-  return [termModal, aiFlowModal, loopModal].some((m) => m && !m.hidden);
+  return [termModal, aiFlowModal, loopModal, frameworkDraftModal].some((m) => m && !m.hidden);
 }
 
 function openAiFlowModal() {
@@ -873,6 +880,22 @@ aiFlowModal?.addEventListener("click", (e) => {
 $("#termModalClose")?.addEventListener("click", closeTermModal);
 $("#termModal")?.addEventListener("click", (e) => {
   if (e.target === $("#termModal")) closeTermModal();
+});
+
+function openFrameworkDraftModal() {
+  show(frameworkDraftModal);
+  document.body.classList.add("modal-open");
+}
+
+function closeFrameworkDraftModal() {
+  hide(frameworkDraftModal);
+  if (!anyModalOpen()) document.body.classList.remove("modal-open");
+}
+
+$("#openFrameworkDraft")?.addEventListener("click", openFrameworkDraftModal);
+$("#frameworkDraftClose")?.addEventListener("click", closeFrameworkDraftModal);
+frameworkDraftModal?.addEventListener("click", (e) => {
+  if (e.target === frameworkDraftModal) closeFrameworkDraftModal();
 });
 
 // Event delegation so all term buttons work (incl. after deck / dynamic UI)

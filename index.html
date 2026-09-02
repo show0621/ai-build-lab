@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&family=Ma+Shan+Zheng&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=codex-4" />
+  <link rel="stylesheet" href="css/styles.css?v=codex-5" />
 </head>
 <body>
   <div class="bg-layer" aria-hidden="true">
@@ -961,7 +961,10 @@ owner: HR
         <div class="tab-panels glass">
           <!-- 架構＋邏輯流程圖 -->
           <div class="tab-panel active" data-panel="arch-diagrams">
-            <p class="panel-intro">像<strong>工程師在白板前畫的草圖</strong>：管線怎麼接、引擎為何拆開、UI 怎麼分 Tab。黃／粉便條是設計當下的思考；點方框看對應目錄。</p>
+            <div class="arch-diagrams-head">
+              <p class="panel-intro">像<strong>工程師在白板前畫的草圖</strong>：管線怎麼接、引擎為何拆開、UI 怎麼分 Tab。黃／粉便條是設計當下的思考；點方框看對應目錄。</p>
+              <button type="button" class="framework-draft-btn" id="openFrameworkDraft" title="點開看原始手繪草稿">當初設計框架草稿</button>
+            </div>
             <div class="ainote-diagram-grid sketch-layout">
               <!-- ① 系統架構手繪 -->
               <article class="sketch-sheet">
@@ -1717,6 +1720,18 @@ owner: HR
   </div>
   <button type="button" class="deck-peek" id="deckPeek" hidden title="顯示控制列（H）">控制列</button>
 
+  <div class="modal-overlay" id="frameworkDraftModal" hidden role="dialog" aria-modal="true" aria-labelledby="frameworkDraftTitle">
+    <div class="modal-panel glass framework-draft-panel">
+      <button class="close-detail" type="button" id="frameworkDraftClose" aria-label="關閉">×</button>
+      <p class="modal-eyebrow">原始手繪 · 設計當下</p>
+      <h3 id="frameworkDraftTitle">當初設計框架草稿</h3>
+      <p class="modal-lead">紙上初稿：優化 Prompt + RAG(MD) + 31B → Thought／Reasoning／Writing + Validation；下方五區塊（法令、翻譯、去識別化、會議助手、筆記本）與助手模式／專業問答管線。</p>
+      <figure class="framework-draft-figure">
+        <img src="assets/images/framework-draft.jpg" alt="當初設計框架手繪草稿：31B 三模型、五區塊與 RAG 管線" width="1200" height="900" loading="lazy" />
+      </figure>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="loopModal" hidden role="dialog" aria-modal="true" aria-labelledby="loopModalTitle">
     <div class="modal-panel glass loop-modal-panel">
       <button class="close-detail" type="button" id="loopModalClose" aria-label="關閉">×</button>
@@ -1823,7 +1838,7 @@ owner: HR
     </div>
   </div>
 
-  <script src="js/app.js?v=codex-4"></script>
+  <script src="js/app.js?v=codex-5"></script>
   <script src="js/spec-workshop.js?v=codex-1"></script>
 </body>
 </html>
