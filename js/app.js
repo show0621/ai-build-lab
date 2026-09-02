@@ -679,6 +679,19 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
+  if (frameworkDraftModal && !frameworkDraftModal.hidden) {
+    if (e.key === "ArrowRight" || e.key === " ") {
+      e.preventDefault();
+      if (frameworkDraftIndex < FRAMEWORK_DRAFTS.length - 1) stepFrameworkDraftSlide(1);
+      return;
+    }
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      if (frameworkDraftIndex > 0) stepFrameworkDraftSlide(-1);
+      return;
+    }
+  }
+
   if (e.key === "Escape" && loopModal && !loopModal.hidden) {
     e.preventDefault();
     closeLoopModal();
@@ -883,6 +896,7 @@ $("#termModal")?.addEventListener("click", (e) => {
 });
 
 function openFrameworkDraftModal() {
+  setFrameworkDraftSlide(0);
   show(frameworkDraftModal);
   document.body.classList.add("modal-open");
 }
@@ -892,8 +906,65 @@ function closeFrameworkDraftModal() {
   if (!anyModalOpen()) document.body.classList.remove("modal-open");
 }
 
+const FRAMEWORK_DRAFTS = [
+  {
+    title: "當初設計框架草稿",
+    lead:
+      "紙上初稿：優化 Prompt + RAG(MD) + 31B → Thought／Reasoning／Writing + Validation；下方五區塊（法令、翻譯、去識別化、會議助手、筆記本）與助手模式／專業問答管線。",
+    src: "assets/images/framework-draft.jpg",
+    alt: "當初設計框架手繪草稿：31B 三模型、五區塊與 RAG 管線",
+    nextLabel: "還有一張，翻過去看看",
+  },
+  {
+    title: "Thought Model 草稿",
+    lead:
+      "思考層流程：原始輸入 → 真正意圖 → 核心問題 → 調用哪些模組／engine → 主要／次要觀點 → 是否過度依賴 RAG → Validation 六步（案件理解、問題辨識、查核假說、案例比對 → Reasoning Model → Writing Model）。",
+    src: "assets/images/thought-model-draft.jpg",
+    alt: "Thought Model 手繪草稿：意圖解析、RAG 依賴檢查與 Validation 管線",
+    nextLabel: "",
+  },
+];
+
+let frameworkDraftIndex = 0;
+
+function setFrameworkDraftSlide(index) {
+  const total = FRAMEWORK_DRAFTS.length;
+  frameworkDraftIndex = Math.max(0, Math.min(index, total - 1));
+  const slide = FRAMEWORK_DRAFTS[frameworkDraftIndex];
+  const titleEl = $("#frameworkDraftTitle");
+  const leadEl = $("#frameworkDraftLead");
+  const imgEl = $("#frameworkDraftImg");
+  const prevBtn = $("#frameworkDraftPrev");
+  const nextBtn = $("#frameworkDraftNext");
+  const dotsEl = $("#frameworkDraftDots");
+
+  if (titleEl) titleEl.textContent = slide.title;
+  if (leadEl) leadEl.textContent = slide.lead;
+  if (imgEl) {
+    imgEl.src = slide.src;
+    imgEl.alt = slide.alt;
+  }
+  if (prevBtn) prevBtn.hidden = frameworkDraftIndex === 0;
+  if (nextBtn) {
+    nextBtn.hidden = frameworkDraftIndex >= total - 1;
+    const label = nextBtn.querySelector(".draft-arrow-label");
+    if (label) label.textContent = slide.nextLabel || "下一張";
+  }
+  if (dotsEl) {
+    dotsEl.querySelectorAll("span").forEach((dot, i) => {
+      dot.classList.toggle("active", i === frameworkDraftIndex);
+    });
+  }
+}
+
+function stepFrameworkDraftSlide(delta) {
+  setFrameworkDraftSlide(frameworkDraftIndex + delta);
+}
+
 $("#openFrameworkDraft")?.addEventListener("click", openFrameworkDraftModal);
 $("#frameworkDraftClose")?.addEventListener("click", closeFrameworkDraftModal);
+$("#frameworkDraftPrev")?.addEventListener("click", () => stepFrameworkDraftSlide(-1));
+$("#frameworkDraftNext")?.addEventListener("click", () => stepFrameworkDraftSlide(1));
 frameworkDraftModal?.addEventListener("click", (e) => {
   if (e.target === frameworkDraftModal) closeFrameworkDraftModal();
 });

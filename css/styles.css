@@ -4156,6 +4156,85 @@ body.deck-mode .ws-output {
   box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.framework-draft-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  min-height: 2.5rem;
+}
+
+.draft-page-dots {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.draft-page-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(44, 62, 80, 0.25);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.draft-page-dots span.active {
+  background: #c0392b;
+  transform: scale(1.25);
+}
+
+.draft-arrow-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  font-family: "Ma Shan Zheng", "Caveat", cursive;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  color: rgba(44, 62, 80, 0.75);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transform: rotate(-0.5deg);
+  transition: color 0.15s, transform 0.15s;
+}
+
+.draft-arrow-btn:hover,
+.draft-arrow-btn:focus-visible {
+  color: #c0392b;
+  transform: rotate(0deg) translateY(-1px);
+  outline: none;
+}
+
+.draft-arrow-btn[hidden] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.draft-arrow-next {
+  margin-left: auto;
+}
+
+.draft-arrow-prev {
+  margin-right: auto;
+}
+
+.draft-arrow-label {
+  white-space: nowrap;
+}
+
+.draft-arrow-svg {
+  width: 4.5rem;
+  height: 1.4rem;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.draft-arrow-btn:focus-visible .draft-arrow-svg {
+  opacity: 1;
+}
+
 .sketch-layout {
   align-items: start;
 }
@@ -4643,6 +4722,21 @@ body.deck-mode .ws-output {
 
   .framework-draft-btn {
     align-self: flex-end;
+  }
+
+  .framework-draft-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .draft-arrow-next,
+  .draft-arrow-prev {
+    margin: 0;
+  }
+
+  .draft-arrow-label {
+    white-space: normal;
+    text-align: center;
   }
 
   .ainote-compare-grid {
