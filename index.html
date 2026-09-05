@@ -956,6 +956,8 @@ owner: HR
           <button role="tab" aria-selected="false" data-tab="arch-layers">系統分層</button>
           <button role="tab" aria-selected="false" data-tab="arch-answer">RAG 回答管線</button>
           <button role="tab" aria-selected="false" data-tab="arch-dev">開發流程</button>
+          <button role="tab" aria-selected="false" data-tab="arch-memory">對話記憶＋案件隔離</button>
+          <button role="tab" aria-selected="false" data-tab="arch-ocr">OCR＋VLM</button>
           <button role="tab" aria-selected="false" data-tab="arch-tech">運用技術</button>
         </div>
         <div class="tab-panels glass">
@@ -1145,6 +1147,16 @@ owner: HR
                 <strong>訓練資料管線</strong>
                 <span>finetune JSONL · golden L3 · LoRA 基礎（Phase 12）</span>
               </button>
+              <article class="ainote-engine-card">
+                <code>conversation_context/</code>
+                <strong>對話壓縮與案件隔離</strong>
+                <span>Rolling Summary · Case ID · Scoped Memory · Evidence Pinning</span>
+              </article>
+              <article class="ainote-engine-card">
+                <code>ocr_tool/</code>
+                <strong>OCR／VLM 文件解析工具</strong>
+                <span>版面偵測 · OCR · 表格／圖像理解 · 人工校驗 · Markdown/JSON</span>
+              </article>
               <button type="button" class="ainote-engine-card dep" data-arch-pop="eng-node-modules">
                 <code>node_modules/</code>
                 <strong>執行環境依賴</strong>
@@ -1233,6 +1245,132 @@ owner: HR
               <li><button type="button" data-arch-pop="dev-9"><strong>9 · 部署＋回饋</strong><span>本機／內網、錯誤案例回寫</span></button></li>
             </ol>
             <button type="button" class="btn btn-primary" data-arch-pop="dev-full">看完整開發流程圖 →</button>
+          </div>
+
+          <!-- 對話記憶＋案件隔離 -->
+          <div class="tab-panel" data-panel="arch-memory">
+            <p class="panel-intro">長對話不能只靠模型的 Context Window。AI NOTE 另外需要一個<strong>對話狀態引擎</strong>：把舊內容壓縮成可核對的案件狀態，同時用 Case ID、命名空間與檢索範圍隔離不同案件。</p>
+
+            <div class="ainote-memory-flow" aria-label="對話壓縮與案件隔離流程">
+              <div><strong>原始對話事件</strong><span>每輪訊息、附件、工具結果保留不可變紀錄</span></div>
+              <b>→</b>
+              <div><strong>結構化壓縮</strong><span>事實、爭點、結論、未決事項、引用來源分欄摘要</span></div>
+              <b>→</b>
+              <div><strong>組裝本輪 Context</strong><span>目前案件摘要＋最近對話＋相關原文片段＋本輪問題</span></div>
+              <b>→</b>
+              <div><strong>回覆後更新</strong><span>追加事件、重算摘要版本；不覆蓋原始紀錄</span></div>
+            </div>
+
+            <div class="ainote-compare-grid ainote-memory-grid">
+              <article class="ainote-compare-card ok">
+                <h4>如何壓縮，卻讓話題繼續？</h4>
+                <ul>
+                  <li><strong>Rolling Summary：</strong>舊對話逐段壓成短摘要，最近數輪保留原文。</li>
+                  <li><strong>Structured State：</strong>分開保存案件事實、當事人、年度、交易、爭點、已確認結論、假設與待補資料。</li>
+                  <li><strong>Evidence Pinning：</strong>金額、日期、法條、引用及使用者明確指示，保留原文或來源 ID，不只留生成摘要。</li>
+                  <li><strong>Topic Threads：</strong>同一案件內可有 FAR、受測個體、PLI、BAPA 攻防等子話題，各自保存游標與摘要。</li>
+                  <li><strong>Re-retrieve：</strong>每輪依本題重查原始事件與知識庫，避免摘要成為唯一真相。</li>
+                </ul>
+              </article>
+              <article class="ainote-compare-card">
+                <h4>壓縮不是把前文全部刪掉</h4>
+                <p>模型真正看到的是「精選後的工作記憶」。原始對話仍在事件庫，需要時可依訊息 ID、文件 ID、來源段落重新取回。</p>
+                <pre class="code-block"><code>Context =
+  system_rules
++ active_case_state
++ active_topic_summary
++ recent_turns
++ retrieved_evidence
++ current_question</code></pre>
+                <p>摘要要帶 <code>summary_version</code>、來源訊息 ID 與不確定欄位；使用者更正事實時，新增更正事件並重建受影響摘要。</p>
+              </article>
+            </div>
+
+            <h4 class="ainote-subhead">同一個對話窗同時談不同案件，怎麼不混在一起？</h4>
+            <div class="ainote-case-demo">
+              <article><span class="case-chip">CASE-TW-SG-001</span><strong>台灣—新加坡封測案</strong><small>年度：112｜話題：功能移轉、3% 報酬｜文件空間：A</small></article>
+              <article><span class="case-chip alt">CASE-TW-JP-002</span><strong>台日 BAPA 案</strong><small>年度：110–114｜話題：受測個體、費用剔除｜文件空間：B</small></article>
+            </div>
+            <table class="mini-table ainote-tech-table">
+              <tr><th>每則訊息必帶</th><td><code>conversation_id</code>、<code>case_id</code>、<code>topic_id</code>；附件與檢索結果也沿用相同範圍。</td></tr>
+              <tr><th>送出前</th><td>畫面顯示「目前案件」；若問題含另一案件名稱或年度，先詢問要切換、比較或建立新案件。</td></tr>
+              <tr><th>檢索過濾</th><td>先套 <code>case_id</code>／權限／文件版本，再做向量與關鍵字檢索；不得只靠語意相似度。</td></tr>
+              <tr><th>跨案比較</th><td>使用明確 <code>comparison_workspace</code>，只讀指定案件；輸出逐句標示來源案件，禁止把結果回寫成任一案的既定事實。</td></tr>
+              <tr><th>防混案驗證</th><td>回覆前檢查公司、年度、幣別、交易類型與來源文件是否屬目前案件；衝突時停止並要求確認。</td></tr>
+              <tr><th>人工控制</th><td>提供案件切換器、鎖定案件、查看「本輪引用了哪些記憶」、移除錯誤記憶與重新摘要。</td></tr>
+            </table>
+            <blockquote class="ainote-callout">白話：同一個聊天視窗可以像同一張辦公桌，但每個案件必須有自己的卷宗編號與抽屜。AI 每次只能打開目前案件的抽屜；要跨案比較，必須先建立一個有明確範圍的比較桌。</blockquote>
+          </div>
+
+          <!-- OCR＋VLM -->
+          <div class="tab-panel" data-panel="arch-ocr">
+            <p class="panel-intro">OCR 解決「圖片裡有哪些字」，VLM（Vision-Language Model）補足「這些字、框線、欄位、表格與圖形之間是什麼關係」。複雜 TP 報告、掃描公文與表格附件，建議將兩者編排成一條可驗證的文件解析管線。</p>
+
+            <div class="ainote-ocr-pipeline">
+              <div><strong>① 檔案檢測</strong><span>原生文字 PDF？掃描頁？DOCX 內嵌圖？</span></div>
+              <div><strong>② 預處理</strong><span>旋轉、去噪、裁切、頁面／區塊偵測</span></div>
+              <div><strong>③ OCR</strong><span>文字＋位置座標＋可用時的信心分數</span></div>
+              <div><strong>④ VLM／版面解析</strong><span>閱讀順序、表格結構、圖表、欄位語意</span></div>
+              <div><strong>⑤ 合併與校驗</strong><span>原生文字、OCR、VLM 交叉比對；標記衝突</span></div>
+              <div><strong>⑥ 輸出</strong><span>Markdown／JSON＋頁碼、bbox、來源圖與解析版本</span></div>
+            </div>
+
+            <div class="ainote-compare-grid">
+              <article class="ainote-compare-card">
+                <h4>只有 OCR 容易漏掉什麼？</h4>
+                <p>OCR 可能讀到「營業收入 100、營業成本 80、營業利益 20」，但不一定可靠地知道哪個數字屬於哪一欄、表頭是否跨欄、註腳是否只適用某年度。</p>
+                <p><strong>例：</strong>掃描的兩年比較表，OCR 把閱讀順序攤平成文字後，100、120 可能和 112、113 年配錯。</p>
+              </article>
+              <article class="ainote-compare-card ok">
+                <h4>搭配 VLM 能補什麼？</h4>
+                <p>VLM 能接收頁面影像，結合位置、框線、標題與視覺區塊理解「這是一張表」「這個註腳指向右欄」「紅框是人工標記」。</p>
+                <p><strong>例：</strong>先由 OCR 提供精確字串，再請 VLM 重建表格欄列與閱讀順序；若金額或統編屬高風險欄位，仍回到原圖做程式規則或人工覆核。</p>
+              </article>
+            </div>
+            <p class="ainote-caution"><strong>邊界：</strong>VLM 也可能幻覺、漏字或看錯小數點。不得讓 VLM 靠「看起來合理」自行補金額、日期、統編或法條；高風險欄位要保存原圖座標並設定人工覆核門檻。</p>
+
+            <h4 class="ainote-subhead">建議獨立建立 <code>ocr_tool/</code>，不要塞進問答 Prompt</h4>
+            <pre class="code-block"><code>POST /v1/ocr/parse
+input: file_id, pages, language, mode, case_id
+output:
+  document.md
+  document.json
+  page_images/
+  blocks[{page,bbox,type,text,confidence,source_engine}]
+  review_queue[{field,reason,candidates}]</code></pre>
+            <p>OCR Tool 可做成內部 REST API、命令列工具或 MCP Server。Orchestrator 只負責呼叫與接收結果；解析器獨立版本化，才能重跑、比較引擎、記錄錯誤與替換套件。</p>
+
+            <div class="ainote-package-grid">
+              <article>
+                <h4>Microsoft MarkItDown</h4>
+                <p><strong>定位：</strong>把 PDF、DOCX、PPTX、XLSX 等內容轉成 Markdown 的 Python 工具，不應把核心套件直接等同完整 OCR 引擎。</p>
+                <p>需要圖片 OCR 時，可啟用官方倉庫中的 <code>markitdown-ocr</code> 外掛；它以 LLM Vision 讀取內嵌圖片，需提供相容的 vision client／model。適合統一多格式輸出，再送 RAG。</p>
+                <a href="https://github.com/microsoft/markitdown" target="_blank" rel="noopener noreferrer">官方 GitHub ↗</a>
+              </article>
+              <article>
+                <h4>MinerU <small>（中國）</small></h4>
+                <p><strong>定位：</strong>OpenDataLab／上海人工智慧實驗室體系的開源文件解析專案，支援 PDF、圖片與 Office 文件，提供 OCR、VLM／Hybrid 後端、版面、表格與公式解析，並可輸出 Markdown／JSON、CLI、API 與 MCP。</p>
+                <p>適合複雜版面與離線部署評估；導入機關環境前須另做授權條款、模型來源、依賴、資料安全及供應鏈審查。</p>
+                <a href="https://github.com/opendatalab/MinerU" target="_blank" rel="noopener noreferrer">官方 GitHub ↗</a>
+              </article>
+              <article>
+                <h4>PaddleOCR</h4>
+                <p><strong>定位：</strong>OCR 與文件解析工具組，官方專案支援多語言，並提供結構化文件與 VLM 方向。適合需要本機 OCR、表格／版面管線且願意管理較完整 ML 環境的情境。</p>
+                <a href="https://github.com/PaddlePaddle/PaddleOCR" target="_blank" rel="noopener noreferrer">官方 GitHub ↗</a>
+              </article>
+              <article>
+                <h4>Tesseract</h4>
+                <p><strong>定位：</strong>成熟的純 OCR 基線，支援多種影像與輸出格式。適合清楚、版面單純的掃描文字；複雜表格、閱讀順序與圖表語意仍需另接版面工具或 VLM。</p>
+                <a href="https://github.com/tesseract-ocr/tesseract" target="_blank" rel="noopener noreferrer">官方 GitHub ↗</a>
+              </article>
+            </div>
+
+            <table class="mini-table ainote-tech-table">
+              <tr><th>快速原型</th><td>MarkItDown＋<code>markitdown-ocr</code>，先統一轉 Markdown；抽樣檢查掃描 PDF、Office 內嵌圖與表格。</td></tr>
+              <tr><th>地端複雜文件</th><td>MinerU、PaddleOCR 或傳統 OCR＋版面模型，以同一份金標文件比較文字、表格、公式、閱讀順序與速度。</td></tr>
+              <tr><th>機關資料</th><td>優先地端／內網；禁止未核准的外部 Vision API。記錄檔案雜湊、引擎版本、參數、輸出與人工修正。</td></tr>
+              <tr><th>驗收指標</th><td>不要只看字元正確率；另測欄列配對、金額／日期、表格結構、頁碼引用、公式、閱讀順序及人工修正時間。</td></tr>
+            </table>
           </div>
 
           <!-- 運用技術 -->
